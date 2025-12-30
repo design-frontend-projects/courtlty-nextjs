@@ -1,0 +1,117 @@
+
+> courtlty-nextjs@0.1.0 build E:\web-projects\web-mobile-work-apps\courtlty-nextjs
+> next build
+
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local
+
+  Creating an optimized production build ...
+Error: Can't resolve 'tailwindcss-animate' in 'E:\web-projects\web-mobile-work-apps\courtlty-nextjs\src\app'
+    [2m[at finishWithoutResolve (E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\enhanced-resolve@5.18.4\node_modules\enhanced-resolve\lib\Resolver.js:565:18)][0m
+    [2m[at E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\enhanced-resolve@5.18.4\node_modules\enhanced-resolve\lib\Resolver.js:657:14][0m
+    [2m[at E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\enhanced-resolve@5.18.4\node_modules\enhanced-resolve\lib\Resolver.js:718:5][0m
+    [2m[at eval (eval at create (E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\tapable@2.3.0\node_modules\tapable\lib\HookCodeFactory.js:31:10), <anonymous>:15:1)][0m
+    [2m[at E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\enhanced-resolve@5.18.4\node_modules\enhanced-resolve\lib\Resolver.js:718:5][0m
+    [2m[at eval (eval at create (E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\tapable@2.3.0\node_modules\tapable\lib\HookCodeFactory.js:31:10), <anonymous>:27:1)][0m
+    [2m[at E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\enhanced-resolve@5.18.4\node_modules\enhanced-resolve\lib\DescriptionFilePlugin.js:89:43][0m
+    [2m[at E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\enhanced-resolve@5.18.4\node_modules\enhanced-resolve\lib\Resolver.js:718:5][0m
+    [2m[at eval (eval at create (E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\tapable@2.3.0\node_modules\tapable\lib\HookCodeFactory.js:31:10), <anonymous>:15:1)][0m
+    [2m[at E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\enhanced-resolve@5.18.4\node_modules\enhanced-resolve\lib\Resolver.js:718:5][0m {
+  details: "resolve 'tailwindcss-animate' in 'E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\src\\app'\n" +
+    '  Parsed request is a module\n' +
+    '  using description file: E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\package.json (relative path: ./src/app)\n' +
+    '    resolve as module\n' +
+    "      E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\src\\app\\node_modules doesn't exist or is not a directory\n" +
+    "      E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\src\\node_modules doesn't exist or is not a directory\n" +
+    '      looking for modules in E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\n' +
+    '        single file module\n' +
+    '          using description file: E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\package.json (relative path: ./node_modules/tailwindcss-animate)\n' +
+    '            no extension\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\tailwindcss-animate doesn't exist\n" +
+    '            .js\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\tailwindcss-animate.js doesn't exist\n" +
+    '            .json\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\tailwindcss-animate.json doesn't exist\n" +
+    '            .node\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\tailwindcss-animate.node doesn't exist\n" +
+    '            .ts\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\tailwindcss-animate.ts doesn't exist\n" +
+    "        E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\tailwindcss-animate doesn't exist\n" +
+    "      E:\\web-projects\\web-mobile-work-apps\\node_modules doesn't exist or is not a directory\n" +
+    "      E:\\web-projects\\node_modules doesn't exist or is not a directory\n" +
+    "      E:\\node_modules doesn't exist or is not a directory\n" +
+    '      looking for modules in E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\bin\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\node_modules\n' +
+    '        single file module\n' +
+    '          using description file: E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\package.json (relative path: ./dist/bin/node_modules;E:/web-projects/web-mobile-work-apps/courtlty-nextjs/node_modules/.pnpm/next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2/node_modules/next/dist/node_modules;E:/web-projects/web-mobile-work-apps/courtlty-nextjs/node_modules/.pnpm/next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2/node_modules/next/node_modules;E:/web-projects/web-mobile-work-apps/courtlty-nextjs/node_modules/.pnpm/next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2/node_modules;E:/web-projects/web-mobile-work-apps/courtlty-nextjs/node_modules/.pnpm/node_modules/tailwindcss-animate)\n' +
+    '            no extension\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\bin\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\node_modules\\tailwindcss-animate doesn't exist\n" +
+    '            .js\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\bin\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\node_modules\\tailwindcss-animate.js doesn't exist\n" +
+    '            .json\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\bin\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\node_modules\\tailwindcss-animate.json doesn't exist\n" +
+    '            .node\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\bin\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\node_modules\\tailwindcss-animate.node doesn't exist\n" +
+    '            .ts\n' +
+    "              E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\bin\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\node_modules\\tailwindcss-animate.ts doesn't exist\n" +
+    "        E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\bin\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\dist\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules\\next\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\next@16.1.1_@babel+core@7.2_39b5f7bf9254f45631682e0d132e5fc2\\node_modules;E:\\web-projects\\web-mobile-work-apps\\courtlty-nextjs\\node_modules\\.pnpm\\node_modules\\tailwindcss-animate doesn't exist"
+}
+
+> Build error occurred
+Error: Turbopack build failed with 2 errors:
+./src/app/globals.css
+Error evaluating Node.js code
+CssSyntaxError: tailwindcss: E:\web-projects\web-mobile-work-apps\courtlty-nextjs\src\app\globals.css:1:1: Can't resolve 'tailwindcss-animate' in 'E:\web-projects\web-mobile-work-apps\courtlty-nextjs\src\app'
+    at Input.error (node_modules/.pnpm/postcss@8.4.31/node_modules/postcss/lib/input.js:106:16) [E:\web-projects\web-mobile-work-apps\courtlty-nextjs\.next\build\chunks\node_modules__pnpm_56ec7204._.js:4132:22]
+    at Root.error (node_modules/.pnpm/postcss@8.4.31/node_modules/postcss/lib/node.js:115:32) [E:\web-projects\web-mobile-work-apps\courtlty-nextjs\.next\build\chunks\node_modules__pnpm_56ec7204._.js:895:38]
+    [at Object.Once (E:\web-projects\web-mobile-work-apps\courtlty-nextjs\node_modules\.pnpm\@tailwindcss+postcss@4.1.18\node_modules\@tailwindcss\postcss\dist\index.js:10:6911)]
+    at async LazyResult.runAsync (node_modules/.pnpm/postcss@8.4.31/node_modules/postcss/lib/lazy-result.js:261:11) [E:\web-projects\web-mobile-work-apps\courtlty-nextjs\.next\build\chunks\node_modules__pnpm_56ec7204._.js:6052:21]
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [E:\web-projects\web-mobile-work-apps\courtlty-nextjs\.next\build\chunks\[root-of-the-server]__51225daf._.js:146:36]
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [E:\web-projects\web-mobile-work-apps\courtlty-nextjs\.next\build\chunks\[root-of-the-server]__974941ed._.js:443:31]
+
+Import trace:
+  Client Component Browser:
+    ./src/app/globals.css [Client Component Browser]
+    ./src/app/layout.tsx [Server Component]
+
+
+./src/lib/supabase/server.ts:2:1
+Ecmascript file had an error
+[0m [90m 1 |[39m [36mimport[39m { createServerClient } [36mfrom[39m [32m"@supabase/ssr"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 2 |[39m [36mimport[39m { cookies } [36mfrom[39m [32m"next/headers"[39m[33m;[39m
+ [90m   |[39m [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 3 |[39m
+ [90m 4 |[39m [36mexport[39m [36masync[39m [36mfunction[39m createClient() {
+ [90m 5 |[39m   [36mconst[39m cookieStore [33m=[39m [36mawait[39m cookies()[33m;[39m[0m
+
+You're importing a component that needs "next/headers". That only works in a Server Component which is not supported in the pages/ directory. Read more: https://nextjs.org/docs/app/building-your-application/rendering/server-components
+
+
+
+Import traces:
+  App Route:
+    ./src/lib/supabase/server.ts
+    ./src/app/api/courts/route.ts
+
+  Server Component:
+    ./src/lib/supabase/server.ts
+    ./src/app/admin/dashboard/page.tsx
+
+  Client Component Browser:
+    ./src/lib/supabase/server.ts [Client Component Browser]
+    ./src/lib/utils/business-logic.ts [Client Component Browser]
+    ./src/components/teams/team-creation-form.tsx [Client Component Browser]
+    ./src/components/teams/team-creation-form.tsx [Server Component]
+    ./src/app/teams/create/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/lib/supabase/server.ts [Client Component SSR]
+    ./src/lib/utils/business-logic.ts [Client Component SSR]
+    ./src/components/teams/team-creation-form.tsx [Client Component SSR]
+    ./src/components/teams/team-creation-form.tsx [Server Component]
+    ./src/app/teams/create/page.tsx [Server Component]
+
+
+    at async transform (turbopack:///[turbopack-node]/transforms/postcss.ts:70:34) [E:\web-projects\web-mobile-work-apps\courtlty-nextjs\.next\build\chunks\[root-of-the-server]__51225daf._.js:146:36])
+    at async run (turbopack:///[turbopack-node]/ipc/evaluate.ts:92:23) [E:\web-projects\web-mobile-work-apps\courtlty-nextjs\.next\build\chunks\[root-of-the-server]__974941ed._.js:443:31])
+    at <unknown> (./src/lib/supabase/server.ts:2:1)
+ ELIFECYCLE  Command failed with exit code 1.
