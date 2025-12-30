@@ -1,10 +1,25 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent } from "@/components/ui/card";
+import { CourtWithDetails } from "@/types";
+import {
+  ChevronLeft,
+  Info,
+  Star,
+  ShieldCheck,
+  MapPinned,
+  CreditCard,
+  User,
+  History,
+} from "lucide-react";
 import BookingForm from "@/components/courts/booking-form";
 import ReviewsList from "@/components/courts/reviews-list";
 import CourtGallery from "@/components/courts/court-gallery";
+import { Separator } from "@/components/ui/separator";
 
 export default async function CourtDetailPage({
   params,
@@ -20,32 +35,18 @@ export default async function CourtDetailPage({
       `
       *,
       court_images (
-        id,
-        url,
-        is_primary,
-        display_order
+        id, url, is_primary, display_order
       ),
       court_availability (
-        id,
-        day_of_week,
-        start_time,
-        end_time,
-        is_available
+        id, day_of_week, start_time, end_time, is_available
       ),
       profiles!courts_owner_id_fkey (
-        id,
-        full_name,
-        avatar_url,
-        phone
+        id, full_name, avatar_url, phone
       ),
       reviews (
-        id,
-        rating,
-        comment,
-        created_at,
+        id, rating, comment, created_at,
         profiles!reviews_reviewer_id_fkey (
-          full_name,
-          avatar_url
+          full_name, avatar_url
         )
       )
     `
@@ -57,182 +58,278 @@ export default async function CourtDetailPage({
     notFound();
   }
 
-  // Calculate average rating
+  const typedCourt: CourtWithDetails = court;
+
   const avgRating =
-    court.reviews && court.reviews.length > 0
+    typedCourt.reviews && typedCourt.reviews.length > 0
       ? (
-          court.reviews.reduce((sum: number, r: any) => sum + r.rating, 0) /
-          court.reviews.length
+          typedCourt.reviews.reduce(
+            (sum: number, r: { rating: number }) => sum + r.rating,
+            0
+          ) / typedCourt.reviews.length
         ).toFixed(1)
       : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link
-            href="/courts"
-            className="text-blue-600 dark:text-blue-400 hover:underline"
-          >
-            ← Back to Courts
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900/50 pb-20">
+      {/* Premium Header */}
+      <header className="sticky top-0 z-50 w-full border-b bg-white/80 dark:bg-gray-800/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/courts">
+            <Button variant="ghost" className="gap-2 rounded-xl">
+              <ChevronLeft className="h-4 w-4" />
+              Back to Discover
+            </Button>
           </Link>
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="px-3 py-1 bg-green-50 text-green-700 border-green-200"
+            >
+              Available Now
+            </Badge>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Court Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Gallery */}
-            <CourtGallery
-              images={court.court_images || []}
-              courtName={court.name}
-            />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          {/* Main Content Area */}
+          <div className="lg:col-span-8 space-y-8">
+            {/* Gallery Section */}
+            <div className="rounded-3xl overflow-hidden shadow-2xl">
+              <CourtGallery
+                images={typedCourt.court_images || []}
+                courtName={typedCourt.name}
+              />
+            </div>
 
-            {/* Court Info */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                    {court.name}
-                  </h1>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {court.address}, {court.city}
-                  </p>
-                </div>
-                {avgRating && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl font-bold text-yellow-500">
-                      ★
-                    </span>
-                    <span className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {avgRating}
-                    </span>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      ({court.reviews?.length} reviews)
-                    </span>
-                  </div>
-                )}
-              </div>
+            {/* Content Tabs */}
+            <Tabs defaultValue="details" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 h-14 p-1.5 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border mb-8">
+                <TabsTrigger
+                  value="details"
+                  className="rounded-xl flex gap-2 font-bold focus:shadow-sm"
+                >
+                  <Info className="h-4 w-4" /> Details
+                </TabsTrigger>
+                <TabsTrigger
+                  value="reviews"
+                  className="rounded-xl flex gap-2 font-bold"
+                >
+                  <Star className="h-4 w-4" /> Reviews
+                </TabsTrigger>
+                <TabsTrigger
+                  value="availability"
+                  className="rounded-xl flex gap-2 font-bold"
+                >
+                  <History className="h-4 w-4" /> Schedule
+                </TabsTrigger>
+              </TabsList>
 
-              {court.description && (
-                <p className="text-gray-700 dark:text-gray-300 mb-6">
-                  {court.description}
-                </p>
-              )}
-
-              {/* Sports */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                  Available Sports
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {court.sports?.map((sport: string) => (
-                    <span
-                      key={sport}
-                      className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-4 py-2 rounded-full font-semibold"
-                    >
-                      {sport}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Amenities */}
-              {court.amenities && court.amenities.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                    Amenities
-                  </h3>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {court.amenities.map((amenity: string) => (
-                      <div
-                        key={amenity}
-                        className="flex items-center gap-2 text-gray-700 dark:text-gray-300"
-                      >
-                        <svg
-                          className="w-5 h-5 text-green-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
-                        <span>{amenity}</span>
+              <TabsContent
+                value="details"
+                className="space-y-8 animate-in fade-in slide-in-from-bottom-2"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">
+                        {typedCourt.name}
+                      </h1>
+                      <div className="flex items-center gap-2 text-muted-foreground text-lg">
+                        <MapPinned className="h-5 w-5 text-blue-600" />
+                        {typedCourt.address}, {typedCourt.city}
                       </div>
-                    ))}
+                    </div>
+                    {avgRating && (
+                      <div className="flex items-center gap-2 bg-yellow-50 dark:bg-yellow-900/30 px-4 py-2 rounded-2xl border border-yellow-200 dark:border-yellow-800 shadow-sm">
+                        <Star className="h-6 w-6 text-yellow-500 fill-yellow-500" />
+                        <div className="flex flex-col">
+                          <span className="text-xl font-black text-yellow-700 dark:text-yellow-500">
+                            {avgRating}
+                          </span>
+                          <span className="text-xs font-bold text-yellow-600/70">
+                            {typedCourt.reviews?.length} Reviews
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {typedCourt.description && (
+                    <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-8">
+                      {typedCourt.description}
+                    </div>
+                  )}
+
+                  <Separator className="my-8" />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-black flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5 text-blue-600" />{" "}
+                        Available Sports
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {typedCourt.sports?.map((sport: string) => (
+                          <Badge
+                            key={sport}
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold capitalize text-sm shadow-md"
+                          >
+                            {sport}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <h3 className="text-xl font-black flex items-center gap-2">
+                        <CreditCard className="h-5 w-5 text-blue-600" />{" "}
+                        Payments
+                      </h3>
+                      <div className="flex gap-3">
+                        {typedCourt.payment_methods?.map((method: string) => (
+                          <Badge
+                            key={method}
+                            variant="secondary"
+                            className="px-4 py-2 rounded-xl text-sm font-bold capitalize"
+                          >
+                            {method === "card" ? "💳 Card" : "💵 Cash"}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator className="my-10" />
+
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-black">
+                      Facilities & Amenities
+                    </h3>
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
+                      {typedCourt.amenities?.map((amenity: string) => (
+                        <div
+                          key={amenity}
+                          className="flex items-center gap-3 p-4 bg-muted/40 rounded-2xl border transition-colors hover:bg-muted/60"
+                        >
+                          <div className="h-8 w-8 rounded-lg bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                            <ShieldCheck className="h-4 w-4 text-green-600" />
+                          </div>
+                          <span className="font-bold text-gray-700 dark:text-gray-200">
+                            {amenity}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              )}
 
-              {/* Payment Methods */}
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                  Payment Methods
-                </h3>
-                <div className="flex flex-wrap gap-2">
-                  {court.payment_methods?.map((method: string) => (
-                    <span
-                      key={method}
-                      className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded-lg"
-                    >
-                      {method === "card" ? "💳 Card" : "💵 Cash"}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Owner Info */}
-              <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-                  Court Owner
-                </h3>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
-                    {court.profiles?.full_name?.charAt(0) || "O"}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
-                      {court.profiles?.full_name || "Court Owner"}
-                    </p>
-                    {court.profiles?.phone && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {court.profiles.phone}
+                <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border">
+                  <h3 className="text-2xl font-black mb-6 flex items-center gap-2">
+                    <User className="h-6 w-6 text-blue-600" /> Managed By
+                  </h3>
+                  <div className="flex items-center gap-6">
+                    <div className="h-20 w-20 rounded-3xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-black shadow-xl">
+                      {typedCourt.profiles?.full_name?.charAt(0) || "C"}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-2xl font-black">
+                        {typedCourt.profiles?.full_name || "Owner Name"}
                       </p>
+                      <p className="text-muted-foreground font-medium">
+                        {typedCourt.profiles?.phone || "Phone not listed"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent
+                value="reviews"
+                className="animate-in fade-in slide-in-from-bottom-2"
+              >
+                <ReviewsList
+                  reviews={typedCourt.reviews || []}
+                  courtId={typedCourt.id}
+                />
+              </TabsContent>
+
+              <TabsContent
+                value="availability"
+                className="animate-in fade-in slide-in-from-bottom-2"
+              >
+                <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border">
+                  <h3 className="text-2xl font-black mb-6">Court Schedule</h3>
+                  <div className="space-y-4">
+                    {typedCourt.court_availability?.length > 0 ? (
+                      <div className="grid grid-cols-1 gap-3">
+                        {typedCourt.court_availability.map(
+                          (item: {
+                            id: string;
+                            day_of_week: string;
+                            start_time: string;
+                            end_time: string;
+                          }) => (
+                            <div
+                              key={item.id}
+                              className="flex justify-between items-center p-4 rounded-2xl bg-muted/30 border"
+                            >
+                              <span className="font-bold capitalize">
+                                {item.day_of_week}
+                              </span>
+                              <Badge className="font-mono">
+                                {item.start_time} - {item.end_time}
+                              </Badge>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-10 text-muted-foreground">
+                        No specific hours listed. Contact owner for details.
+                      </div>
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Reviews */}
-            <ReviewsList reviews={court.reviews || []} courtId={court.id} />
+              </TabsContent>
+            </Tabs>
           </div>
 
-          {/* Right Column - Booking */}
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sticky top-4">
-              <div className="mb-6">
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-1">
-                  Price per hour
-                </p>
-                <p className="text-4xl font-bold text-gray-900 dark:text-white">
-                  ${court.price_per_hour}
-                </p>
+          {/* Booking Sidebar */}
+          <div className="lg:col-span-4">
+            <div className="sticky top-24 space-y-6">
+              <Card className="rounded-[40px] shadow-2xl border-0 overflow-hidden bg-white/90 dark:bg-gray-800/90 backdrop-blur-md">
+                <div className="h-32 bg-linear-to-br from-blue-600 to-indigo-700 p-8 flex flex-col justify-end">
+                  <p className="text-blue-100 font-bold mb-1">Starting at</p>
+                  <div className="flex items-baseline gap-2 text-white">
+                    <span className="text-5xl font-black">
+                      ${typedCourt.price_per_hour}
+                    </span>
+                    <span className="text-lg font-bold opacity-80">/hour</span>
+                  </div>
+                </div>
+                <CardContent className="p-8">
+                  <BookingForm
+                    courtId={court.id}
+                    sports={court.sports || []}
+                    pricePerHour={court.price_per_hour || 0}
+                  />
+                </CardContent>
+              </Card>
+              <div className="p-6 bg-blue-50 dark:bg-blue-900/20 rounded-3xl border border-blue-100 dark:border-blue-800 flex items-start gap-4">
+                <ShieldCheck className="h-6 w-6 text-blue-600 shrink-0" />
+                <div>
+                  <h4 className="font-black text-blue-900 dark:text-blue-200">
+                    Courtly Protection
+                  </h4>
+                  <p className="text-sm text-blue-700/80 dark:text-blue-300/80 mt-1 font-medium">
+                    Your booking is protected. If the court isn&apos;t as
+                    described, we&apos;ll make it right.
+                  </p>
+                </div>
               </div>
-
-              <BookingForm
-                courtId={court.id}
-                sports={court.sports || []}
-                pricePerHour={court.price_per_hour || 0}
-                availability={court.court_availability || []}
-              />
             </div>
           </div>
         </div>

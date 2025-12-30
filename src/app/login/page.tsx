@@ -37,8 +37,8 @@ export default function LoginPage() {
         if (error) throw error;
       }
       setOtpSent(true);
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert((error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -49,15 +49,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.verifyOtp({
-        [method]: method === "email" ? email : phone,
-        token: otp,
-        type: method === "email" ? "email" : "sms",
-      });
+      const { error } = await supabase.auth.verifyOtp(
+        method === "email"
+          ? { email, token: otp, type: "email" }
+          : { phone, token: otp, type: "sms" }
+      );
       if (error) throw error;
       router.push("/dashboard");
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      alert((error as Error).message);
     } finally {
       setLoading(false);
     }
@@ -152,7 +152,7 @@ export default function LoginPage() {
                   value={otp}
                   onChange={(e) => setOtp(e.target.value)}
                   required
-                  maxLength={6}
+                  maxLength={8}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-2xl tracking-widest"
                   placeholder="000000"
                 />

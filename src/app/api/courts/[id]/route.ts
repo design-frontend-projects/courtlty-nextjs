@@ -69,13 +69,29 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Check if user is owner or admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const { data: court } = await supabase
+    .from("courts")
+    .select("owner_id")
+    .eq("id", id)
+    .single();
+
+  if (profile?.role !== "admin" && court?.owner_id !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const body = await request.json();
 
   const { data, error } = await supabase
     .from("courts")
     .update(body)
     .eq("id", id)
-    .eq("owner_id", user.id)
     .select()
     .single();
 
@@ -101,11 +117,24 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { error } = await supabase
+  // Check if user is owner or admin
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const { data: court } = await supabase
     .from("courts")
-    .delete()
+    .select("owner_id")
     .eq("id", id)
-    .eq("owner_id", user.id);
+    .single();
+
+  if (profile?.role !== "admin" && court?.owner_id !== user.id) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { error } = await supabase.from("courts").delete().eq("id", id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

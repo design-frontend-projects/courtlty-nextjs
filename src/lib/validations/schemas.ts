@@ -26,6 +26,7 @@ export const courtSchema = z.object({
   description: z.string().optional(),
   sports: z.array(z.string()).min(1, "Select at least one sport"),
   size: z.record(
+    z.string(),
     z.object({
       width: z.number().positive(),
       length: z.number().positive(),
@@ -62,8 +63,8 @@ export const teamSchema = z.object({
   sport: z.string().min(1, "Sport is required"),
   description: z.string().optional(),
   max_players: z.number().int().positive().max(50),
-  looking_for_players: z.boolean().default(false),
-  players_needed: z.number().int().min(0).default(0),
+  looking_for_players: z.boolean(),
+  players_needed: z.number().int().min(0),
 });
 
 export type TeamFormData = z.infer<typeof teamSchema>;

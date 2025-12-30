@@ -1,8 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import {
-  canCreateTeam,
-  getMaxPlayersForSport,
-} from "@/lib/utils/business-logic";
+import { canCreateTeam } from "@/lib/utils/business-logic-server";
+import { getMaxPlayersForSport } from "@/lib/utils/business-logic";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
