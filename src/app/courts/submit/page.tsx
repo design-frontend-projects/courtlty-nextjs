@@ -15,7 +15,7 @@ export default async function SubmitCourtPage() {
 
   // Check user role
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("auth.users")
     .select("role")
     .eq("id", user.id)
     .single();

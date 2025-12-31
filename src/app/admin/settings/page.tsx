@@ -15,7 +15,7 @@ export default async function AdminSettingsPage() {
 
   // Fetch user profile for notification preferences
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("auth.users")
     .select("notification_preferences")
     .eq("id", user.id)
     .single();

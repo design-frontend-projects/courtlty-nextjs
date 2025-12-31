@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Table,
@@ -42,6 +42,10 @@ export default function AdminCourtsClient({
 }: AdminCourtsClientProps) {
   const [courts, setCourts] = useState<CourtWithDetails[]>(initialCourts);
   const router = useRouter();
+
+  useEffect(() => {
+    console.log("courts", courts);
+  }, [courts]);
 
   const handleStatusUpdate = async (
     courtId: string,

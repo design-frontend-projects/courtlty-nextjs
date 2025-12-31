@@ -13,17 +13,6 @@ export default async function AdminNewCourtPage() {
     redirect("/login");
   }
 
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  // if (profile?.role !== "admin") {
-  //   redirect("/dashboard");
-  // }
-
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div>

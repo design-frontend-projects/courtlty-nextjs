@@ -96,7 +96,7 @@ export default function SettingsClient({
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("profiles")
+        .from("auth.users")
         .update({
           notification_preferences: {
             emailNotifications,

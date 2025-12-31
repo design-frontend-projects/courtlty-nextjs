@@ -53,7 +53,7 @@ export default function ProfileClient({
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("profiles")
+        .from("auth.users")
         .update({
           full_name: data.full_name,
           phone: data.phone,

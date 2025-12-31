@@ -37,7 +37,7 @@ export function AdminNavbar() {
 
         if (user) {
           const { data } = await supabase
-            .from("profiles")
+            .from("auth.users")
             .select("*")
             .eq("id", user.id)
             .single();

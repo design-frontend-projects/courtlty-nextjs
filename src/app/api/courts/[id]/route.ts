@@ -26,12 +26,6 @@ export async function GET(
         end_time,
         is_available
       ),
-      profiles!courts_owner_id_fkey (
-        id,
-        full_name,
-        avatar_url,
-        phone
-      ),
       reviews (
         id,
         rating,
@@ -69,20 +63,13 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Check if user is owner or admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
   const { data: court } = await supabase
     .from("courts")
     .select("owner_id")
     .eq("id", id)
     .single();
 
-  if (profile?.role !== "admin" && court?.owner_id !== user.id) {
+  if (court?.owner_id !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -117,20 +104,13 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Check if user is owner or admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
   const { data: court } = await supabase
     .from("courts")
     .select("owner_id")
     .eq("id", id)
     .single();
 
-  if (profile?.role !== "admin" && court?.owner_id !== user.id) {
+  if (court?.owner_id !== user.id) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

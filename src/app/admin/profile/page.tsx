@@ -15,7 +15,7 @@ export default async function AdminProfilePage() {
 
   // Fetch user profile
   const { data: profile, error } = await supabase
-    .from("profiles")
+    .from("auth.users")
     .select("*")
     .eq("id", user.id)
     .single();

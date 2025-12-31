@@ -13,30 +13,8 @@ export default async function AdminCourtsPage() {
     redirect("/login");
   }
 
-  // Check if user is admin
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-  console.log("profile data", profile);
-
-  // if (profile?.role !== "admin") {
-  //   redirect("/dashboard");
-  // }
-
-  const { data: courts, error } = await supabase
-    .from("courts")
-    .select(
-      `
-      *,
-      profiles!courts_owner_id_fkey (
-        full_name,
-        email
-      )
-    `
-    )
-    .order("created_at", { ascending: false });
+  const { data: courts, error } = await supabase.from("courts").select("*");
+  console.log("courts", courts);
 
   if (error) {
     console.error("Error fetching courts:", error);

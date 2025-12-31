@@ -17,7 +17,7 @@ export default async function AdminDashboardPage() {
     .select("*", { count: "exact", head: true });
 
   const { count: usersCount } = await supabase
-    .from("profiles")
+    .from("auth.users")
     .select("*", { count: "exact", head: true });
 
   return (
