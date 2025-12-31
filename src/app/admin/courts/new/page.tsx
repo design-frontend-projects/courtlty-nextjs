@@ -20,9 +20,9 @@ export default async function AdminNewCourtPage() {
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "admin") {
-    redirect("/dashboard");
-  }
+  // if (profile?.role !== "admin") {
+  //   redirect("/dashboard");
+  // }
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

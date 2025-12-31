@@ -15,12 +15,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { HomeIcon, LogOut, SettingsIcon, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Profile } from "@/types";
+import { User } from "@supabase/supabase-js";
 
 export function AdminNavbar() {
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
@@ -31,6 +33,7 @@ export function AdminNavbar() {
         const {
           data: { user },
         } = await supabase.auth.getUser();
+        setUserData(user);
 
         if (user) {
           const { data } = await supabase
@@ -57,8 +60,11 @@ export function AdminNavbar() {
       toast.success("Signed out successfully");
       router.push("/login");
       router.refresh();
-    } catch (error) {
-      toast.error("Error signing out");
+    } catch (error: unknown) {
+      toast.error("Error signing out", {
+        description:
+          error instanceof Error ? error.message : "An unknown error occurred",
+      });
     }
   };
 
@@ -72,7 +78,7 @@ export function AdminNavbar() {
       <div className="flex items-center gap-4">
         {loading ? (
           <div className="h-8 w-8 rounded-full bg-gray-200 animate-pulse" />
-        ) : profile ? (
+        ) : userData ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -81,11 +87,11 @@ export function AdminNavbar() {
               >
                 <Avatar className="h-10 w-10 border-2 border-indigo-100">
                   <AvatarImage
-                    src={profile.avatar_url || ""}
-                    alt={profile.full_name || ""}
+                    src={userData.user_metadata.avatar_url || ""}
+                    alt={userData.user_metadata.full_name || ""}
                   />
                   <AvatarFallback className="bg-indigo-100 text-indigo-700">
-                    {profile.full_name?.charAt(0) || "A"}
+                    {userData.user_metadata.full_name?.charAt(0) || "A"}
                   </AvatarFallback>
                 </Avatar>
               </Button>
@@ -94,13 +100,21 @@ export function AdminNavbar() {
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">
-                    {profile.full_name}
+                    {userData.email}
                   </p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    {profile.role}
+                    {userData.user_metadata.role}
                   </p>
                 </div>
               </DropdownMenuLabel>
+              <DropdownMenuItem>
+                <HomeIcon className="mr-2 h-4 w-4" />
+                <Link href="/admin/profile">Profile</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <SettingsIcon className="mr-2 h-4 w-4" />
+                <Link href="/admin/settings">Settings</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleSignOut}
@@ -112,12 +126,14 @@ export function AdminNavbar() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button
-            asChild
-            className="rounded-full bg-black text-white hover:bg-gray-800"
-          >
-            <Link href="/login">Login</Link>
-          </Button>
+          !userData && (
+            <Button
+              asChild
+              className="rounded-full bg-black text-white hover:bg-gray-800"
+            >
+              <Link href="/login">Login</Link>
+            </Button>
+          )
         )}
       </div>
     </div>

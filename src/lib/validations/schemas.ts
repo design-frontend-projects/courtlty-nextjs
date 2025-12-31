@@ -73,10 +73,24 @@ export type TeamFormData = z.infer<typeof teamSchema>;
 export const profileSchema = z.object({
   full_name: z.string().min(2, "Name must be at least 2 characters"),
   phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number"),
+  avatar_url: z.string().url("Invalid URL").optional().or(z.literal("")),
   favorite_sports: z.array(z.string()).optional(),
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;
+
+// Settings Schema
+export const settingsSchema = z.object({
+  theme: z.enum(["light", "dark", "system"]).default("system"),
+  language: z.string().default("en"),
+  timezone: z.string().default("UTC"),
+  emailNotifications: z.boolean().default(true),
+  pushNotifications: z.boolean().default(true),
+  bookingReminders: z.boolean().default(true),
+  marketingEmails: z.boolean().default(false),
+});
+
+export type SettingsFormData = z.infer<typeof settingsSchema>;
 
 // Review Schema
 export const reviewSchema = z.object({

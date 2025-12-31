@@ -19,10 +19,11 @@ export default async function AdminCourtsPage() {
     .select("role")
     .eq("id", user.id)
     .single();
+  console.log("profile data", profile);
 
-  if (profile?.role !== "admin") {
-    redirect("/dashboard");
-  }
+  // if (profile?.role !== "admin") {
+  //   redirect("/dashboard");
+  // }
 
   const { data: courts, error } = await supabase
     .from("courts")

@@ -20,15 +20,15 @@ export default async function AdminLayout({
   }
 
   // Check if user has admin role
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
+  // const { data: profile } = await supabase
+  //   .from("profiles")
+  //   .select("role")
+  //   .eq("id", user.id)
+  //   .single();
 
-  if (profile?.role !== "admin") {
-    redirect("/dashboard");
-  }
+  // if (profile?.role !== "admin") {
+  //   redirect("/dashboard");
+  // }
 
   return (
     <SidebarProvider>

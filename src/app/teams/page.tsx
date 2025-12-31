@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import Image from "next/image";
 import Link from "next/link";
 
 export default async function TeamsPage() {
@@ -85,11 +86,13 @@ export default async function TeamsPage() {
                 href={`/teams/${team.id}`}
                 className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-shadow"
               >
-                <div className="relative h-32 bg-gradient-to-br from-green-500 to-blue-600 flex items-center justify-center">
+                <div className="relative h-32 bg-linear-to-br from-green-500 to-blue-600 flex items-center justify-center">
                   {team.logo_url ? (
-                    <img
+                    <Image
                       src={team.logo_url}
                       alt={team.name}
+                      width={80}
+                      height={80}
                       className="w-20 h-20 rounded-full border-4 border-white"
                     />
                   ) : (
@@ -140,7 +143,7 @@ export default async function TeamsPage() {
 
                   <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                      <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-bold">
                         {team.profiles?.full_name?.charAt(0) || "O"}
                       </div>
                       <div className="text-sm">
