@@ -40,14 +40,8 @@ export default async function CourtDetailPage({
       court_availability (
         id, day_of_week, start_time, end_time, is_available
       ),
-      profiles!courts_owner_id_fkey (
-        id, full_name, avatar_url, phone
-      ),
       reviews (
-        id, rating, comment, created_at,
-        profiles!reviews_reviewer_id_fkey (
-          full_name, avatar_url
-        )
+        id, rating, comment, created_at
       )
     `
     )
@@ -313,6 +307,7 @@ export default async function CourtDetailPage({
                 <CardContent className="p-8">
                   <BookingForm
                     courtId={court.id}
+                    courtName={court.name}
                     sports={court.sports || []}
                     pricePerHour={court.price_per_hour || 0}
                   />

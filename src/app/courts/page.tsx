@@ -4,23 +4,73 @@ import { CourtWithDetails } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, MapPin, ArrowRight, Trophy, Star } from "lucide-react";
+import { MapPin, ArrowRight, Trophy, Star } from "lucide-react";
+import Image from "next/image";
+import { CourtFilters } from "./_components/court-filters";
 
-export default async function CourtsPage() {
+interface SearchParams {
+  q?: string;
+  sport?: string;
+  city?: string;
+  minPrice?: string;
+  maxPrice?: string;
+}
+
+export default async function CourtsPage(props: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const searchParams = await props.searchParams;
+  const { q, sport, city, minPrice, maxPrice } = searchParams;
   const supabase = await createClient();
 
-  const { data: courts } = await supabase
+  // Fetch filters data
+  const { data: citiesData } = await supabase
     .from("courts")
-    .select(
-      `
-      *,
-      profiles:owner_id (*),
-      court_images (*)
-    `
-    )
+    .select("city")
+    .eq("is_active", true)
+    .not("city", "is", null);
+
+  const uniqueCities = Array.from(
+    new Set(citiesData?.map((c) => c.city).filter(Boolean) as string[])
+  ).sort();
+
+  const { data: sportsData } = await supabase
+    .from("courts")
+    .select("sports")
+    .eq("is_active", true);
+
+  const uniqueSports = Array.from(
+    new Set(sportsData?.flatMap((c) => c.sports) || [])
+  ).sort();
+
+  // Build Query
+  let query = supabase
+    .from("courts")
+    .select("*")
     .eq("status", "approved")
     .eq("is_active", true);
+
+  if (q) {
+    query = query.or(`name.ilike.%${q}%,city.ilike.%${q}%`);
+  }
+
+  if (sport && sport !== "all") {
+    query = query.contains("sports", [sport]);
+  }
+
+  if (city && city !== "all") {
+    query = query.eq("city", city);
+  }
+
+  if (minPrice) {
+    query = query.gte("price_per_hour", minPrice);
+  }
+
+  if (maxPrice) {
+    query = query.lte("price_per_hour", maxPrice);
+  }
+
+  const { data: courts } = await query;
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
@@ -36,30 +86,13 @@ export default async function CourtsPage() {
           <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter">
             FIND YOUR <span className="text-blue-500">ARENA</span>
           </h1>
-
-          <div className="relative group max-w-2xl mx-auto">
-            <div className="absolute -inset-1 bg-linear-to-r from-blue-600 to-indigo-600 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            <div className="relative flex items-center bg-white/90 dark:bg-gray-900/90 backdrop-blur-xl rounded-[28px] p-2 shadow-2xl border border-white/20">
-              <div className="flex-1 flex items-center px-6">
-                <Search className="h-6 w-6 text-blue-500 mr-4" />
-                <Input
-                  placeholder="Search by name, city or sport..."
-                  className="border-0 bg-transparent focus-visible:ring-0 text-lg h-12 p-0 placeholder:text-gray-400 font-medium"
-                />
-              </div>
-              <Button
-                size="lg"
-                className="rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 px-8 shadow-lg shadow-blue-500/20 transition-all hover:scale-105 active:scale-95"
-              >
-                Search
-              </Button>
-            </div>
-          </div>
         </div>
       </section>
 
+      <CourtFilters availableSports={uniqueSports} cities={uniqueCities} />
+
       {/* Courts Grid */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 -mt-20 relative z-30">
+      <section className="max-w-7xl mx-auto px-4 md:px-8 mt-12 relative z-30">
         <div className="flex justify-between items-end mb-10 px-2">
           <div>
             <h2 className="text-3xl font-black text-gray-900 dark:text-white flex items-center gap-3">
@@ -67,10 +100,9 @@ export default async function CourtsPage() {
               <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
             </h2>
             <p className="text-muted-foreground font-medium mt-1">
-              Discover top-rated courts near you
+              {courts?.length || 0} courts found
             </p>
           </div>
-          <div className="flex gap-2">{/* Filters placeholder */}</div>
         </div>
 
         {courts && courts.length > 0 ? (
@@ -80,10 +112,12 @@ export default async function CourtsPage() {
                 <Card className="group overflow-hidden rounded-[32px] border-0 bg-white dark:bg-gray-800 shadow-lg hover:shadow-2xl transition-all duration-500 hover:-translate-y-2">
                   <div className="relative h-64 overflow-hidden">
                     {court.court_images?.[0] ? (
-                      <img
+                      <Image
                         src={court.court_images[0].url}
                         alt={court.name}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        width={500}
+                        height={500}
                       />
                     ) : (
                       <div className="w-full h-full bg-linear-to-br from-blue-100 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center">
@@ -154,8 +188,11 @@ export default async function CourtsPage() {
           <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-[40px] border-2 border-dashed border-gray-200 dark:border-gray-800">
             <Trophy className="h-16 w-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-2xl font-black text-gray-400">
-              No courts listed yet.
+              No courts found matching your criteria.
             </h3>
+            <p className="text-gray-500 mt-2">
+              Try adjusting your filters or search terms.
+            </p>
           </div>
         )}
       </section>

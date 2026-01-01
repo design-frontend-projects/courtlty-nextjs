@@ -35,18 +35,27 @@ import { format } from "date-fns";
 import { CalendarIcon, Clock, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+import { PaymentDialog } from "./payment-dialog";
+import { generateReceiptPDF } from "@/lib/pdf/receipt-generator";
+
 interface BookingFormProps {
   courtId: string;
+  courtName: string;
   sports: string[];
   pricePerHour: number;
 }
 
 export default function BookingForm({
   courtId,
+  courtName,
   sports,
   pricePerHour,
 }: BookingFormProps) {
   const [loading, setLoading] = useState(false);
+  const [showPayment, setShowPayment] = useState(false);
+  const [paymentProcessing, setPaymentProcessing] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [lastBookingId, setLastBookingId] = useState<string>("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -76,12 +85,22 @@ export default function BookingForm({
 
   const totalAmount = calculateTotalAmount();
 
-  const onSubmit = async (data: BookingFormData) => {
-    setLoading(true);
+  const handleFormSubmit = async (data: BookingFormData) => {
+    setShowPayment(true);
+  };
+
+  const handlePaymentConfirm = async () => {
+    setPaymentProcessing(true);
+
+    // Simulate payment processing
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     try {
+      const data = form.getValues();
       const {
         data: { user },
       } = await supabase.auth.getUser();
+
       if (!user) {
         toast.error("Please log in to book a court.");
         router.push("/login?redirect=/courts/" + courtId);
@@ -94,6 +113,7 @@ export default function BookingForm({
         body: JSON.stringify({
           ...data,
           total_amount: totalAmount,
+          payment_status: "paid",
         }),
       });
 
@@ -101,22 +121,48 @@ export default function BookingForm({
       if (!response.ok)
         throw new Error(result.error || "Failed to create booking");
 
-      toast.success("Booking requested successfully!");
-      setTimeout(() => {
-        router.push("/dashboard");
-        router.refresh();
-      }, 1500);
+      setLastBookingId(result.id || "ID-123456"); // Assuming API returns ID
+      setPaymentSuccess(true);
+      toast.success("Booking confirmed!");
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setLoading(false);
+      setPaymentProcessing(false);
+    }
+  };
+
+  const handleDownloadReceipt = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    generateReceiptPDF({
+      bookingId: lastBookingId,
+      courtName: courtName,
+      sport: form.getValues().sport,
+      date: form.getValues().booking_date,
+      startTime: form.getValues().start_time,
+      endTime: form.getValues().end_time,
+      pricePerHour: pricePerHour,
+      totalAmount: totalAmount,
+      userName: user?.user_metadata?.full_name || user?.email || "Guest User",
+    });
+  };
+
+  const handleClose = () => {
+    setShowPayment(false);
+    if (paymentSuccess) {
+      router.push("/dashboard");
+      router.refresh();
     }
   };
 
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <form
+          onSubmit={form.handleSubmit(handleFormSubmit)}
+          className="space-y-5"
+        >
           <FormField
             control={form.control}
             name="sport"
@@ -290,6 +336,21 @@ export default function BookingForm({
           </Button>
         </form>
       </Form>
+
+      <PaymentDialog
+        isOpen={showPayment}
+        onClose={handleClose}
+        onConfirm={handlePaymentConfirm}
+        amount={totalAmount}
+        bookingDetails={{
+          courtName: courtName,
+          date: form.getValues().booking_date,
+          time: `${startTime} - ${endTime}`,
+        }}
+        isProcessing={paymentProcessing}
+        isSuccess={paymentSuccess}
+        onDownloadReceipt={handleDownloadReceipt}
+      />
     </div>
   );
 }
