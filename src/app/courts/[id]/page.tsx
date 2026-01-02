@@ -19,6 +19,7 @@ import {
 import BookingForm from "@/components/courts/booking-form";
 import ReviewsList from "@/components/courts/reviews-list";
 import CourtGallery from "@/components/courts/court-gallery";
+import { CourtMap } from "@/components/courts/CourtMap";
 import { Separator } from "@/components/ui/separator";
 
 export default async function CourtDetailPage({
@@ -156,6 +157,14 @@ export default async function CourtDetailPage({
                       {typedCourt.description}
                     </div>
                   )}
+
+                  <Separator className="my-8" />
+
+                  <CourtMap
+                    address={`${typedCourt.address || ""}, ${
+                      typedCourt.city || ""
+                    }`}
+                  />
 
                   <Separator className="my-8" />
 

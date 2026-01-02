@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { type Database } from "@/types/database.types";
 import { courtSchema, type CourtFormData } from "@/lib/validations/schemas";
 import { CourtWithDetails } from "@/types";
 import { Button } from "@/components/ui/button";
@@ -26,8 +25,9 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
+  CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Trophy,
@@ -39,6 +39,7 @@ import {
   Layers,
   Sparkles,
 } from "lucide-react";
+import { CourtMap } from "./CourtMap";
 
 const SPORTS_OPTIONS = [
   "Basketball",
@@ -137,7 +138,7 @@ export default function CourtSubmissionForm({
     if (changed) {
       setValue("size", currentSizeData);
     }
-  }, [selectedSports, setValue]);
+  }, [selectedSports, setValue, currentSize]);
 
   const toggleSport = (sport: string) => {
     const id = sport.toLowerCase();
@@ -525,6 +526,64 @@ export default function CourtSubmissionForm({
                     </div>
                   );
                 })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Location Map Card */}
+          <Card className="rounded-[32px] border-0 shadow-xl overflow-hidden bg-white/80 backdrop-blur-sm">
+            <CardHeader className="bg-linear-to-br from-indigo-500 to-purple-600 p-8 text-white">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 bg-white/20 rounded-xl">
+                  <MapPin className="w-5 h-5" />
+                </div>
+                <CardTitle className="text-2xl">Location on Map</CardTitle>
+              </div>
+              <CardDescription className="text-indigo-100">
+                Pinpoint the exact location of your venue
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-8">
+              <CourtMap
+                isInteractive
+                address={`${watch("address") || ""} ${watch("city") || ""}`}
+                defaultLocation={
+                  initialData?.latitude && initialData?.longitude
+                    ? { lat: initialData.latitude, lng: initialData.longitude }
+                    : undefined
+                }
+                onLocationSelect={(loc: { lat: number; lng: number }) => {
+                  setValue("latitude", loc.lat);
+                  setValue("longitude", loc.lng);
+                }}
+              />
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <FormField
+                  control={control}
+                  name="latitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Latitude</FormLabel>
+                      <FormControl>
+                        <Input {...field} readOnly className="bg-muted" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={control}
+                  name="longitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Longitude</FormLabel>
+                      <FormControl>
+                        <Input {...field} readOnly className="bg-muted" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             </CardContent>
           </Card>

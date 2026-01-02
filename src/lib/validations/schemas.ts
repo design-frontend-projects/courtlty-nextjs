@@ -39,6 +39,8 @@ export const courtSchema = z.object({
   payment_methods: z
     .array(z.string())
     .min(1, "Select at least one payment method"),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 export type CourtFormData = z.infer<typeof courtSchema>;

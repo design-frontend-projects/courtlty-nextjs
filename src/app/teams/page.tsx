@@ -5,26 +5,7 @@ import Link from "next/link";
 export default async function TeamsPage() {
   const supabase = await createClient();
 
-  const { data: teams } = await supabase
-    .from("teams")
-    .select(
-      `
-      *,
-      profiles!teams_owner_id_fkey (
-        full_name,
-        avatar_url
-      ),
-      team_members (
-        id,
-        profiles!team_members_player_id_fkey (
-          id,
-          full_name,
-          avatar_url
-        )
-      )
-    `
-    )
-    .order("created_at", { ascending: false });
+  const { data: teams } = await supabase.from("teams").select("*");
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

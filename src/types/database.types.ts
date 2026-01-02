@@ -6,209 +6,181 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type Database = {
+export interface Database {
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string;
-          full_name: string | null;
-          phone: string | null;
-          avatar_url: string | null;
-          role: "player" | "court_owner" | "admin";
-          favorite_sports: string[] | null;
-          notification_preferences: Json | null;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id: string;
-          full_name?: string | null;
-          phone?: string | null;
-          avatar_url?: string | null;
-          role?: "player" | "court_owner" | "admin";
-          favorite_sports?: string[] | null;
-          notification_preferences?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          full_name?: string | null;
-          phone?: string | null;
-          avatar_url?: string | null;
-          role?: "player" | "court_owner" | "admin";
-          favorite_sports?: string[] | null;
-          notification_preferences?: Json | null;
-          created_at?: string;
-          updated_at?: string;
-        };
-      };
       courts: {
         Row: {
           id: string;
-          owner_id: string | null;
+          created_at: string;
           name: string;
           description: string | null;
-          sports: string[];
-          size: Json | null;
           address: string | null;
           city: string | null;
-          location: unknown | null;
-          price_per_hour: number | null;
-          amenities: string[] | null;
-          status: "pending" | "approved" | "rejected";
-          payment_methods: string[] | null;
-          is_active: boolean;
-          created_at: string;
-          updated_at: string;
-        };
-        Insert: {
-          id?: string;
-          owner_id?: string | null;
-          name: string;
-          description?: string | null;
+          latitude: number | null;
+          longitude: number | null;
+          price_per_hour: number;
           sports: string[];
-          size?: Json | null;
+          amenities: string[];
+          payment_methods: string[];
+          images: string[] | null;
+          owner_id: string;
+          is_active: boolean;
+          status: "pending" | "approved" | "rejected";
+          size: Json | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          name: string;
+          description?: string | null;
           address?: string | null;
           city?: string | null;
-          location?: unknown | null;
-          price_per_hour?: number | null;
-          amenities?: string[] | null;
-          status?: "pending" | "approved" | "rejected";
-          payment_methods?: string[] | null;
-          is_active?: boolean;
-          created_at?: string;
-          updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          owner_id?: string | null;
-          name?: string;
-          description?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          price_per_hour: number;
           sports?: string[];
+          amenities?: string[];
+          payment_methods?: string[];
+          images?: string[] | null;
+          owner_id?: string;
+          is_active?: boolean;
+          status?: "pending" | "approved" | "rejected";
           size?: Json | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          name?: string;
+          description?: string | null;
           address?: string | null;
           city?: string | null;
-          location?: unknown | null;
-          price_per_hour?: number | null;
-          amenities?: string[] | null;
-          status?: "pending" | "approved" | "rejected";
-          payment_methods?: string[] | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          price_per_hour?: number;
+          sports?: string[];
+          amenities?: string[];
+          payment_methods?: string[];
+          images?: string[] | null;
+          owner_id?: string;
           is_active?: boolean;
-          created_at?: string;
-          updated_at?: string;
+          status?: "pending" | "approved" | "rejected";
+          size?: Json | null;
         };
       };
-      teams: {
+      profiles: {
         Row: {
           id: string;
-          name: string;
-          owner_id: string | null;
-          sport: string;
-          description: string | null;
-          logo_url: string | null;
-          max_players: number;
-          looking_for_players: boolean;
-          players_needed: number;
-          weekly_wins: number;
-          total_games: number;
-          rating: number;
-          created_at: string;
-          updated_at: string;
+          updated_at: string | null;
+          username: string | null;
+          full_name: string | null;
+          avatar_url: string | null;
+          website: string | null;
+          role: "user" | "admin" | "moderator";
+          phone: string | null;
         };
         Insert: {
-          id?: string;
-          name: string;
-          owner_id?: string | null;
-          sport: string;
-          description?: string | null;
-          logo_url?: string | null;
-          max_players?: number;
-          looking_for_players?: boolean;
-          players_needed?: number;
-          weekly_wins?: number;
-          total_games?: number;
-          rating?: number;
-          created_at?: string;
-          updated_at?: string;
+          id: string;
+          updated_at?: string | null;
+          username?: string | null;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          website?: string | null;
+          role?: "user" | "admin" | "moderator";
+          phone?: string | null;
         };
         Update: {
           id?: string;
-          name?: string;
-          owner_id?: string | null;
-          sport?: string;
-          description?: string | null;
-          logo_url?: string | null;
-          max_players?: number;
-          looking_for_players?: boolean;
-          players_needed?: number;
-          weekly_wins?: number;
-          total_games?: number;
-          rating?: number;
-          created_at?: string;
-          updated_at?: string;
+          updated_at?: string | null;
+          username?: string | null;
+          full_name?: string | null;
+          avatar_url?: string | null;
+          website?: string | null;
+          role?: "user" | "admin" | "moderator";
+          phone?: string | null;
         };
       };
-      bookings: {
+      court_availability: {
         Row: {
           id: string;
-          court_id: string | null;
-          booked_by: string | null;
-          team_id: string | null;
-          booking_date: string;
+          court_id: string;
+          day_of_week: string;
           start_time: string;
           end_time: string;
-          sport: string;
-          status: "pending" | "confirmed" | "cancelled" | "completed";
-          total_amount: number;
-          payment_status: "pending" | "paid" | "refunded";
+          is_available: boolean;
           created_at: string;
-          updated_at: string;
         };
         Insert: {
           id?: string;
-          court_id?: string | null;
-          booked_by?: string | null;
-          team_id?: string | null;
-          booking_date: string;
+          court_id: string;
+          day_of_week: string;
           start_time: string;
           end_time: string;
-          sport: string;
-          status?: "pending" | "confirmed" | "cancelled" | "completed";
-          total_amount: number;
-          payment_status?: "pending" | "paid" | "refunded";
+          is_available?: boolean;
           created_at?: string;
-          updated_at?: string;
         };
         Update: {
           id?: string;
-          court_id?: string | null;
-          booked_by?: string | null;
-          team_id?: string | null;
-          booking_date?: string;
+          court_id?: string;
+          day_of_week?: string;
           start_time?: string;
           end_time?: string;
-          sport?: string;
-          status?: "pending" | "confirmed" | "cancelled" | "completed";
-          total_amount?: number;
-          payment_status?: "pending" | "paid" | "refunded";
+          is_available?: boolean;
           created_at?: string;
-          updated_at?: string;
+        };
+      };
+      reviews: {
+        Row: {
+          id: string;
+          court_id: string;
+          user_id: string;
+          rating: number;
+          comment: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          court_id: string;
+          user_id: string;
+          rating: number;
+          comment?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          court_id?: string;
+          user_id?: string;
+          rating?: number;
+          comment?: string | null;
+          created_at?: string;
+        };
+      };
+      court_images: {
+        Row: {
+          id: string;
+          court_id: string;
+          url: string;
+          is_primary: boolean;
+          display_order: number;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          court_id: string;
+          url: string;
+          is_primary?: boolean;
+          display_order?: number;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          court_id?: string;
+          url?: string;
+          is_primary?: boolean;
+          display_order?: number;
+          created_at?: string;
         };
       };
     };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      [_ in never]: never;
-    };
-    Enums: {
-      user_role: "player" | "court_owner" | "admin";
-      court_status: "pending" | "approved" | "rejected";
-      booking_status: "pending" | "confirmed" | "cancelled" | "completed";
-      payment_status: "pending" | "paid" | "refunded";
-    };
   };
-};
+}
