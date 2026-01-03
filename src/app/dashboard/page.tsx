@@ -22,6 +22,7 @@ import {
   Search,
   LayoutGrid,
 } from "lucide-react";
+import { DashboardBookingsClient } from "@/components/dashboard/dashboard-bookings-client";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -41,7 +42,7 @@ export default async function DashboardPage() {
     .eq("id", user.id)
     .single();
 
-  // Fetch user's upcoming bookings
+  // Fetch all user's upcoming bookings
   const { data: bookings } = await supabase
     .from("bookings")
     .select(
@@ -56,11 +57,11 @@ export default async function DashboardPage() {
     )
     .eq("booked_by", user.id)
     .gte("booking_date", new Date().toISOString().split("T")[0])
-    .order("booking_date", { ascending: true })
-    .limit(5);
+    .order("booking_date", { ascending: true });
 
-  // Fetch user's team
-  const { data: team } = await supabase
+  // Fetch all teams user belongs to (as owner or member)
+  // First get teams where user is owner
+  const { data: ownedTeams } = await supabase
     .from("teams")
     .select(
       `
@@ -74,8 +75,42 @@ export default async function DashboardPage() {
       )
     `
     )
-    .eq("owner_id", user.id)
-    .single();
+    .eq("owner_id", user.id);
+
+  // Get teams where user is a member
+  const { data: memberTeams } = await supabase
+    .from("team_members")
+    .select(
+      `
+       team_id,
+       teams (
+         *,
+         team_members (
+            id,
+            profiles!team_members_player_id_fkey (
+              full_name,
+              avatar_url
+            )
+         )
+       )
+       `
+    )
+    .eq("player_id", user.id);
+
+  // Combine teams
+  // Combine teams
+  const joinedTeams = memberTeams?.map((mt) => mt.teams) || [];
+  // Filter out any duplicates if user is owner and also in team_members (unlikely but safe)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allTeams: any[] = [...(ownedTeams || [])];
+  joinedTeams.forEach((jt) => {
+    // @ts-expect-error - Supabase join types are complex
+    if (jt && !allTeams.find((t: any) => t.id === jt.id)) {
+      allTeams.push(jt);
+    }
+  });
+
+  const latestBookings = bookings?.slice(0, 5) || [];
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -131,24 +166,8 @@ export default async function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Quick Stats */}
           <div className="lg:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all hover:shadow-md">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                  Upcoming Bookings
-                </CardTitle>
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/40 rounded-xl">
-                  <CalendarDays className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-black text-slate-900 dark:text-slate-50">
-                  {bookings?.length || 0}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Confirmed for this week
-                </p>
-              </CardContent>
-            </Card>
+            {/* Booking Stats Card with Modal */}
+            <DashboardBookingsClient bookings={bookings || []} />
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm transition-all hover:shadow-md">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -161,7 +180,7 @@ export default async function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-black text-slate-900 dark:text-slate-50">
-                  {team ? "1" : "0"}
+                  {allTeams.length}
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Active squad memberships
@@ -206,9 +225,9 @@ export default async function DashboardPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
-                {bookings && bookings.length > 0 ? (
+                {latestBookings && latestBookings.length > 0 ? (
                   <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {bookings.map((booking: any) => (
+                    {latestBookings.map((booking: any) => (
                       <div
                         key={booking.id}
                         className="p-6 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group"
@@ -270,63 +289,57 @@ export default async function DashboardPage() {
           <div className="lg:col-span-4 flex flex-col gap-6">
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden h-fit">
               <CardHeader className="bg-linear-to-br from-indigo-600 to-blue-500 text-white pb-8">
-                <CardTitle className="text-xl font-bold">My Team</CardTitle>
+                <CardTitle className="text-xl font-bold">My Teams</CardTitle>
                 <CardDescription className="text-indigo-100">
-                  Squad status and members
+                  {allTeams.length > 0
+                    ? "Manage your squads"
+                    : "Join or create a team"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="-mt-6">
-                {team ? (
+                {allTeams.length > 0 ? (
                   <div className="space-y-6">
-                    <Card className="border-white/20 shadow-xl bg-white dark:bg-slate-900 p-6 text-center">
-                      <Avatar className="w-20 h-20 mx-auto mb-4 border-4 border-slate-50 dark:border-slate-800 shadow-lg">
-                        <AvatarFallback className="bg-linear-to-r from-blue-500 to-emerald-500 text-white text-2xl font-black">
-                          {team.name.charAt(0)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <h3 className="text-xl font-black text-slate-900 dark:text-slate-50">
-                        {team.name}
-                      </h3>
-                      <Badge variant="secondary" className="mt-2 capitalize">
-                        {team.sport}
-                      </Badge>
-                    </Card>
+                    {allTeams.map((team: any) => (
+                      <div key={team.id} className="space-y-4 mb-6 last:mb-0">
+                        <Card className="border-white/20 shadow-xl bg-white dark:bg-slate-900 p-6 text-center">
+                          <Avatar className="w-20 h-20 mx-auto mb-4 border-4 border-slate-50 dark:border-slate-800 shadow-lg">
+                            <AvatarFallback className="bg-linear-to-r from-blue-500 to-emerald-500 text-white text-2xl font-black">
+                              {team.name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <h3 className="text-xl font-black text-slate-900 dark:text-slate-50">
+                            {team.name}
+                          </h3>
+                          <Badge
+                            variant="secondary"
+                            className="mt-2 capitalize"
+                          >
+                            {team.sport}
+                          </Badge>
+                          <div className="mt-4 flex items-center justify-between text-sm">
+                            <span className="font-semibold text-slate-600 dark:text-slate-400">
+                              Members
+                            </span>
+                            <span className="text-slate-900 dark:text-slate-100 font-bold">
+                              {team.team_members?.length || 0} /{" "}
+                              {team.max_players}
+                            </span>
+                          </div>
+                          <Separator className="my-4 bg-slate-100 dark:bg-slate-800" />
 
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold text-slate-600 dark:text-slate-400">
-                          Members
-                        </span>
-                        <span className="text-slate-900 dark:text-slate-100 font-bold">
-                          {team.team_members?.length || 0} / {team.max_players}
-                        </span>
+                          <Button
+                            asChild
+                            variant="default"
+                            className="w-full font-bold group"
+                          >
+                            <Link href={`/teams/${team.id}`}>
+                              Manage Squad
+                              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                          </Button>
+                        </Card>
                       </div>
-                      <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-                        <div
-                          className="bg-blue-600 h-full rounded-full transition-all duration-1000"
-                          style={{
-                            width: `${
-                              ((team.team_members?.length || 0) /
-                                team.max_players) *
-                              100
-                            }%`,
-                          }}
-                        />
-                      </div>
-
-                      <Separator className="bg-slate-100 dark:bg-slate-800" />
-
-                      <Button
-                        asChild
-                        variant="default"
-                        className="w-full font-bold group"
-                      >
-                        <Link href={`/teams/${team.id}`}>
-                          Manage Squad
-                          <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                        </Link>
-                      </Button>
-                    </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="bg-white dark:bg-slate-900 rounded-xl p-8 border border-slate-100 dark:border-slate-800 text-center shadow-lg transform -translate-y-2">

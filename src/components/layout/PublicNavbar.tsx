@@ -15,26 +15,46 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, User as UserIcon, LogOut } from "lucide-react";
+import { Bell, User as UserIcon, LogOut, Users } from "lucide-react";
 
 export function PublicNavbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [hasTeam, setHasTeam] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
-    const getUser = async () => {
+    const getUserData = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
       setUser(user);
+
+      if (user) {
+        // Check if user is part of any team (as owner or member)
+        const { count } = await supabase
+          .from("team_members")
+          .select("*", { count: "exact", head: true })
+          .eq("player_id", user.id);
+
+        const { count: ownedCount } = await supabase
+          .from("teams")
+          .select("*", { count: "exact", head: true })
+          .eq("owner_id", user.id);
+
+        setHasTeam((count || 0) > 0 || (ownedCount || 0) > 0);
+      }
     };
-    getUser();
+    getUserData();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        // Re-check team status on auth change
+        getUserData();
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -56,7 +76,7 @@ export function PublicNavbar() {
           <div className="flex items-center">
             <Link
               href="/"
-              className="text-xl font-bold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent"
+              className="text-xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent"
             >
               Courtly
             </Link>
@@ -117,6 +137,14 @@ export function PublicNavbar() {
                         <span>Profile</span>
                       </Link>
                     </DropdownMenuItem>
+                    {hasTeam && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard">
+                          <Users className="mr-2 h-4 w-4" />
+                          <span>My Teams</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
                       <LogOut className="mr-2 h-4 w-4" />

@@ -33,8 +33,9 @@ export default async function TeamDetailPage({
 
   const { data: team, error } = await supabase
     .from("teams")
-    .select("*, team_members(player_id, status, role, profiles(*))")
+    .select("*, team_members(team_id,player_id, status, role, profiles(*))")
     .eq("id", id)
+    .eq("team_members.team_id", id)
     .single();
 
   if (error || !team) {

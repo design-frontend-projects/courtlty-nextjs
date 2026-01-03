@@ -57,9 +57,9 @@ export default function SettingsClient({
   const router = useRouter();
   const supabase = createClient();
 
-  // Load theme from localStorage
+  // Load theme from sessionStorage
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as
+    const savedTheme = sessionStorage.getItem("theme") as
       | "light"
       | "dark"
       | "system"
@@ -87,7 +87,7 @@ export default function SettingsClient({
 
   const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
     setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
+    sessionStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
     toast.success("Theme updated");
   };
