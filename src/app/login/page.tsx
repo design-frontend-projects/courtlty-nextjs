@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -26,6 +26,29 @@ export default function LoginPage() {
   const [otp, setOtp] = useState("");
   const router = useRouter();
   const supabase = createClient();
+
+  // Redirect admin users away from login page
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        if (!error && profile?.role === "admin") {
+          router.replace("/admin");
+        }
+        if (!error && profile?.role !== "admin") {
+          router.replace("/dashboard");
+        }
+      }
+    };
+    checkAdmin();
+  }, []);
 
   const handleSendOTP = async (e: React.FormEvent) => {
     e.preventDefault();

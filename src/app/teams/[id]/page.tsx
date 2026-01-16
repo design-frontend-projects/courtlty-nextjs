@@ -38,6 +38,8 @@ export default async function TeamDetailPage({
     .eq("team_members.team_id", id)
     .single();
 
+  console.log("check team", team);
+
   if (error || !team) {
     notFound();
   }
