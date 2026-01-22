@@ -52,18 +52,18 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  // Fetch user profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  // Fetch user's teams - cast the result properly
-  const { data: teamMembershipsRaw } = await supabase
-    .from("team_members")
-    .select(
-      `
+  const [
+    { data: profile },
+    { data: teamMembershipsRaw },
+    { data: recentBookingsRaw },
+  ] = await Promise.all([
+    // Fetch user profile
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    // Fetch user's teams - cast the result properly
+    supabase
+      .from("team_members")
+      .select(
+        `
       id,
       role,
       status,
@@ -74,15 +74,14 @@ export default async function ProfilePage() {
         logo_url
       )
     `,
-    )
-    .eq("user_id", user.id)
-    .eq("status", "approved");
-
-  // Fetch user's recent bookings - cast the result properly
-  const { data: recentBookingsRaw } = await supabase
-    .from("bookings")
-    .select(
-      `
+      )
+      .eq("user_id", user.id)
+      .eq("status", "approved"),
+    // Fetch user's recent bookings - cast the result properly
+    supabase
+      .from("bookings")
+      .select(
+        `
       id,
       booking_date,
       start_time,
@@ -95,10 +94,11 @@ export default async function ProfilePage() {
         address
       )
     `,
-    )
-    .eq("user_id", user.id)
-    .order("booking_date", { ascending: false })
-    .limit(5);
+      )
+      .eq("user_id", user.id)
+      .order("booking_date", { ascending: false })
+      .limit(5),
+  ]);
 
   // Transform the data to handle Supabase's array wrapping for single relations
   const teamMemberships = (teamMembershipsRaw || []).map((item) => {

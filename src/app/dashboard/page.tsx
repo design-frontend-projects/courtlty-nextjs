@@ -104,12 +104,16 @@ export default async function DashboardPage() {
   // Combine teams
   const joinedTeams = memberTeams?.map((mt) => mt.teams) || [];
   // Filter out any duplicates if user is owner and also in team_members (unlikely but safe)
-  const allTeams = [...(ownedTeams || [])];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const allTeams: any[] = [...(ownedTeams || [])];
+  // Create a Set of existing team IDs for O(1) lookups
+  const existingTeamIds = new Set(allTeams.map((t) => t.id));
+
   joinedTeams.forEach((jt) => {
     // @ts-expect-error - Supabase join types are complex
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    if (jt && !allTeams.find((t: any) => t.id === jt.id)) {
+    if (jt && !existingTeamIds.has(jt.id)) {
       allTeams.push(jt);
+      existingTeamIds.add(jt.id);
     }
   });
 

@@ -13,4 +13,5 @@ export interface CourtWithDetails extends Court {
   court_availability: CourtAvailability[];
   reviews: Review[];
   profiles: Pick<Profile, "full_name" | "phone" | "avatar_url"> | null;
+  average_rating?: number;
 }

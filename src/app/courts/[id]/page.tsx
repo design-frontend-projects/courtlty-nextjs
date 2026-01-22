@@ -46,6 +46,7 @@ export default async function CourtDetailPage({
     .select(
       `
       *,
+      average_rating,
       court_images (
         id, url, is_primary, display_order
       ),
@@ -71,13 +72,8 @@ export default async function CourtDetailPage({
   const typedCourt: CourtWithDetails = court;
 
   const avgRating =
-    typedCourt.reviews && typedCourt.reviews.length > 0
-      ? (
-          typedCourt.reviews.reduce(
-            (sum: number, r: { rating: number }) => sum + r.rating,
-            0
-          ) / typedCourt.reviews.length
-        ).toFixed(1)
+    typedCourt.average_rating != null
+      ? typedCourt.average_rating.toFixed(1)
       : null;
 
   return (
