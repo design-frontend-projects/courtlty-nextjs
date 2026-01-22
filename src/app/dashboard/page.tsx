@@ -35,18 +35,20 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Fetch user profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const [
+    { data: profile },
+    { data: bookings },
+    { data: ownedTeams },
+    { data: memberTeams },
+  ] = await Promise.all([
+    // Fetch user profile
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
 
-  // Fetch all user's upcoming bookings
-  const { data: bookings } = await supabase
-    .from("bookings")
-    .select(
-      `
+    // Fetch all user's upcoming bookings
+    supabase
+      .from("bookings")
+      .select(
+        `
       *,
       courts (
         name,
@@ -54,17 +56,17 @@ export default async function DashboardPage() {
         city
       )
     `
-    )
-    .eq("booked_by", user.id)
-    .gte("booking_date", new Date().toISOString().split("T")[0])
-    .order("booking_date", { ascending: true });
+      )
+      .eq("booked_by", user.id)
+      .gte("booking_date", new Date().toISOString().split("T")[0])
+      .order("booking_date", { ascending: true }),
 
-  // Fetch all teams user belongs to (as owner or member)
-  // First get teams where user is owner
-  const { data: ownedTeams } = await supabase
-    .from("teams")
-    .select(
-      `
+    // Fetch all teams user belongs to (as owner or member)
+    // First get teams where user is owner
+    supabase
+      .from("teams")
+      .select(
+        `
       *,
       team_members (
         id,
@@ -74,14 +76,14 @@ export default async function DashboardPage() {
         )
       )
     `
-    )
-    .eq("owner_id", user.id);
+      )
+      .eq("owner_id", user.id),
 
-  // Get teams where user is a member
-  const { data: memberTeams } = await supabase
-    .from("team_members")
-    .select(
-      `
+    // Get teams where user is a member
+    supabase
+      .from("team_members")
+      .select(
+        `
        team_id,
        teams (
          *,
@@ -94,17 +96,18 @@ export default async function DashboardPage() {
          )
        )
        `
-    )
-    .eq("player_id", user.id);
+      )
+      .eq("player_id", user.id),
+  ]);
 
   // Combine teams
   // Combine teams
   const joinedTeams = memberTeams?.map((mt) => mt.teams) || [];
   // Filter out any duplicates if user is owner and also in team_members (unlikely but safe)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const allTeams: any[] = [...(ownedTeams || [])];
+  const allTeams = [...(ownedTeams || [])];
   joinedTeams.forEach((jt) => {
     // @ts-expect-error - Supabase join types are complex
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (jt && !allTeams.find((t: any) => t.id === jt.id)) {
       allTeams.push(jt);
     }
@@ -227,6 +230,7 @@ export default async function DashboardPage() {
               <CardContent className="p-0">
                 {latestBookings && latestBookings.length > 0 ? (
                   <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {latestBookings.map((booking: any) => (
                       <div
                         key={booking.id}
@@ -299,6 +303,7 @@ export default async function DashboardPage() {
               <CardContent className="-mt-6">
                 {allTeams.length > 0 ? (
                   <div className="space-y-6">
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                     {allTeams.map((team: any) => (
                       <div key={team.id} className="space-y-4 mb-6 last:mb-0">
                         <Card className="border-white/20 shadow-xl bg-white dark:bg-slate-900 p-6 text-center">
