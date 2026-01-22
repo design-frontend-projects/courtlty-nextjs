@@ -24,24 +24,20 @@ export default async function CourtsPage(props: {
   const supabase = await createClient();
 
   // Fetch filters data
-  const { data: citiesData } = await supabase
-    .from("courts")
-    .select("city")
-    .eq("is_active", true)
-    .not("city", "is", null);
+  const [citiesResponse, sportsResponse] = await Promise.all([
+    supabase.rpc("get_unique_cities"),
+    supabase.rpc("get_unique_sports"),
+  ]);
 
-  const uniqueCities = Array.from(
-    new Set(citiesData?.map((c) => c.city).filter(Boolean) as string[])
-  ).sort();
+  const uniqueCities =
+    (citiesResponse.data as unknown as { city: string }[])?.map(
+      (c) => c.city
+    ) || [];
 
-  const { data: sportsData } = await supabase
-    .from("courts")
-    .select("sports")
-    .eq("is_active", true);
-
-  const uniqueSports = Array.from(
-    new Set(sportsData?.flatMap((c) => c.sports) || [])
-  ).sort();
+  const uniqueSports =
+    (sportsResponse.data as unknown as { sport: string }[])?.map(
+      (s) => s.sport
+    ) || [];
 
   // Build Query
   let query = supabase
