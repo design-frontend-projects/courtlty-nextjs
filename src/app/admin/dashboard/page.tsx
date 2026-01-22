@@ -15,7 +15,7 @@ export default async function AdminDashboardPage() {
       .eq("status", "pending")
       .order("created_at", { ascending: false }),
     supabase.from("courts").select("*", { count: "exact", head: true }),
-    supabase.from("auth.users").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
   ]);
 
   return (
