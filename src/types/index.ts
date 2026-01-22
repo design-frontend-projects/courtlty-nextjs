@@ -6,6 +6,7 @@ export type CourtAvailability =
   Database["public"]["Tables"]["court_availability"]["Row"];
 export type Review = Database["public"]["Tables"]["reviews"]["Row"];
 export type CourtImage = Database["public"]["Tables"]["court_images"]["Row"];
+export type Booking = Database["public"]["Tables"]["bookings"]["Row"];
 
 export interface CourtWithDetails extends Court {
   court_images: CourtImage[];
