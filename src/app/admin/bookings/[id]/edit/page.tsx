@@ -10,17 +10,14 @@ export default async function EditBookingPage({
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: booking } = await supabase
-    .from("bookings")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const [{ data: booking }, { data: courts }, { data: users }] =
+    await Promise.all([
+      supabase.from("bookings").select("*").eq("id", id).single(),
+      supabase.from("courts").select("*"),
+      supabase.from("auth.users").select("*"),
+    ]);
 
   if (!booking) notFound();
-
-  // Fetch courts/users for dropdowns
-  const { data: courts } = await supabase.from("courts").select("*");
-  const { data: users } = await supabase.from("auth.users").select("*");
 
   return (
     <div className="space-y-6">
