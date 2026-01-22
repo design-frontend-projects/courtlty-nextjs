@@ -23,22 +23,6 @@ export default async function CourtsPage(props: {
   const { q, sport, city, minPrice, maxPrice } = searchParams;
   const supabase = await createClient();
 
-  // Fetch filters data
-  const [citiesResponse, sportsResponse] = await Promise.all([
-    supabase.rpc("get_unique_cities"),
-    supabase.rpc("get_unique_sports"),
-  ]);
-
-  const uniqueCities =
-    (citiesResponse.data as unknown as { city: string }[])?.map(
-      (c) => c.city
-    ) || [];
-
-  const uniqueSports =
-    (sportsResponse.data as unknown as { sport: string }[])?.map(
-      (s) => s.sport
-    ) || [];
-
   // Build Query
   let query = supabase
     .from("courts")
@@ -66,7 +50,25 @@ export default async function CourtsPage(props: {
     query = query.lte("price_per_hour", maxPrice);
   }
 
-  const { data: courts } = await query;
+  // Fetch all data in parallel
+  const [{ data: citiesData }, { data: sportsData }, { data: courts }] =
+    await Promise.all([
+      supabase
+        .from("courts")
+        .select("city")
+        .eq("is_active", true)
+        .not("city", "is", null),
+      supabase.from("courts").select("sports").eq("is_active", true),
+      query,
+    ]);
+
+  const uniqueCities = Array.from(
+    new Set(citiesData?.map((c) => c.city).filter(Boolean) as string[])
+  ).sort();
+
+  const uniqueSports = Array.from(
+    new Set(sportsData?.flatMap((c) => c.sports) || [])
+  ).sort();
 
   return (
     <main className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
