@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { courtSchema } from "@/lib/validations/schemas";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -58,12 +59,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "admin" && profile?.role !== "moderator") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const body = await request.json();
+  const validation = courtSchema.safeParse(body);
+
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const validatedData = validation.data;
 
   const { data, error } = await supabase
     .from("courts")
     .insert({
-      ...body,
+      ...validatedData,
       owner_id: user.id,
       status: "pending",
       is_active: false,
