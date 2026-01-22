@@ -15,12 +15,12 @@ export default async function SubmitCourtPage() {
 
   // Check user role
   const { data: profile } = await supabase
-    .from("auth.users")
+    .from("profiles")
     .select("role")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "court_owner" && profile?.role !== "admin") {
+  if (profile?.role !== "admin" && profile?.role !== "moderator") {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">

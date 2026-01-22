@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { courtSchema } from "@/lib/validations/schemas";
 
 export async function GET(
   request: Request,
@@ -63,21 +64,44 @@ export async function PUT(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdminOrModerator =
+    profile?.role === "admin" || profile?.role === "moderator";
+
   const { data: court } = await supabase
     .from("courts")
     .select("owner_id")
     .eq("id", id)
     .single();
 
-  if (court?.owner_id !== user.id) {
+  if (!court) {
+    return NextResponse.json({ error: "Court not found" }, { status: 404 });
+  }
+
+  if (court.owner_id !== user.id && !isAdminOrModerator) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const body = await request.json();
+  const validation = courtSchema.partial().safeParse(body);
+
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 }
+    );
+  }
+
+  const validatedData = validation.data;
 
   const { data, error } = await supabase
     .from("courts")
-    .update(body)
+    .update(validatedData)
     .eq("id", id)
     .select()
     .single();
@@ -104,13 +128,26 @@ export async function DELETE(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdminOrModerator =
+    profile?.role === "admin" || profile?.role === "moderator";
+
   const { data: court } = await supabase
     .from("courts")
     .select("owner_id")
     .eq("id", id)
     .single();
 
-  if (court?.owner_id !== user.id) {
+  if (!court) {
+    return NextResponse.json({ error: "Court not found" }, { status: 404 });
+  }
+
+  if (court.owner_id !== user.id && !isAdminOrModerator) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
