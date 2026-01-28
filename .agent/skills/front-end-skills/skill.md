@@ -65,7 +65,29 @@ This skill is especially useful for:
 - Use **Next.js with TypeScript**
 - Enable strict mode
 - Prefer **App Router** unless Pages Router is explicitly required
+- Use **shadcn/ui** for UI components
+- Use **Tailwind CSS v4** for styling
+- Use **Zustand** for state management
+- Use **TanStack Query** for data fetching
+- Use **TanStack Router** for routing
+- Use **Zod** for form validation
+- Use **React Hook Form** for form handling
+- Use pnpm as package manager
+- Use **Framer Motion** for animations
 
 ```bash
 npx create-next-app@latest --ts
 ```
+
+src/
+├─ app/
+├─ features/
+│ ├─ auth/
+│ ├─ users/
+│ └─ orders/
+├─ stores/ # Zustand stores
+├─ services/ # API & data access
+└─ shared/
+├─ components/
+├─ hooks/
+└─ utils/
