@@ -22,6 +22,17 @@ import CourtGallery from "@/components/courts/court-gallery";
 import { CourtMap } from "@/components/courts/CourtMap";
 import { Separator } from "@/components/ui/separator";
 
+interface ReviewWithProfile {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  profiles: {
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
 export default async function CourtDetailPage({
   params,
 }: {
@@ -35,6 +46,7 @@ export default async function CourtDetailPage({
     .select(
       `
       *,
+      average_rating,
       court_images (
         id, url, is_primary, display_order
       ),
@@ -42,7 +54,11 @@ export default async function CourtDetailPage({
         id, day_of_week, start_time, end_time, is_available
       ),
       reviews (
-        id, rating, comment, created_at
+        id, rating, comment, created_at,
+        profiles!reviews_reviewer_id_fkey (
+          full_name,
+          avatar_url
+        )
       )
     `
     )
@@ -56,13 +72,8 @@ export default async function CourtDetailPage({
   const typedCourt: CourtWithDetails = court;
 
   const avgRating =
-    typedCourt.reviews && typedCourt.reviews.length > 0
-      ? (
-          typedCourt.reviews.reduce(
-            (sum: number, r: { rating: number }) => sum + r.rating,
-            0
-          ) / typedCourt.reviews.length
-        ).toFixed(1)
+    typedCourt.average_rating != null
+      ? typedCourt.average_rating.toFixed(1)
       : null;
 
   return (
@@ -254,7 +265,9 @@ export default async function CourtDetailPage({
                 className="animate-in fade-in slide-in-from-bottom-2"
               >
                 <ReviewsList
-                  reviews={typedCourt.reviews || []}
+                  reviews={
+                    (typedCourt.reviews as unknown as ReviewWithProfile[]) || []
+                  }
                   courtId={typedCourt.id}
                 />
               </TabsContent>

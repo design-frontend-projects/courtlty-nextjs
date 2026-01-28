@@ -78,6 +78,7 @@ export interface Database {
           website: string | null;
           role: "user" | "admin" | "moderator";
           phone: string | null;
+          favorite_sports: string[] | null;
         };
         Insert: {
           id: string;
@@ -88,6 +89,7 @@ export interface Database {
           website?: string | null;
           role?: "user" | "admin" | "moderator";
           phone?: string | null;
+          favorite_sports?: string[] | null;
         };
         Update: {
           id?: string;
@@ -98,6 +100,7 @@ export interface Database {
           website?: string | null;
           role?: "user" | "admin" | "moderator";
           phone?: string | null;
+          favorite_sports?: string[] | null;
         };
       };
       court_availability: {
@@ -153,6 +156,44 @@ export interface Database {
           rating?: number;
           comment?: string | null;
           created_at?: string;
+        };
+      };
+      bookings: {
+        Row: {
+          id: string;
+          created_at: string;
+          court_id: string;
+          booked_by: string;
+          booking_date: string;
+          start_time: string;
+          end_time: string;
+          total_amount: number;
+          status: "pending" | "confirmed" | "cancelled";
+          payment_status: "pending" | "paid" | "failed";
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          court_id: string;
+          booked_by: string;
+          booking_date: string;
+          start_time: string;
+          end_time: string;
+          total_amount: number;
+          status?: "pending" | "confirmed" | "cancelled";
+          payment_status?: "pending" | "paid" | "failed";
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          court_id?: string;
+          booked_by?: string;
+          booking_date?: string;
+          start_time?: string;
+          end_time?: string;
+          total_amount?: number;
+          status?: "pending" | "confirmed" | "cancelled";
+          payment_status?: "pending" | "paid" | "failed";
         };
       };
       court_images: {

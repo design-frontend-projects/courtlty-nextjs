@@ -4,21 +4,19 @@ import AdminDashboardClient from "./dashboard-client";
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  // Fetch pending courts
-  const { data: pendingCourts } = await supabase
-    .from("courts")
-    .select("*, profiles(full_name, email)")
-    .eq("status", "pending")
-    .order("created_at", { ascending: false });
-
-  // Fetch stats (optional, but nice)
-  const { count: courtsCount } = await supabase
-    .from("courts")
-    .select("*", { count: "exact", head: true });
-
-  const { count: usersCount } = await supabase
-    .from("auth.users")
-    .select("*", { count: "exact", head: true });
+  const [
+    { data: pendingCourts },
+    { count: courtsCount },
+    { count: usersCount },
+  ] = await Promise.all([
+    supabase
+      .from("courts")
+      .select("*, profiles(full_name, email)")
+      .eq("status", "pending")
+      .order("created_at", { ascending: false }),
+    supabase.from("courts").select("*", { count: "exact", head: true }),
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+  ]);
 
   return (
     <AdminDashboardClient
