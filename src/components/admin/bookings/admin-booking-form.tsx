@@ -159,7 +159,6 @@ export default function AdminBookingForm({
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
-                  disabled={isEdit} // Maybe disable editing user after creation
                 >
                   <FormControl>
                     <SelectTrigger>
