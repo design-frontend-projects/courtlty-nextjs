@@ -90,9 +90,18 @@ export default function ProfileClient({
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
+      // Immediately update the profile avatar_url in database
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+        .eq("id", initialProfile?.id);
+
+      if (updateError) throw updateError;
+
       setAvatarUrl(publicUrl);
       setValue("avatar_url", publicUrl);
-      toast.success("Image uploaded successfully");
+      toast.success("Avatar updated successfully");
+      router.refresh();
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error("Failed to upload image");

@@ -182,11 +182,18 @@ export default function ProfilePageClient({
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
+      // Immediately update the profile avatar_url in database
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
+        .eq("id", user.id);
+
+      if (updateError) throw updateError;
+
       setAvatarUrl(publicUrl);
       setValue("avatar_url", publicUrl);
-      toast.success("Avatar uploaded successfully!");
-
-      // Auto-save if not in editing mode? Actually, just update the state
+      toast.success("Avatar updated successfully!");
+      router.refresh();
     } catch (error) {
       console.error("Error uploading avatar:", error);
       toast.error("Failed to upload avatar");
