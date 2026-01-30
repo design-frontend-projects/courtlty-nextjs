@@ -38,6 +38,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CourtMap } from "./CourtMap";
+import CourtImageUploader from "@/components/admin/courts/court-image-uploader";
+import CourtAvailabilityManager from "@/components/admin/courts/court-availability-manager";
 
 const SPORTS_OPTIONS = [
   "Basketball",
@@ -59,8 +61,28 @@ const AMENITIES_OPTIONS = [
   "First Aid",
 ];
 
+interface AvailabilitySlot {
+  id: string;
+  court_id: string;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_available: boolean;
+}
+
+interface CourtImageData {
+  id: string;
+  court_id: string;
+  url: string;
+  is_primary: boolean;
+  display_order: number;
+  created_at: string;
+}
+
 interface CourtSubmissionFormProps {
   initialData?: CourtWithDetails;
+  initialAvailability?: AvailabilitySlot[];
+  initialImages?: CourtImageData[];
   mode?: "create" | "edit";
   courtId?: string;
   isAdmin?: boolean;
@@ -68,6 +90,8 @@ interface CourtSubmissionFormProps {
 
 export default function CourtSubmissionForm({
   initialData,
+  initialAvailability = [],
+  initialImages = [],
   mode = "create",
   courtId,
   isAdmin = false,
@@ -599,6 +623,20 @@ export default function CourtSubmissionForm({
               </div>
             </CardContent>
           </Card>
+
+          {/* Images & Availability - Only in Edit Mode with courtId */}
+          {mode === "edit" && courtId && (
+            <div className="space-y-8">
+              <CourtImageUploader
+                courtId={courtId}
+                initialImages={initialImages}
+              />
+              <CourtAvailabilityManager
+                courtId={courtId}
+                initialData={initialAvailability}
+              />
+            </div>
+          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col gap-4">

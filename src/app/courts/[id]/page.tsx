@@ -46,7 +46,12 @@ export default async function CourtDetailPage({
     .select(
       `
       *,
-      average_rating,
+      profiles!courts_owner_id_fkey (
+        id,
+        full_name,
+        avatar_url,
+        phone
+      ),
       court_images (
         id, url, is_primary, display_order
       ),
@@ -60,20 +65,25 @@ export default async function CourtDetailPage({
           avatar_url
         )
       )
-    `
+    `,
     )
     .eq("id", id)
     .single();
 
   if (error || !court) {
+    console.error("Court fetch error:", error);
     notFound();
   }
 
   const typedCourt: CourtWithDetails = court;
 
+  // Calculate average rating from reviews
+  const reviews = typedCourt.reviews || [];
   const avgRating =
-    typedCourt.average_rating != null
-      ? typedCourt.average_rating.toFixed(1)
+    reviews.length > 0
+      ? (
+          reviews.reduce((sum, r) => sum + (r.rating || 0), 0) / reviews.length
+        ).toFixed(1)
       : null;
 
   return (
@@ -299,7 +309,7 @@ export default async function CourtDetailPage({
                                 {item.start_time} - {item.end_time}
                               </Badge>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     ) : (

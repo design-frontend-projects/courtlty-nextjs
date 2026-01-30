@@ -18,15 +18,30 @@ export default async function AdminEditCourtPage({
     redirect("/login");
   }
 
+  // Fetch court with related data
   const { data: court } = await supabase
     .from("courts")
-    .select("*")
+    .select(
+      `
+      *,
+      court_images (
+        id, court_id, url, is_primary, display_order, created_at
+      ),
+      court_availability (
+        id, court_id, day_of_week, start_time, end_time, is_available
+      )
+    `,
+    )
     .eq("id", id)
     .single();
 
   if (!court) {
     notFound();
   }
+
+  // Extract related data
+  const courtImages = court.court_images || [];
+  const courtAvailability = court.court_availability || [];
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -38,6 +53,8 @@ export default async function AdminEditCourtPage({
         mode="edit"
         courtId={id}
         initialData={court}
+        initialImages={courtImages}
+        initialAvailability={courtAvailability}
         isAdmin={true}
       />
     </div>

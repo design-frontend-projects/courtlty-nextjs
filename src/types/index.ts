@@ -11,7 +11,9 @@ export type Booking = Database["public"]["Tables"]["bookings"]["Row"];
 export interface CourtWithDetails extends Court {
   court_images: CourtImage[];
   court_availability: CourtAvailability[];
-  reviews: Review[];
-  profiles: Pick<Profile, "full_name" | "phone" | "avatar_url"> | null;
+  reviews: (Review & {
+    profiles?: { full_name: string | null; avatar_url: string | null } | null;
+  })[];
+  profiles: Pick<Profile, "id" | "full_name" | "phone" | "avatar_url"> | null;
   average_rating?: number;
 }
