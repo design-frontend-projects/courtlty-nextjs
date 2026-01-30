@@ -6,7 +6,12 @@ export default async function CreateBookingPage() {
 
   // Fetch courts
   const { data: courts } = await supabase.from("courts").select("*");
-  const { data: users } = await supabase.from("auth.users").select("*");
+
+  // Fetch users from profiles table
+  const { data: users } = await supabase
+    .from("profiles")
+    .select("id, first_name, last_name, full_name, email, role")
+    .order("full_name", { ascending: true });
 
   return (
     <div className="space-y-6">

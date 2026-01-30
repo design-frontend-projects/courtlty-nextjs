@@ -32,11 +32,22 @@ import {
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Court, Profile } from "@/types";
+import { Court } from "@/types";
+
+// Lighter type for user dropdown - matches the subset of fields we query
+interface UserOption {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  full_name: string | null;
+  email?: string | null;
+  role: string;
+  username?: string | null;
+}
 
 interface AdminBookingFormProps {
   courts: Court[];
-  users: Profile[];
+  users: UserOption[];
   initialData?: Partial<BookingFormData> & { status?: string };
   bookingId?: string;
   isEdit?: boolean;
@@ -105,6 +116,7 @@ export default function AdminBookingForm({
       };
 
       let response;
+      console.log("payload: ", JSON.stringify(payload));
       if (isEdit && bookingId) {
         response = await fetch(`/api/bookings/${bookingId}`, {
           method: "PUT",
@@ -158,8 +170,8 @@ export default function AdminBookingForm({
                     {users.map((user) => (
                       <SelectItem key={user.id} value={user.id}>
                         {user.full_name ||
-                          user.username ||
                           user.first_name ||
+                          user.last_name ||
                           "Unknown User"}{" "}
                         ({user.role})
                       </SelectItem>

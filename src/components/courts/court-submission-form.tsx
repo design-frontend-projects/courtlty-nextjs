@@ -91,6 +91,8 @@ export default function CourtSubmissionForm({
           price_per_hour: initialData.price_per_hour || 0,
           amenities: initialData.amenities || [],
           payment_methods: initialData.payment_methods || ["card"],
+          latitude: initialData.latitude ?? undefined,
+          longitude: initialData.longitude ?? undefined,
         }
       : {
           name: "",
@@ -102,6 +104,8 @@ export default function CourtSubmissionForm({
           price_per_hour: 0,
           amenities: [],
           payment_methods: ["card"],
+          latitude: undefined,
+          longitude: undefined,
         },
   });
 
@@ -184,7 +188,7 @@ export default function CourtSubmissionForm({
       toast.success(
         mode === "create"
           ? "Court submitted! It is pending admin approval."
-          : "Court updated successfully!"
+          : "Court updated successfully!",
       );
 
       if (isAdmin) {
@@ -358,7 +362,7 @@ export default function CourtSubmissionForm({
                               "flex items-center justify-center gap-2 cursor-pointer rounded-2xl border-2 p-4 font-bold capitalize transition-all duration-300",
                               isSelected
                                 ? "border-emerald-500 bg-emerald-50 text-emerald-700 shadow-md transform scale-[1.02]"
-                                : "border-gray-100 bg-gray-50/50 text-gray-400 hover:border-gray-200"
+                                : "border-gray-100 bg-gray-50/50 text-gray-400 hover:border-gray-200",
                             )}
                           >
                             {method === "cash" ? "💵" : "💳"} {method}
@@ -397,7 +401,7 @@ export default function CourtSubmissionForm({
                             "cursor-pointer rounded-2xl border-2 p-3 text-center text-sm font-bold transition-all duration-300",
                             isSelected
                               ? "border-orange-500 bg-orange-50 text-orange-700 shadow-md"
-                              : "border-gray-100 bg-gray-50/50 text-gray-500 hover:border-gray-200"
+                              : "border-gray-100 bg-gray-50/50 text-gray-500 hover:border-gray-200",
                           )}
                         >
                           {sport}
@@ -512,7 +516,7 @@ export default function CourtSubmissionForm({
                         "flex items-center gap-2 cursor-pointer rounded-xl border p-4 text-sm font-bold transition-all duration-300",
                         isSelected
                           ? "border-gray-900 bg-gray-900 text-white shadow-lg transform scale-[1.02]"
-                          : "border-gray-100 bg-gray-50/50 text-gray-500 hover:border-gray-200"
+                          : "border-gray-100 bg-gray-50/50 text-gray-500 hover:border-gray-200",
                       )}
                     >
                       {isSelected ? (
@@ -563,7 +567,12 @@ export default function CourtSubmissionForm({
                     <FormItem>
                       <FormLabel>Latitude</FormLabel>
                       <FormControl>
-                        <Input {...field} readOnly className="bg-muted" />
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          readOnly
+                          className="bg-muted"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -576,7 +585,12 @@ export default function CourtSubmissionForm({
                     <FormItem>
                       <FormLabel>Longitude</FormLabel>
                       <FormControl>
-                        <Input {...field} readOnly className="bg-muted" />
+                        <Input
+                          {...field}
+                          value={field.value ?? ""}
+                          readOnly
+                          className="bg-muted"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
