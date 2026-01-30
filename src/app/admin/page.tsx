@@ -7,7 +7,6 @@ export default async function AdminDashboard() {
 
   // Fetch today's bookings by default for initial load
   const today = new Date().toISOString().split("T")[0];
-  console.log("get booking admin");
 
   const { data: bookings } = await supabase
     .from("bookings")

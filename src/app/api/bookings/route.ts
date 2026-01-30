@@ -74,20 +74,34 @@ export async function POST(request: Request) {
     sport,
     team_id,
     total_amount,
+    user_id: requestedUserId, // Rename to avoid conflict if we used user_id elsewhere
   } = body;
+
+  // Check if current user is admin to allow overriding booked_by
+  let bookingUserId = user.id;
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role === "admin" && requestedUserId) {
+    bookingUserId = requestedUserId;
+  }
 
   // Check for booking conflicts
   const hasConflict = await checkBookingConflict(
     court_id,
     booking_date,
     start_time,
-    end_time
+    end_time,
   );
 
   if (hasConflict) {
     return NextResponse.json(
       { error: "This time slot is already booked" },
-      { status: 409 }
+      { status: 409 },
     );
   }
 
@@ -95,15 +109,15 @@ export async function POST(request: Request) {
     .from("bookings")
     .insert({
       court_id,
-      booked_by: user.id,
+      booked_by: bookingUserId,
       team_id,
       booking_date,
       start_time,
       end_time,
       sport,
       total_amount,
-      status: "pending",
-      payment_status: "pending",
+      status: "confirmed", // Admins usually confirm immediately, or default to pending? Let's use confirmed if admin.
+      payment_status: profile?.role === "admin" ? "paid" : "pending", // Admins might mark as paid? Let's keep pending or make it optional.
     })
     .select()
     .single();

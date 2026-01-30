@@ -11,27 +11,25 @@ export default async function AdminLayout({
 }) {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // const {
+  //   data: { user },
+  // } = await supabase.auth.getUser();
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user?.id)
-    .single();
+  // const { data: profile } = await supabase
+  //   .from("profiles")
+  //   .select("role")
+  //   .eq("id", user?.id)
+  //   .single();
 
-  if (!user || profile?.role !== "admin") {
-    redirect("/login");
-  }
+  // if (!user || profile?.role !== "admin") {
+  //   redirect("/login");
+  // }
 
-  if (profile?.role === "admin") {
-    console.log("redirect to admin");
-    redirect("/admin");
-  } else {
-    console.log("redirect to home");
-    redirect("/");
-  }
+  // if (profile?.role === "admin") {
+  //   redirect("/admin");
+  // } else {
+  //   redirect("/");
+  // }
 
   return (
     <SidebarProvider>

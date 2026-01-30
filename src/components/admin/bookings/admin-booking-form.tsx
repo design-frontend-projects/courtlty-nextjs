@@ -37,13 +37,14 @@ import { Court, Profile } from "@/types";
 interface AdminBookingFormProps {
   courts: Court[];
   users: Profile[];
-  initialData?: any;
+  initialData?: Partial<BookingFormData> & { status?: string };
   bookingId?: string;
   isEdit?: boolean;
 }
 
 export default function AdminBookingForm({
   courts,
+  users,
   initialData,
   bookingId,
   isEdit = false,
@@ -56,6 +57,7 @@ export default function AdminBookingForm({
     defaultValues: initialData || {
       court_id: "",
       sport: "",
+      user_id: "",
       booking_date: format(new Date(), "yyyy-MM-dd"),
       start_time: "09:00",
       end_time: "10:00",
@@ -82,6 +84,20 @@ export default function AdminBookingForm({
   const onSubmit = async (data: BookingFormData) => {
     setLoading(true);
     try {
+      // Validate time logic
+      const start = new Date(`2000-01-01T${data.start_time}`);
+      const end = new Date(`2000-01-01T${data.end_time}`);
+      if (end <= start) {
+        toast.error("End time must be after start time");
+        return;
+      }
+
+      // If user_id is missing during create, error out (unless editing? logic implies admin override)
+      if (!isEdit && !data.user_id) {
+        toast.error("Please select a user for the booking");
+        return;
+      }
+
       const payload = {
         ...data,
         total_amount: totalAmount,
@@ -96,29 +112,10 @@ export default function AdminBookingForm({
           body: JSON.stringify(payload),
         });
       } else {
-        // For admin create, we might need to manually set the user_id if we add a user selector
-        // But the schema/form currently assumes logged-in user or passed user_id?
-        // Wait, the form schema usually doesn't include user_id if it comes from session.
-        // I need to add user_id selection for admins.
-
-        // Let's assume for now we are creating for a specific user, or we default to the admin (which is wrong).
-        // I need to add a "user_id" field to the form/schema for admins, or handle it separately.
-        // The current `bookingSchema` probably doesn't have `user_id`.
-        // I will append user_id to the payload manually if I add a selector.
-
-        // I'll add a user selector to the form and pass it.
         response = await fetch("/api/bookings", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...payload,
-            // We need to pass user_id if the API supports it for admins
-            // The API likely gets user from session. I might need to update API to allow overriding user_id if admin.
-            // For now, let's assume the API might not support it yet, so we'll have to rely on the current user (admin)
-            // which isn't ideal for "creating booking for someone else".
-            // I'll skip user selection for now to adhere to existing schema,
-            // or just update schema later.
-          }),
+          body: JSON.stringify(payload),
         });
       }
 
@@ -140,6 +137,40 @@ export default function AdminBookingForm({
     <div className="max-w-2xl mx-auto p-6 bg-white rounded-2xl shadow-sm border border-gray-100">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* User Selection - new feature */}
+          <FormField
+            control={form.control}
+            name="user_id"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>User</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                  disabled={isEdit} // Maybe disable editing user after creation
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a user" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.full_name ||
+                          user.username ||
+                          user.first_name ||
+                          "Unknown User"}{" "}
+                        ({user.role})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Court Selection */}
           <FormField
             control={form.control}
@@ -227,7 +258,7 @@ export default function AdminBookingForm({
                           variant={"outline"}
                           className={cn(
                             "w-full pl-3 text-left font-normal",
-                            !field.value && "text-muted-foreground"
+                            !field.value && "text-muted-foreground",
                           )}
                         >
                           {field.value ? (
@@ -250,6 +281,9 @@ export default function AdminBookingForm({
                           setValue("booking_date", format(date, "yyyy-MM-dd"))
                         }
                         initialFocus
+                        disabled={(date) =>
+                          date < new Date(new Date().setHours(0, 0, 0, 0))
+                        }
                       />
                     </PopoverContent>
                   </Popover>
@@ -306,8 +340,8 @@ export default function AdminBookingForm({
             {loading
               ? "Processing..."
               : isEdit
-              ? "Update Booking"
-              : "Create Booking"}
+                ? "Update Booking"
+                : "Create Booking"}
           </Button>
         </form>
       </Form>

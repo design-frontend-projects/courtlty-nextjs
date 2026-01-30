@@ -49,6 +49,7 @@ export type CourtFormData = z.infer<typeof courtSchema>;
 export const bookingSchema = z.object({
   court_id: z.string().uuid(),
   team_id: z.string().uuid().optional(),
+  user_id: z.string().uuid().optional(), // For admin creation
   booking_date: z.string().refine((date) => new Date(date) >= new Date(), {
     message: "Booking date must be in the future",
   }),
