@@ -91,6 +91,8 @@ export default function LoginPage() {
           ? { email, token: otp, type: "email" }
           : { phone, token: otp, type: "sms" },
       );
+      console.log("user data after login", user.user);
+
       if (error) throw error;
 
       const { data: profile, error: profileError } = await supabase
@@ -98,6 +100,8 @@ export default function LoginPage() {
         .select("role")
         .eq("id", user?.user?.id)
         .single();
+      console.log("after login role is");
+      console.log(profile);
 
       if (!profileError && profile?.role === "admin") {
         router.replace("/admin");
