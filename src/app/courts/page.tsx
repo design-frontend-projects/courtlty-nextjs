@@ -63,11 +63,11 @@ export default async function CourtsPage(props: {
     ]);
 
   const uniqueCities = Array.from(
-    new Set(citiesData?.map((c) => c.city).filter(Boolean) as string[])
+    new Set(citiesData?.map((c) => c.city).filter(Boolean) as string[]),
   ).sort();
 
   const uniqueSports = Array.from(
-    new Set(sportsData?.flatMap((c) => c.sports) || [])
+    new Set(sportsData?.flatMap((c) => c.sports) || []),
   ).sort();
 
   return (
@@ -81,7 +81,7 @@ export default async function CourtsPage(props: {
           <Badge className="mb-6 bg-blue-500/20 text-blue-400 border-blue-500/30 backdrop-blur-md px-4 py-1.5 text-sm font-bold uppercase tracking-wider">
             Premium Court Booking
           </Badge>
-          <h1 className="text-6xl md:text-8xl font-black text-white mb-8 tracking-tighter">
+          <h1 className="text-6xl md:text-8xl font-black text-blue-800 mb-8 tracking-tighter">
             FIND YOUR <span className="text-blue-500">ARENA</span>
           </h1>
         </div>
