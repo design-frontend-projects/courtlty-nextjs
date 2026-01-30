@@ -10,13 +10,7 @@ export default async function AdminDashboard() {
 
   const { data: bookings } = await supabase
     .from("bookings")
-    .select(
-      `
-      *,
-      courts (name),
-      profiles (full_name, phone)
-    `
-    )
+    .select(`*, courts (name), profiles (full_name, phone)`)
     .gte("date", today)
     .order("date", { ascending: true })
     .order("start_time", { ascending: true })

@@ -30,7 +30,7 @@ export const courtSchema = z.object({
     z.object({
       width: z.number().positive(),
       length: z.number().positive(),
-    })
+    }),
   ),
   address: z.string().min(5, "Address is required"),
   city: z.string().min(2, "City is required"),
@@ -73,8 +73,26 @@ export type TeamFormData = z.infer<typeof teamSchema>;
 
 // Profile Schema
 export const profileSchema = z.object({
-  full_name: z.string().min(2, "Name must be at least 2 characters"),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number"),
+  first_name: z
+    .string()
+    .min(2, "First name must be at least 2 characters")
+    .optional()
+    .or(z.literal("")),
+  last_name: z
+    .string()
+    .min(2, "Last name must be at least 2 characters")
+    .optional()
+    .or(z.literal("")),
+  full_name: z
+    .string()
+    .min(2, "Name must be at least 2 characters")
+    .optional()
+    .or(z.literal("")),
+  phone: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number")
+    .optional()
+    .or(z.literal("")),
   avatar_url: z.string().url("Invalid URL").optional().or(z.literal("")),
   favorite_sports: z.array(z.string()).optional(),
 });

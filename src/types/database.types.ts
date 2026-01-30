@@ -79,6 +79,8 @@ export interface Database {
           role: "user" | "admin" | "moderator";
           phone: string | null;
           favorite_sports: string[] | null;
+          first_name: string | null;
+          last_name: string | null;
         };
         Insert: {
           id: string;
@@ -90,6 +92,8 @@ export interface Database {
           role?: "user" | "admin" | "moderator";
           phone?: string | null;
           favorite_sports?: string[] | null;
+          first_name?: string | null;
+          last_name?: string | null;
         };
         Update: {
           id?: string;
@@ -101,6 +105,8 @@ export interface Database {
           role?: "user" | "admin" | "moderator";
           phone?: string | null;
           favorite_sports?: string[] | null;
+          first_name?: string | null;
+          last_name?: string | null;
         };
       };
       court_availability: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -132,30 +132,82 @@ export default function ProfilePageClient({
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
   const router = useRouter();
   const supabase = createClient();
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
+      first_name: profile?.first_name || "",
+      last_name: profile?.last_name || "",
       full_name: profile?.full_name || "",
       phone: profile?.phone || "",
       avatar_url: profile?.avatar_url || "",
-      favorite_sports: [],
+      favorite_sports: profile?.favorite_sports || [],
     },
   });
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `avatars/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(filePath);
+
+      setAvatarUrl(publicUrl);
+      setValue("avatar_url", publicUrl);
+      toast.success("Avatar uploaded successfully!");
+
+      // Auto-save if not in editing mode? Actually, just update the state
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Failed to upload avatar");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onSubmit = async (data: ProfileFormData) => {
     setLoading(true);
     try {
+      // Calculate full name if needed
+      const updatedFullName = `${data.first_name} ${data.last_name}`.trim();
+
       const { error } = await supabase
         .from("profiles")
         .update({
-          full_name: data.full_name,
-          phone: data.phone,
-          avatar_url: avatarUrl || null,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          full_name: updatedFullName || data.full_name,
+          avatar_url: avatarUrl || data.avatar_url || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
@@ -198,7 +250,7 @@ export default function ProfilePageClient({
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20 pt-24 pb-16">
+    <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20 pt-24 pb-16">
       {/* Decorative background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         <div className="absolute top-20 left-[10%] w-72 h-72 bg-emerald-200/20 dark:bg-emerald-900/10 rounded-full blur-3xl" />
@@ -210,27 +262,42 @@ export default function ProfilePageClient({
         <FadeInUp>
           <div className="relative mb-8">
             {/* Cover gradient */}
-            <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-br from-emerald-500 via-cyan-500 to-violet-500 rounded-3xl" />
+            <div className="absolute inset-x-0 top-0 h-48 bg-linear-to-br from-emerald-500 via-cyan-500 to-violet-500 rounded-3xl" />
 
             <div className="relative pt-24 px-6 sm:px-8">
               <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
                 {/* Avatar */}
                 <div className="relative group">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute -inset-1 bg-linear-to-r from-emerald-500 to-cyan-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity" />
                   <Avatar className="relative w-32 h-32 border-4 border-white dark:border-slate-800 shadow-2xl">
                     <AvatarImage
                       src={avatarUrl}
                       alt={profile?.full_name || ""}
                     />
-                    <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-cyan-400 text-white text-4xl font-bold">
+                    <AvatarFallback className="bg-linear-to-br from-emerald-400 to-cyan-400 text-white text-4xl font-bold">
                       {profile?.full_name?.charAt(0) ||
                         user.email?.charAt(0) ||
                         "U"}
                     </AvatarFallback>
                   </Avatar>
-                  <button className="absolute bottom-1 right-1 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors">
-                    <Camera className="w-5 h-5" />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={loading}
+                    className="absolute bottom-1 right-1 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                    ) : (
+                      <Camera className="w-5 h-5" />
+                    )}
                   </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
                 </div>
 
                 {/* Info */}
@@ -275,7 +342,7 @@ export default function ProfilePageClient({
                   className={
                     isEditing
                       ? ""
-                      : "bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg"
+                      : "bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg"
                   }
                 >
                   {isEditing ? (
@@ -320,21 +387,21 @@ export default function ProfilePageClient({
           <TabsList className="flex w-full max-w-lg mx-auto bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-1 shadow-lg">
             <TabsTrigger
               value="overview"
-              className="flex-1 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+              className="flex-1 rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
             >
               <Target className="w-4 h-4 mr-2" />
               Overview
             </TabsTrigger>
             <TabsTrigger
               value="teams"
-              className="flex-1 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+              className="flex-1 rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
             >
               <Users className="w-4 h-4 mr-2" />
               Teams
             </TabsTrigger>
             <TabsTrigger
               value="settings"
-              className="flex-1 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
+              className="flex-1 rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
             >
               <Settings className="w-4 h-4 mr-2" />
               Settings
@@ -369,7 +436,7 @@ export default function ProfilePageClient({
                             className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all"
                           >
                             <div className="flex items-start gap-4">
-                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-3xl shadow-lg">
+                              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-3xl shadow-lg">
                                 {sportIcons[booking.sport.toLowerCase()] ||
                                   "🏆"}
                               </div>
@@ -417,7 +484,7 @@ export default function ProfilePageClient({
                         <p className="text-slate-500 dark:text-slate-400 mb-4">
                           Start exploring courts and book your first game!
                         </p>
-                        <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white">
+                        <Button className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white">
                           Find Courts
                         </Button>
                       </div>
@@ -463,7 +530,7 @@ export default function ProfilePageClient({
                       className="flex items-center gap-4 bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all group"
                     >
                       <div
-                        className={`w-12 h-12 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shadow-lg`}
+                        className={`w-12 h-12 rounded-xl bg-linear-to-br ${action.color} flex items-center justify-center shadow-lg`}
                       >
                         <action.icon className="w-6 h-6 text-white" />
                       </div>
@@ -488,7 +555,7 @@ export default function ProfilePageClient({
                       className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all"
                     >
                       <div className="flex items-center gap-4 mb-4">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-3xl shadow-lg">
+                        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-3xl shadow-lg">
                           {membership.team
                             ? sportIcons[membership.team.sport.toLowerCase()] ||
                               "🏆"
@@ -530,7 +597,7 @@ export default function ProfilePageClient({
                       own team!
                     </p>
                     <div className="flex gap-4 justify-center">
-                      <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white">
+                      <Button className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white">
                         Browse Teams
                       </Button>
                       <Button variant="outline">Create Team</Button>
@@ -573,21 +640,34 @@ export default function ProfilePageClient({
                             src={avatarUrl}
                             alt={profile?.full_name || ""}
                           />
-                          <AvatarFallback className="bg-gradient-to-br from-emerald-400 to-cyan-400 text-white text-2xl font-bold">
+                          <AvatarFallback className="bg-linear-to-br from-emerald-400 to-cyan-400 text-white text-2xl font-bold">
                             {profile?.full_name?.charAt(0) || "U"}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex-1 space-y-2">
-                          <Label htmlFor="avatar_url">Avatar URL</Label>
-                          <Input
-                            id="avatar_url"
-                            type="url"
-                            placeholder="https://example.com/avatar.jpg"
-                            value={avatarUrl}
-                            onChange={(e) => setAvatarUrl(e.target.value)}
-                            disabled={!isEditing}
-                            className="bg-white dark:bg-slate-800"
-                          />
+                        <div className="flex-1 space-y-4">
+                          <div>
+                            <Label>Avatar Image</Label>
+                            <p className="text-sm text-slate-500 mb-4">
+                              Click on the avatar display to change your profile
+                              picture.
+                            </p>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={!isEditing || loading}
+                              className="flex items-center gap-2"
+                            >
+                              <Camera className="w-4 h-4" />
+                              Change Image
+                            </Button>
+                          </div>
+                          {avatarUrl && (
+                            <div className="text-xs text-slate-500 truncate max-w-[200px]">
+                              Current: {avatarUrl}
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -607,45 +687,77 @@ export default function ProfilePageClient({
                         </p>
                       </div>
 
-                      {/* Full Name */}
+                      {/* Name Section */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor="first_name">First Name</Label>
+                          <Input
+                            id="first_name"
+                            {...register("first_name")}
+                            placeholder="John"
+                            disabled={!isEditing}
+                            className="bg-white dark:bg-slate-800"
+                          />
+                          {errors.first_name && (
+                            <p className="text-sm text-red-500">
+                              {errors.first_name.message}
+                            </p>
+                          )}
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="last_name">Last Name</Label>
+                          <Input
+                            id="last_name"
+                            {...register("last_name")}
+                            placeholder="Doe"
+                            disabled={!isEditing}
+                            className="bg-white dark:bg-slate-800"
+                          />
+                          {errors.last_name && (
+                            <p className="text-sm text-red-500">
+                              {errors.last_name.message}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Full Name (Disabled) */}
                       <div className="space-y-2">
-                        <Label htmlFor="full_name">Full Name</Label>
+                        <Label htmlFor="full_name">
+                          Full Name (Display Name)
+                        </Label>
                         <Input
                           id="full_name"
                           {...register("full_name")}
                           placeholder="John Doe"
-                          disabled={!isEditing}
-                          className="bg-white dark:bg-slate-800"
+                          disabled
+                          className="bg-slate-100 dark:bg-slate-900"
                         />
-                        {errors.full_name && (
-                          <p className="text-sm text-red-500">
-                            {errors.full_name.message}
-                          </p>
-                        )}
+                        <p className="text-sm text-slate-500">
+                          Automatically generated from your first and last name.
+                        </p>
                       </div>
 
-                      {/* Phone */}
+                      {/* Phone (Disabled) */}
                       <div className="space-y-2">
                         <Label htmlFor="phone">Phone Number</Label>
                         <Input
                           id="phone"
                           {...register("phone")}
                           placeholder="+1234567890"
-                          disabled={!isEditing}
-                          className="bg-white dark:bg-slate-800"
+                          disabled
+                          className="bg-slate-100 dark:bg-slate-900"
                         />
-                        {errors.phone && (
-                          <p className="text-sm text-red-500">
-                            {errors.phone.message}
-                          </p>
-                        )}
+                        <p className="text-sm text-slate-500">
+                          Phone number editing is currently disabled.
+                        </p>
                       </div>
 
                       {/* Role Badge */}
                       <div className="space-y-2">
                         <Label>Role</Label>
                         <div className="flex items-center gap-3">
-                          <Badge className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white">
+                          <Badge className="bg-linear-to-r from-emerald-500 to-cyan-500 text-white">
                             {profile?.role || "player"}
                           </Badge>
                           <p className="text-sm text-slate-500">
@@ -672,7 +784,7 @@ export default function ProfilePageClient({
                           <Button
                             type="submit"
                             disabled={loading}
-                            className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white"
+                            className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white"
                           >
                             {loading && (
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -14,13 +14,33 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, User as UserIcon, LogOut, Users } from "lucide-react";
+import {
+  Bell,
+  User as UserIcon,
+  LogOut,
+  Users,
+  Menu,
+  MapPin,
+} from "lucide-react";
+
+const navLinks = [
+  { href: "/courts", label: "Find Courts", icon: MapPin },
+  { href: "/teams", label: "Teams", icon: Users },
+];
 
 export function PublicNavbar() {
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [hasTeam, setHasTeam] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
@@ -31,7 +51,6 @@ export function PublicNavbar() {
       setUser(user);
 
       if (user) {
-        // Check if user is part of any team (as owner or member)
         const { count } = await supabase
           .from("team_members")
           .select("*", { count: "exact", head: true })
@@ -52,7 +71,6 @@ export function PublicNavbar() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        // Re-check team status on auth change
         getUserData();
       }
     });
@@ -70,33 +88,36 @@ export function PublicNavbar() {
   };
 
   return (
-    <nav className="border-b bg-background sticky top-0 z-50">
+    <nav className="border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
+          {/* Logo & Desktop Links */}
           <div className="flex items-center">
             <Link
               href="/"
-              className="text-xl font-bold bg-linear-to-r from-primary to-primary/80 bg-clip-text text-transparent"
+              className="text-xl font-black bg-linear-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent"
             >
               Courtly
             </Link>
             <div className="hidden md:flex ml-10 space-x-8">
-              <Link
-                href="/courts"
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                Find Courts
-              </Link>
-              <Link
-                href="/teams"
-                className="text-sm font-medium hover:text-primary transition-colors"
-              >
-                Teams
-              </Link>
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-sm font-medium hover:text-primary transition-colors ${
+                    pathname === link.href
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          {/* Right Side: Auth + Mobile Menu */}
+          <div className="flex items-center gap-2">
             {user ? (
               <>
                 <Button variant="ghost" size="icon" className="relative">
@@ -154,7 +175,7 @@ export function PublicNavbar() {
                 </DropdownMenu>
               </>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="hidden sm:flex items-center space-x-2">
                 <Button variant="ghost" asChild>
                   <Link href="/login">Log in</Link>
                 </Button>
@@ -163,6 +184,115 @@ export function PublicNavbar() {
                 </Button>
               </div>
             )}
+
+            {/* Mobile Hamburger Menu */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+                <SheetHeader className="pb-6 border-b">
+                  <SheetTitle className="text-2xl font-black bg-linear-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">
+                    Courtly
+                  </SheetTitle>
+                </SheetHeader>
+
+                <div className="flex flex-col gap-2 py-6">
+                  {navLinks.map((link) => {
+                    const Icon = link.icon;
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                          pathname === link.href
+                            ? "bg-primary/10 text-primary"
+                            : "hover:bg-muted"
+                        }`}
+                      >
+                        <Icon className="h-5 w-5" />
+                        {link.label}
+                      </Link>
+                    );
+                  })}
+                </div>
+
+                <div className="border-t pt-6">
+                  {user ? (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 px-4">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={user.user_metadata?.avatar_url} />
+                          <AvatarFallback>
+                            {user.email?.[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {user.email}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Logged in
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Link
+                          href="/profile"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-muted transition-colors"
+                        >
+                          <UserIcon className="h-5 w-5" />
+                          Profile
+                        </Link>
+                        {hasTeam && (
+                          <Link
+                            href="/dashboard"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-muted transition-colors"
+                          >
+                            <Users className="h-5 w-5" />
+                            My Teams
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => {
+                            handleSignOut();
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 hover:bg-red-500/10 transition-colors w-full text-left"
+                        >
+                          <LogOut className="h-5 w-5" />
+                          Log out
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col gap-3 px-4">
+                      <Button asChild className="w-full">
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Log in
+                        </Link>
+                      </Button>
+                      <Button variant="outline" asChild className="w-full">
+                        <Link
+                          href="/login?tab=signup"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Sign up
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
