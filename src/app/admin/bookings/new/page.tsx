@@ -5,7 +5,11 @@ export default async function CreateBookingPage() {
   const supabase = await createClient();
 
   // Fetch courts
-  const { data: courts } = await supabase.from("courts").select("*");
+  const { data: courts } = await supabase
+    .from("courts")
+    .select("*")
+    .eq("is_active", true)
+    .eq("status", "approved");
 
   // Fetch users from profiles table
   const { data: users } = await supabase

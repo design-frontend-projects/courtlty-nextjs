@@ -22,7 +22,7 @@ export default async function BookingDetailsPage({
         *,
         courts (*),
         profiles (*)
-    `
+    `,
     )
     .eq("id", id)
     .single();
@@ -74,7 +74,7 @@ export default async function BookingDetailsPage({
             <div>
               <h3 className="text-sm font-medium text-gray-500">Date</h3>
               <p className="text-lg font-semibold">
-                {format(new Date(booking.date), "EEEE, MMMM do, yyyy")}
+                {format(new Date(booking.booking_date), "EEEE, MMMM do, yyyy")}
               </p>
             </div>
             <div>
@@ -95,7 +95,7 @@ export default async function BookingDetailsPage({
             </div>
             <div className="flex justify-between items-center mt-1 text-xl font-bold text-blue-600">
               <span>Total</span>
-              <span>${booking.total_price}</span>
+              <span>${booking.total_amount}</span>
             </div>
           </div>
         </CardContent>

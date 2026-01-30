@@ -78,8 +78,14 @@ export async function updateSession(request: NextRequest) {
   console.log(`User role: ${role}, Path: ${pathname}`);
 
   // Rule: If role is admin and NOT on an admin route, redirect to /admin
-  // We skip this for auth-related paths and internal assets (though matcher should handle them)
-  if (role === "admin" && !isAdminRoute && !pathname.startsWith("/auth")) {
+  // We skip this for auth-related paths, API routes, and internal assets
+  const isApiRoute = pathname.startsWith("/api");
+  if (
+    role === "admin" &&
+    !isAdminRoute &&
+    !pathname.startsWith("/auth") &&
+    !isApiRoute
+  ) {
     console.log("Admin detected on non-admin route, redirecting to /admin");
     const url = request.nextUrl.clone();
     url.pathname = "/admin";

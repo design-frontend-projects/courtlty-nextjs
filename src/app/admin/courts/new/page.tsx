@@ -8,7 +8,6 @@ export default async function AdminNewCourtPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   if (!user) {
     redirect("/login");
   }
