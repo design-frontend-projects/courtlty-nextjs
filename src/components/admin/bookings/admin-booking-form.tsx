@@ -101,7 +101,7 @@ export default function AdminBookingForm({
       const payload = {
         ...data,
         total_amount: totalAmount,
-        status: isEdit ? initialData.status : "confirmed",
+        status: isEdit ? initialData?.status : "confirmed",
       };
 
       let response;
