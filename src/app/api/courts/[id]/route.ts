@@ -14,7 +14,7 @@ export async function GET(
     .select(
       `
       *,
-      court_images (
+       court_images (
         id,
         url,
         is_primary,
@@ -26,16 +26,6 @@ export async function GET(
         start_time,
         end_time,
         is_available
-      ),
-      reviews (
-        id,
-        rating,
-        comment,
-        created_at,
-        profiles!reviews_reviewer_id_fkey (
-          full_name,
-          avatar_url
-        )
       )
     `,
     )

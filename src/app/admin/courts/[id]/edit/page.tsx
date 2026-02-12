@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect, notFound } from "next/navigation";
 import CourtSubmissionForm from "@/components/courts/court-submission-form";
+import { Court, CourtImage, CourtAvailability } from "@/types";
+
+interface AdminEditCourtData extends Court {
+  court_images: CourtImage[];
+  court_availability: CourtAvailability[];
+}
 
 export default async function AdminEditCourtPage({
   params,
@@ -18,12 +24,22 @@ export default async function AdminEditCourtPage({
     redirect("/login");
   }
 
-  // Fetch court with related data
-  const { data: court } = await supabase
+  // Fetch court with related data, selecting specific fields
+  const { data: courtRaw, error } = await supabase
     .from("courts")
     .select(
       `
-      *,
+      id,
+      name,
+      description,
+      address,
+      city,
+      price_per_hour,
+      sports,
+      amenities,
+      payment_methods,
+      status,
+      is_active,
       court_images (
         id, court_id, url, is_primary, display_order, created_at
       ),
@@ -35,9 +51,12 @@ export default async function AdminEditCourtPage({
     .eq("id", id)
     .single();
 
-  if (!court) {
+  if (error || !courtRaw) {
+    if (error) console.error("Admin court fetch error:", error);
     notFound();
   }
+
+  const court = courtRaw as unknown as AdminEditCourtData;
 
   // Extract related data
   const courtImages = court.court_images || [];

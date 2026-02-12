@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { courtSchema, type CourtFormData } from "@/lib/validations/schemas";
-import { CourtWithDetails } from "@/types";
+import { Court } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -80,7 +80,7 @@ interface CourtImageData {
 }
 
 interface CourtSubmissionFormProps {
-  initialData?: CourtWithDetails;
+  initialData?: Court;
   initialAvailability?: AvailabilitySlot[];
   initialImages?: CourtImageData[];
   mode?: "create" | "edit";

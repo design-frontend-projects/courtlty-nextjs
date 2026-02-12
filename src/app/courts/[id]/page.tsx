@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent } from "@/components/ui/card";
-import { CourtWithDetails } from "@/types";
 import {
   ChevronLeft,
   Info,
@@ -21,64 +20,143 @@ import ReviewsList from "@/components/courts/reviews-list";
 import CourtGallery from "@/components/courts/court-gallery";
 import { CourtMap } from "@/components/courts/CourtMap";
 import { Separator } from "@/components/ui/separator";
+import { Metadata } from "next";
 
-interface ReviewWithProfile {
+// Define strict types for the query result
+interface CourtData {
   id: string;
-  rating: number;
-  comment: string | null;
-  created_at: string;
+  name: string;
+  description: string | null;
+  address: string;
+  city: string;
+  price_per_hour: number;
+  sports: string[];
+  amenities: string[];
+  payment_methods: string[];
   profiles: {
+    id: string;
     full_name: string | null;
     avatar_url: string | null;
+    phone: string | null;
   } | null;
+  court_images: {
+    id: string;
+    url: string;
+    is_primary: boolean;
+    display_order: number;
+  }[];
+  court_availability: {
+    id: string;
+    day_of_week: string;
+    start_time: string;
+    end_time: string;
+    is_available: boolean;
+  }[];
+  reviews: {
+    id: string;
+    rating: number;
+    comment: string | null;
+    created_at: string;
+    profiles: {
+      full_name: string | null;
+      avatar_url: string | null;
+    } | null;
+  }[];
 }
 
-export default async function CourtDetailPage({
-  params,
-}: {
+interface PageProps {
   params: Promise<{ id: string }>;
-}) {
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { id } = await params;
   const supabase = await createClient();
 
-  const { data: court, error } = await supabase
+  const { data: court } = await supabase
+    .from("courts")
+    .select("name, description, city")
+    .eq("id", id)
+    .single();
+
+  if (!court) {
+    return {
+      title: "Court Not Found",
+    };
+  }
+
+  return {
+    title: `${court.name} | Courtly`,
+    description:
+      court.description || `Book ${court.name} in ${court.city} on Courtly.`,
+  };
+}
+
+export default async function CourtDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const supabase = await createClient();
+
+  // Optimized query selecting only necessary fields
+  const { data: courtRaw, error } = await supabase
     .from("courts")
     .select(
       `
-      *,
-      profiles!courts_owner_id_fkey (
-        id,
+    id,
+    name,
+    description,
+    address,
+    city,
+    price_per_hour,
+    sports,
+    amenities,
+    payment_methods,
+    owner_id,
+    profiles!inner (
+      id,
+      full_name,
+      avatar_url,
+      phone
+    ),
+    court_images (
+      id,
+      url,
+      is_primary,
+      display_order
+    ),
+    court_availability (
+      id,
+      day_of_week,
+      start_time,
+      end_time,
+      is_available
+    ),
+    reviews (
+      id,
+      rating,
+      comment,
+      created_at,
+      reviewer_id,
+      profiles (
         full_name,
-        avatar_url,
-        phone
-      ),
-      court_images (
-        id, url, is_primary, display_order
-      ),
-      court_availability (
-        id, day_of_week, start_time, end_time, is_available
-      ),
-      reviews (
-        id, rating, comment, created_at,
-        profiles!reviews_reviewer_id_fkey (
-          full_name,
-          avatar_url
-        )
+        avatar_url
       )
-    `,
+    )
+  `,
     )
     .eq("id", id)
     .single();
 
-  if (error || !court) {
-    console.error("Court fetch error:", error);
+  if (error || !courtRaw) {
+    if (error) console.error("Court fetch error:", error);
     notFound();
   }
 
-  const typedCourt: CourtWithDetails = court;
+  // Cast strictly to our interface
+  const court = courtRaw as unknown as CourtData;
 
-  // Calculate average rating from reviews
-  const reviews = typedCourt.reviews || [];
+  // Calculate average rating
+  const reviews = court.reviews || [];
   const avgRating =
     reviews.length > 0
       ? (
@@ -115,8 +193,8 @@ export default async function CourtDetailPage({
             {/* Gallery Section */}
             <div className="rounded-3xl overflow-hidden shadow-2xl">
               <CourtGallery
-                images={typedCourt.court_images || []}
-                courtName={typedCourt.name}
+                images={court.court_images || []}
+                courtName={court.name}
               />
             </div>
 
@@ -151,11 +229,11 @@ export default async function CourtDetailPage({
                   <div className="flex justify-between items-start mb-6">
                     <div>
                       <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">
-                        {typedCourt.name}
+                        {court.name}
                       </h1>
                       <div className="flex items-center gap-2 text-muted-foreground text-lg">
                         <MapPinned className="h-5 w-5 text-blue-600" />
-                        {typedCourt.address}, {typedCourt.city}
+                        {court.address}, {court.city}
                       </div>
                     </div>
                     {avgRating && (
@@ -166,25 +244,23 @@ export default async function CourtDetailPage({
                             {avgRating}
                           </span>
                           <span className="text-xs font-bold text-yellow-600/70">
-                            {typedCourt.reviews?.length} Reviews
+                            {court.reviews?.length} Reviews
                           </span>
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {typedCourt.description && (
+                  {court.description && (
                     <div className="prose dark:prose-invert max-w-none text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-8">
-                      {typedCourt.description}
+                      {court.description}
                     </div>
                   )}
 
                   <Separator className="my-8" />
 
                   <CourtMap
-                    address={`${typedCourt.address || ""}, ${
-                      typedCourt.city || ""
-                    }`}
+                    address={`${court.address || ""}, ${court.city || ""}`}
                   />
 
                   <Separator className="my-8" />
@@ -196,7 +272,7 @@ export default async function CourtDetailPage({
                         Available Sports
                       </h3>
                       <div className="flex flex-wrap gap-2">
-                        {typedCourt.sports?.map((sport: string) => (
+                        {court.sports?.map((sport) => (
                           <Badge
                             key={sport}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl font-bold capitalize text-sm shadow-md"
@@ -213,7 +289,7 @@ export default async function CourtDetailPage({
                         Payments
                       </h3>
                       <div className="flex gap-3">
-                        {typedCourt.payment_methods?.map((method: string) => (
+                        {court.payment_methods?.map((method) => (
                           <Badge
                             key={method}
                             variant="secondary"
@@ -233,7 +309,7 @@ export default async function CourtDetailPage({
                       Facilities & Amenities
                     </h3>
                     <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-                      {typedCourt.amenities?.map((amenity: string) => (
+                      {court.amenities?.map((amenity) => (
                         <div
                           key={amenity}
                           className="flex items-center gap-3 p-4 bg-muted/40 rounded-2xl border transition-colors hover:bg-muted/60"
@@ -256,14 +332,14 @@ export default async function CourtDetailPage({
                   </h3>
                   <div className="flex items-center gap-6">
                     <div className="h-20 w-20 rounded-3xl bg-linear-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-black shadow-xl">
-                      {typedCourt.profiles?.full_name?.charAt(0) || "C"}
+                      {court.profiles?.full_name?.charAt(0) || "C"}
                     </div>
                     <div className="space-y-1">
                       <p className="text-2xl font-black">
-                        {typedCourt.profiles?.full_name || "Owner Name"}
+                        {court.profiles?.full_name || "Owner Name"}
                       </p>
                       <p className="text-muted-foreground font-medium">
-                        {typedCourt.profiles?.phone || "Phone not listed"}
+                        {court.profiles?.phone || "Phone not listed"}
                       </p>
                     </div>
                   </div>
@@ -274,12 +350,7 @@ export default async function CourtDetailPage({
                 value="reviews"
                 className="animate-in fade-in slide-in-from-bottom-2"
               >
-                <ReviewsList
-                  reviews={
-                    (typedCourt.reviews as unknown as ReviewWithProfile[]) || []
-                  }
-                  courtId={typedCourt.id}
-                />
+                <ReviewsList reviews={court.reviews || []} courtId={court.id} />
               </TabsContent>
 
               <TabsContent
@@ -289,28 +360,21 @@ export default async function CourtDetailPage({
                 <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 border">
                   <h3 className="text-2xl font-black mb-6">Court Schedule</h3>
                   <div className="space-y-4">
-                    {typedCourt.court_availability?.length > 0 ? (
+                    {court.court_availability?.length > 0 ? (
                       <div className="grid grid-cols-1 gap-3">
-                        {typedCourt.court_availability.map(
-                          (item: {
-                            id: string;
-                            day_of_week: string;
-                            start_time: string;
-                            end_time: string;
-                          }) => (
-                            <div
-                              key={item.id}
-                              className="flex justify-between items-center p-4 rounded-2xl bg-muted/30 border"
-                            >
-                              <span className="font-bold capitalize">
-                                {item.day_of_week}
-                              </span>
-                              <Badge className="font-mono">
-                                {item.start_time} - {item.end_time}
-                              </Badge>
-                            </div>
-                          ),
-                        )}
+                        {court.court_availability.map((item) => (
+                          <div
+                            key={item.id}
+                            className="flex justify-between items-center p-4 rounded-2xl bg-muted/30 border"
+                          >
+                            <span className="font-bold capitalize">
+                              {item.day_of_week}
+                            </span>
+                            <Badge className="font-mono">
+                              {item.start_time} - {item.end_time}
+                            </Badge>
+                          </div>
+                        ))}
                       </div>
                     ) : (
                       <div className="text-center py-10 text-muted-foreground">
@@ -331,7 +395,7 @@ export default async function CourtDetailPage({
                   <p className="text-blue-100 font-bold mb-1">Starting at</p>
                   <div className="flex items-baseline gap-2 text-white">
                     <span className="text-5xl font-black">
-                      ${typedCourt.price_per_hour}
+                      ${court.price_per_hour}
                     </span>
                     <span className="text-lg font-bold opacity-80">/hour</span>
                   </div>
