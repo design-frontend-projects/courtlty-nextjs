@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface CourtGalleryProps {
   images: Array<{
@@ -21,12 +22,12 @@ export default function CourtGallery({ images, courtName }: CourtGalleryProps) {
   });
 
   const [selectedImage, setSelectedImage] = useState(
-    sortedImages[0]?.url || null
+    sortedImages[0]?.url || null,
   );
 
   if (!images || images.length === 0) {
     return (
-      <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl h-96 flex items-center justify-center">
+      <div className="bg-linear-to-br from-blue-500 to-indigo-600 rounded-[2.5rem] h-96 flex items-center justify-center shadow-inner">
         <span className="text-white text-6xl font-bold">
           {courtName.charAt(0)}
         </span>
@@ -37,35 +38,54 @@ export default function CourtGallery({ images, courtName }: CourtGalleryProps) {
   return (
     <div className="space-y-4">
       {/* Main Image */}
-      <div className="relative h-96 bg-gray-200 dark:bg-gray-700 rounded-xl overflow-hidden">
-        {selectedImage ? (
-          <Image
-            src={selectedImage}
-            alt={courtName}
-            fill
-            className="object-cover"
-            priority
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-            <span className="text-white text-6xl font-bold">
-              {courtName.charAt(0)}
-            </span>
-          </div>
-        )}
-      </div>
+      <motion.div
+        layoutId="main-image"
+        className="relative h-96 bg-gray-200 dark:bg-gray-700 rounded-3xl overflow-hidden shadow-lg border border-white/10 ring-1 ring-black/5"
+      >
+        <AnimatePresence mode="wait">
+          {selectedImage ? (
+            <motion.div
+              key={selectedImage}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={selectedImage}
+                alt={courtName}
+                fill
+                className="object-cover"
+                priority
+              />
+            </motion.div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-blue-500 to-indigo-600">
+              <span className="text-white text-6xl font-black">
+                {courtName.charAt(0)}
+              </span>
+            </div>
+          )}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Thumbnails */}
       {sortedImages.length > 1 && (
-        <div className="grid grid-cols-4 gap-4">
-          {sortedImages.map((image) => (
-            <button
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
+          {sortedImages.map((image, index) => (
+            <motion.button
               key={image.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedImage(image.url)}
-              className={`relative h-24 rounded-lg overflow-hidden border-2 transition-all ${
+              className={`relative h-20 rounded-2xl overflow-hidden border-2 transition-all ${
                 selectedImage === image.url
-                  ? "border-blue-600 ring-2 ring-blue-600"
-                  : "border-gray-300 dark:border-gray-600 hover:border-blue-400"
+                  ? "border-blue-600 ring-4 ring-blue-500/20 shadow-lg"
+                  : "border-gray-200 dark:border-gray-800 hover:border-blue-400"
               }`}
             >
               <Image
@@ -74,7 +94,7 @@ export default function CourtGallery({ images, courtName }: CourtGalleryProps) {
                 fill
                 className="object-cover"
               />
-            </button>
+            </motion.button>
           ))}
         </div>
       )}
