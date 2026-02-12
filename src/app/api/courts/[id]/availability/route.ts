@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+import { availabilitySchema } from "@/lib/validations/schemas";
+
 // GET - Fetch all availability slots for a court
 export async function GET(
   request: Request,
@@ -67,15 +69,16 @@ export async function POST(
   }
 
   const body = await request.json();
-  const { day_of_week, start_time, end_time, is_available = true } = body;
+  const validation = availabilitySchema.safeParse(body);
 
-  // Validate required fields
-  if (day_of_week === undefined || !start_time || !end_time) {
+  if (!validation.success) {
     return NextResponse.json(
-      { error: "day_of_week, start_time, and end_time are required" },
+      { error: "Validation failed", details: validation.error.issues },
       { status: 400 },
     );
   }
+
+  const { day_of_week, start_time, end_time, is_available } = validation.data;
 
   // Check for overlapping slots
   const { data: existing } = await supabase
@@ -128,8 +131,7 @@ export async function PUT(
   }
 
   const body = await request.json();
-  const { availability_id, day_of_week, start_time, end_time, is_available } =
-    body;
+  const { availability_id, ...dataToValidate } = body;
 
   if (!availability_id) {
     return NextResponse.json(
@@ -137,6 +139,16 @@ export async function PUT(
       { status: 400 },
     );
   }
+
+  const validation = availabilitySchema.partial().safeParse(dataToValidate);
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 },
+    );
+  }
+
+  const validatedData = validation.data;
 
   // Check if user owns the court or is admin
   const { data: court } = await supabase
@@ -165,15 +177,12 @@ export async function PUT(
     );
   }
 
-  const updateData: Record<string, unknown> = {};
-  if (day_of_week !== undefined) updateData.day_of_week = day_of_week;
-  if (start_time) updateData.start_time = start_time;
-  if (end_time) updateData.end_time = end_time;
-  if (is_available !== undefined) updateData.is_available = is_available;
-
   const { data, error } = await supabase
     .from("court_availability")
-    .update(updateData)
+    .update({
+      ...validatedData,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", availability_id)
     .eq("court_id", courtId)
     .select()

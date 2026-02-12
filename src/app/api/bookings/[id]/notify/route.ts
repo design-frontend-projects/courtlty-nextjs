@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { sendBookingNotification } from "@/lib/notifications";
+import { z } from "zod";
 
 export async function POST(
   request: Request,
@@ -31,11 +32,20 @@ export async function POST(
 
   // 3. Get message from body
   const body = await request.json();
-  const { message } = body;
+  const notifySchema = z.object({
+    message: z.string().min(1, "Message is required").max(500),
+  });
 
-  if (!message || typeof message !== "string") {
-    return NextResponse.json({ error: "Message is required" }, { status: 400 });
+  const validation = notifySchema.safeParse(body);
+
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 },
+    );
   }
+
+  const { message } = validation.data;
 
   // 4. Fetch booking details to find recipients
   const { data: booking, error: bookingError } = await supabase

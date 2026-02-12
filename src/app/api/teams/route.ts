@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { canCreateTeam } from "@/lib/utils/business-logic-server";
 import { getMaxPlayersForSport } from "@/lib/utils/business-logic";
 import { NextResponse } from "next/server";
+import { teamSchema } from "@/lib/validations/schemas";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -63,19 +64,36 @@ export async function POST(request: Request) {
   if (!canCreate) {
     return NextResponse.json(
       { error: "You can only own one team at a time" },
-      { status: 403 }
+      { status: 403 },
     );
   }
 
   const body = await request.json();
-  const { name, sport, description, logo_url, max_players } = body;
+
+  // Server-side validation
+  const validation = teamSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 },
+    );
+  }
+
+  const {
+    name,
+    sport,
+    description,
+    max_players,
+    looking_for_players,
+    players_needed,
+  } = validation.data;
 
   // Validate max players for sport
   const maxAllowed = getMaxPlayersForSport(sport);
   if (max_players > maxAllowed) {
     return NextResponse.json(
       { error: `Maximum ${maxAllowed} players allowed for ${sport}` },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -86,8 +104,9 @@ export async function POST(request: Request) {
       name,
       sport,
       description,
-      logo_url,
       max_players,
+      looking_for_players,
+      players_needed,
       owner_id: user.id,
     })
     .select()

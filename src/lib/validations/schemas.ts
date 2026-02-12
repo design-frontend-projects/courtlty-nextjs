@@ -56,6 +56,7 @@ export const bookingSchema = z.object({
   start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
   end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
   sport: z.string().min(1, "Sport is required"),
+  total_amount: z.number().nonnegative(),
 });
 
 export type BookingFormData = z.infer<typeof bookingSchema>;
@@ -125,3 +126,21 @@ export const reviewSchema = z.object({
 });
 
 export type ReviewFormData = z.infer<typeof reviewSchema>;
+// Availability Schema
+export const availabilitySchema = z.object({
+  day_of_week: z.number().int().min(0).max(6),
+  start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+  is_available: z.boolean().default(true),
+});
+
+export type AvailabilityFormData = z.infer<typeof availabilitySchema>;
+
+// Image Schema
+export const imageSchema = z.object({
+  url: z.string().url("Invalid image URL"),
+  is_primary: z.boolean().default(false),
+  display_order: z.number().int().nonnegative().default(0),
+});
+
+export type ImageFormData = z.infer<typeof imageSchema>;

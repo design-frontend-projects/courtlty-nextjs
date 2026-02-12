@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+import { imageSchema } from "@/lib/validations/schemas";
+
 // GET - Fetch all images for a court
 export async function GET(
   request: Request,
@@ -66,11 +68,16 @@ export async function POST(
   }
 
   const body = await request.json();
-  const { url, is_primary = false, display_order = 0 } = body;
+  const validation = imageSchema.safeParse(body);
 
-  if (!url) {
-    return NextResponse.json({ error: "url is required" }, { status: 400 });
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 },
+    );
   }
+
+  const { url, is_primary, display_order } = validation.data;
 
   // If setting as primary, unset other primaries first
   if (is_primary) {
@@ -115,7 +122,7 @@ export async function PUT(
   }
 
   const body = await request.json();
-  const { image_id, is_primary, display_order } = body;
+  const { image_id, ...dataToValidate } = body;
 
   if (!image_id) {
     return NextResponse.json(
@@ -123,6 +130,16 @@ export async function PUT(
       { status: 400 },
     );
   }
+
+  const validation = imageSchema.partial().safeParse(dataToValidate);
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 },
+    );
+  }
+
+  const validatedData = validation.data;
 
   // Check if user owns the court or is admin
   const { data: court } = await supabase
@@ -152,20 +169,19 @@ export async function PUT(
   }
 
   // If setting as primary, unset other primaries first
-  if (is_primary) {
+  if (validatedData.is_primary) {
     await supabase
       .from("court_images")
       .update({ is_primary: false })
       .eq("court_id", courtId);
   }
 
-  const updateData: Record<string, unknown> = {};
-  if (is_primary !== undefined) updateData.is_primary = is_primary;
-  if (display_order !== undefined) updateData.display_order = display_order;
-
   const { data, error } = await supabase
     .from("court_images")
-    .update(updateData)
+    .update({
+      ...validatedData,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", image_id)
     .eq("court_id", courtId)
     .select()

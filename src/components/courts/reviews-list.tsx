@@ -42,21 +42,49 @@ export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
         return;
       }
 
-      const { error } = await supabase.from("reviews").insert({
-        court_id: courtId,
-        reviewer_id: user.id,
-        rating,
-        comment: comment || null,
+      // We need a booking_id to submit a review now
+      // For this demo/enhancement, we'll look for a recent booking for this court
+      const { data: recentBooking } = await supabase
+        .from("bookings")
+        .select("id")
+        .eq("court_id", courtId)
+        .eq("booked_by", user.id)
+        .eq("status", "confirmed")
+        .order("booking_date", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!recentBooking) {
+        throw new Error(
+          "You must have a confirmed booking to review this court.",
+        );
+      }
+
+      const response = await fetch("/api/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          court_id: courtId,
+          booking_id: recentBooking.id,
+          rating,
+          comment: comment || undefined,
+        }),
       });
 
-      if (error) throw error;
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit review");
+      }
 
       setShowForm(false);
       setComment("");
       setRating(5);
       router.refresh();
-    } catch (err: any) {
-      alert(err.message);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -138,7 +166,7 @@ export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
               className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0"
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold flex-shrink-0">
+                <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">
                   {review.profiles?.full_name?.charAt(0) || "U"}
                 </div>
                 <div className="flex-1">

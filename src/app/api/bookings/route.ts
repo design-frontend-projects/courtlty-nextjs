@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { checkBookingConflict } from "@/lib/utils/business-logic-server";
 import { NextResponse } from "next/server";
+import { bookingSchema } from "@/lib/validations/schemas";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -9,6 +10,23 @@ export async function GET(request: Request) {
   const status = searchParams.get("status");
 
   const supabase = await createClient();
+
+  const {
+    data: { user: currentUser },
+  } = await supabase.auth.getUser();
+
+  if (!currentUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Get profile to check role
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", currentUser.id)
+    .single();
+
+  const isAdmin = profile?.role === "admin";
 
   let query = supabase.from("bookings").select(`
       *,
@@ -31,7 +49,11 @@ export async function GET(request: Request) {
       )
     `);
 
-  if (userId) {
+  // Security: Users can only see their own bookings unless admin
+  if (!isAdmin) {
+    query = query.eq("booked_by", currentUser.id);
+  } else if (userId) {
+    // Admin can filter by userId
     query = query.eq("booked_by", userId);
   }
 
@@ -66,7 +88,15 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  console.log("body: ", body);
+
+  // Server-side validation
+  const validation = bookingSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: "Validation failed", details: validation.error.issues },
+      { status: 400 },
+    );
+  }
 
   const {
     court_id,
@@ -76,8 +106,8 @@ export async function POST(request: Request) {
     sport,
     team_id,
     total_amount,
-    user_id: requestedUserId, // Rename to avoid conflict if we used user_id elsewhere
-  } = body;
+    user_id: requestedUserId,
+  } = validation.data;
 
   // Check if current user is admin to allow overriding booked_by
   let bookingUserId = user.id;
@@ -118,8 +148,8 @@ export async function POST(request: Request) {
       end_time,
       sport,
       total_amount,
-      status: "confirmed", // Admins usually confirm immediately, or default to pending? Let's use confirmed if admin.
-      payment_status: profile?.role === "admin" ? "paid" : "pending", // Admins might mark as paid? Let's keep pending or make it optional.
+      status: profile?.role === "admin" ? "confirmed" : "pending",
+      payment_status: profile?.role === "admin" ? "paid" : "pending",
     })
     .select()
     .single();
