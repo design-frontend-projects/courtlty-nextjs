@@ -4,7 +4,7 @@ import { courtSchema } from "@/lib/validations/schemas";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const supabase = await createClient();
@@ -37,7 +37,7 @@ export async function GET(
           avatar_url
         )
       )
-    `
+    `,
     )
     .eq("id", id)
     .single();
@@ -51,7 +51,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const supabase = await createClient();
@@ -93,15 +93,37 @@ export async function PUT(
   if (!validation.success) {
     return NextResponse.json(
       { error: "Validation failed", details: validation.error.issues },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
   const validatedData = validation.data;
+  const updateData: any = { ...validatedData };
+
+  // Allow admins/moderators to update status and is_active
+  if (isAdminOrModerator) {
+    if (
+      body.status &&
+      ["approved", "pending", "rejected"].includes(body.status)
+    ) {
+      updateData.status = body.status;
+    }
+    if (typeof body.is_active === "boolean") {
+      updateData.is_active = body.is_active;
+    }
+  }
+
+  // Ensure there is something to update
+  if (Object.keys(updateData).length === 0) {
+    return NextResponse.json(
+      { error: "No valid fields provided for update" },
+      { status: 400 },
+    );
+  }
 
   const { data, error } = await supabase
     .from("courts")
-    .update(validatedData)
+    .update(updateData)
     .eq("id", id)
     .select()
     .single();
@@ -115,7 +137,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const supabase = await createClient();
