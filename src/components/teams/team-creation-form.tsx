@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { teamSchema, type TeamFormData } from "@/lib/validations/schemas";
 import { getMaxPlayersForSport } from "@/lib/utils/business-logic";
+import { toast } from "sonner";
 
 const SPORTS_OPTIONS = [
   "Basketball",
@@ -65,10 +66,10 @@ export default function TeamCreationForm() {
         throw new Error(result.error || "Failed to create team");
       }
 
-      alert("Team created successfully!");
+      toast.success("Team created successfully!");
       router.push(`/teams/${result.team.id}`);
     } catch (err: any) {
-      alert(err.message);
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
@@ -174,7 +175,7 @@ export default function TeamCreationForm() {
               Looking for players
             </span>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Let others know you're recruiting
+              Let others know youre recruiting
             </p>
           </div>
         </label>

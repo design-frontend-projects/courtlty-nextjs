@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { checkBookingConflict } from "@/lib/utils/business-logic-server";
 import { NextResponse } from "next/server";
-import { bookingSchema } from "@/lib/validations/schemas";
+import { bookingSchema, openMatchSchema } from "@/lib/validations/schemas";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -89,8 +89,26 @@ export async function POST(request: Request) {
 
   const body = await request.json();
 
-  // Server-side validation
-  const validation = bookingSchema.safeParse(body);
+  // Check role first for open match permission
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  const isAdmin = profile?.role === "admin" || profile?.role === "moderator";
+
+  // Determine schema and validation based on request type
+  let validation;
+  let isOpenMatch = false;
+
+  if (isAdmin && body.is_open_match) {
+    isOpenMatch = true;
+    validation = openMatchSchema.safeParse(body);
+  } else {
+    validation = bookingSchema.safeParse(body);
+  }
+
   if (!validation.success) {
     return NextResponse.json(
       { error: "Validation failed", details: validation.error.issues },
@@ -107,18 +125,16 @@ export async function POST(request: Request) {
     team_id,
     total_amount,
     user_id: requestedUserId,
+    // @ts-expect-error - match_title is not in bookingSchema
+    match_title,
+    // @ts-expect-error - max_participants is not in bookingSchema
+    max_participants,
   } = validation.data;
 
   // Check if current user is admin to allow overriding booked_by
   let bookingUserId = user.id;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .eq("id", user.id)
-    .single();
-
-  if (profile?.role === "admin" && requestedUserId) {
+  if (isAdmin && requestedUserId) {
     bookingUserId = requestedUserId;
   }
 
@@ -148,8 +164,11 @@ export async function POST(request: Request) {
       end_time,
       sport,
       total_amount,
-      status: profile?.role === "admin" ? "confirmed" : "pending",
-      payment_status: profile?.role === "admin" ? "paid" : "pending",
+      status: isAdmin ? "confirmed" : "pending",
+      payment_status: isAdmin ? "paid" : "pending",
+      is_open_match: isOpenMatch,
+      match_title: isOpenMatch ? match_title : null,
+      max_participants: isOpenMatch ? max_participants : null,
     })
     .select()
     .single();

@@ -1,38 +1,42 @@
 "use client";
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { updateMemberStatus } from "@/lib/actions/teams";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
+
+type TeamMember = {
+  id: string;
+  player_id: string;
+  profiles: {
+    avatar_url: string | null;
+    email: string | null;
+    first_name: string | null;
+  } | null;
+};
 
 export function TeamMemberManagement({
   initialPendingMembers,
   teamId,
 }: {
-  initialPendingMembers: any[];
+  initialPendingMembers: TeamMember[];
   teamId: string;
 }) {
   const [pendingMembers, setPendingMembers] = useState(initialPendingMembers);
-  const supabase = createClient();
-
   const handleAction = async (
     memberId: string,
-    action: "approved" | "rejected"
+    action: "approved" | "rejected",
   ) => {
-    const { error } = await supabase
-      .from("team_members")
-      .update({ status: action })
-      .eq("id", memberId)
-      .eq("team_id", teamId);
-
-    if (error) {
-      toast.error(`Failed to ${action} member`);
-      return;
+    try {
+      await updateMemberStatus(teamId, memberId, action);
+      toast.success(`Member ${action}`);
+      setPendingMembers((prev) => prev.filter((m) => m.player_id !== memberId));
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : `Failed to ${action} member`;
+      toast.error(errorMessage);
     }
-
-    toast.success(`Member ${action}`);
-    setPendingMembers((prev) => prev.filter((m) => m.id !== memberId));
   };
 
   if (pendingMembers.length === 0)
@@ -49,7 +53,7 @@ export function TeamMemberManagement({
         >
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10 border">
-              <AvatarImage src={member.profiles?.avatar_url} />
+              <AvatarImage src={member.profiles?.avatar_url ?? undefined} />
               <AvatarFallback>
                 {member.profiles?.email?.[0]?.toUpperCase()}
               </AvatarFallback>
@@ -67,7 +71,7 @@ export function TeamMemberManagement({
               size="sm"
               variant="outline"
               className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
-              onClick={() => handleAction(member.id, "approved")}
+              onClick={() => handleAction(member.player_id, "approved")}
             >
               <Check className="h-4 w-4" />
             </Button>
@@ -75,7 +79,7 @@ export function TeamMemberManagement({
               size="sm"
               variant="outline"
               className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-              onClick={() => handleAction(member.id, "rejected")}
+              onClick={() => handleAction(member.player_id, "rejected")}
             >
               <X className="h-4 w-4" />
             </Button>

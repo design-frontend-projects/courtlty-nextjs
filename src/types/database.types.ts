@@ -176,6 +176,9 @@ export interface Database {
           total_amount: number;
           status: "pending" | "confirmed" | "cancelled";
           payment_status: "pending" | "paid" | "failed";
+          is_open_match: boolean;
+          match_title: string | null;
+          max_participants: number | null;
         };
         Insert: {
           id?: string;
@@ -188,6 +191,9 @@ export interface Database {
           total_amount: number;
           status?: "pending" | "confirmed" | "cancelled";
           payment_status?: "pending" | "paid" | "failed";
+          is_open_match?: boolean;
+          match_title?: string | null;
+          max_participants?: number | null;
         };
         Update: {
           id?: string;
@@ -200,6 +206,9 @@ export interface Database {
           total_amount?: number;
           status?: "pending" | "confirmed" | "cancelled";
           payment_status?: "pending" | "paid" | "failed";
+          is_open_match?: boolean;
+          match_title?: string | null;
+          max_participants?: number | null;
         };
       };
       court_images: {
@@ -226,6 +235,90 @@ export interface Database {
           is_primary?: boolean;
           display_order?: number;
           created_at?: string;
+        };
+      };
+      prizes: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          image_url: string | null;
+          points_cost: number;
+          quantity: number;
+          valid_until: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          image_url?: string | null;
+          points_cost: number;
+          quantity?: number;
+          valid_until?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          description?: string | null;
+          image_url?: string | null;
+          points_cost?: number;
+          quantity?: number;
+          valid_until?: string | null;
+          created_at?: string | null;
+        };
+      };
+      weekly_winners: {
+        Row: {
+          id: string;
+          user_id: string;
+          prize_id: string | null;
+          week_start_date: string;
+          rank: number;
+          created_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          prize_id?: string | null;
+          week_start_date: string;
+          rank: number;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          prize_id?: string | null;
+          week_start_date?: string;
+          rank?: number;
+          created_at?: string | null;
+        };
+      };
+      match_participants: {
+        Row: {
+          id: string;
+          booking_id: string;
+          user_id: string;
+          team_id: string | null;
+          status: "joined" | "withdrawn";
+          joined_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          booking_id: string;
+          user_id: string;
+          team_id?: string | null;
+          status?: "joined" | "withdrawn";
+          joined_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          booking_id?: string;
+          user_id?: string;
+          team_id?: string | null;
+          status?: "joined" | "withdrawn";
+          joined_at?: string | null;
         };
       };
     };

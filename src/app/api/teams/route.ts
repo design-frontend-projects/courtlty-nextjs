@@ -121,6 +121,7 @@ export async function POST(request: Request) {
     team_id: team.id,
     player_id: user.id,
     role: "owner",
+    status: "approved",
   });
 
   if (memberError) {

@@ -144,3 +144,38 @@ export const imageSchema = z.object({
 });
 
 export type ImageFormData = z.infer<typeof imageSchema>;
+
+// Prize Schema
+export const prizeSchema = z.object({
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  description: z.string().optional(),
+  image_url: z.string().url("Invalid URL").optional().or(z.literal("")),
+  points_cost: z.number().int().nonnegative("Points cost must be non-negative"),
+  quantity: z.number().int().nonnegative("Quantity must be non-negative"),
+  is_active: z.boolean().default(true),
+});
+
+export type PrizeFormData = z.infer<typeof prizeSchema>;
+
+// Weekly Winner Schema
+export const weeklyWinnerSchema = z.object({
+  user_id: z.string().uuid(),
+  prize_id: z.string().uuid().optional(),
+  week_start_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
+  rank: z.number().int().positive(),
+});
+
+export type WeeklyWinnerFormData = z.infer<typeof weeklyWinnerSchema>;
+
+// Open Match Schema
+export const openMatchSchema = bookingSchema.extend({
+  match_title: z.string().min(5, "Match title is required"),
+  max_participants: z
+    .number()
+    .int()
+    .positive("Max participants must be positive"),
+});
+
+export type OpenMatchFormData = z.infer<typeof openMatchSchema>;

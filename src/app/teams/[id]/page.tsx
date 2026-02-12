@@ -10,7 +10,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CalendarDays, Users, Trophy } from "lucide-react";
@@ -35,7 +34,6 @@ export default async function TeamDetailPage({
     .from("teams")
     .select("*, team_members(team_id,player_id, status, role, profiles(*))")
     .eq("id", id)
-    .eq("team_members.team_id", id)
     .single();
 
   console.log("check team", team);
@@ -45,15 +43,19 @@ export default async function TeamDetailPage({
   }
 
   const currentMember = team.team_members.find(
-    (m: any) => m.player_id === user.id
+    (m: any) => m.player_id === user.id,
   );
+  console.log("current member: ", currentMember);
+
   const isMember = currentMember?.status === "approved";
   const isOwner = currentMember?.role === "owner"; // Or check based on team.owner_id if reliable
   const pendingMembers = team.team_members.filter(
-    (m: any) => m.status === "pending"
+    (m: any) => m.status === "pending",
   );
+  console.log("pending members: ", pendingMembers);
+
   const approvedMembers = team.team_members.filter(
-    (m: any) => m.status === "approved"
+    (m: any) => m.status === "approved",
   );
 
   async function joinTeam() {
