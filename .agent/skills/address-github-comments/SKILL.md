@@ -1,4 +1,5 @@
 ---
+version: 4.1.0-fractal
 name: address-github-comments
 description: Use when you need to address review or issue comments on an open GitHub Pull Request using the gh CLI.
 ---
@@ -21,35 +22,9 @@ If not logged in, run `gh auth login`.
 
 ## Workflow
 
-### 1. Inspect Comments
+## 🧠 Knowledge Modules (Fractal Skills)
 
-Fetch the comments for the current branch's PR.
-
-```bash
-gh pr view --comments
-```
-
-Or use a custom script if available to list threads.
-
-### 2. Categorize and Plan
-
-- List the comments and review threads.
-- Propose a fix for each.
-- **Wait for user confirmation** on which comments to address first if there are many.
-
-### 3. Apply Fixes
-
-Apply the code changes for the selected comments.
-
-### 4. Respond to Comments
-
-Once fixed, respond to the threads as resolved.
-
-```bash
-gh pr comment <PR_NUMBER> --body "Addressed in latest commit."
-```
-
-## Common Mistakes
-
-- **Applying fixes without understanding context**: Always read the surrounding code of a comment.
-- **Not verifying auth**: Check `gh auth status` before starting.
+### 1. [1. Inspect Comments](./sub-skills/1-inspect-comments.md)
+### 2. [2. Categorize and Plan](./sub-skills/2-categorize-and-plan.md)
+### 3. [3. Apply Fixes](./sub-skills/3-apply-fixes.md)
+### 4. [4. Respond to Comments](./sub-skills/4-respond-to-comments.md)

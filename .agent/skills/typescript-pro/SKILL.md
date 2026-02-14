@@ -1,4 +1,5 @@
 ---
+version: 4.1.0-fractal
 name: typescript-pro
 description: Master TypeScript with advanced types, generics, and strict type
   safety. Handles complex type systems, decorators, and enterprise-grade

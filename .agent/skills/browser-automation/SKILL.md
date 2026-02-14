@@ -1,4 +1,5 @@
 ---
+version: 4.1.0-fractal
 name: browser-automation
 description: "Browser automation powers web testing, scraping, and AI agent interactions. The difference between a flaky script and a reliable system comes down to understanding selectors, waiting strategies, and anti-detection patterns.  This skill covers Playwright (recommended) and Puppeteer, with patterns for testing, scraping, and agentic browser control. Key insight: Playwright won the framework war. Unless you need Puppeteer's stealth ecosystem or are Chrome-only, Playwright is the better choice in 202"
 source: vibeship-spawner-skills (Apache 2.0)
@@ -32,39 +33,11 @@ For scraping, yo
 
 ## Patterns
 
-### Test Isolation Pattern
+## 🧠 Knowledge Modules (Fractal Skills)
 
-Each test runs in complete isolation with fresh state
-
-### User-Facing Locator Pattern
-
-Select elements the way users see them
-
-### Auto-Wait Pattern
-
-Let Playwright wait automatically, never add manual waits
-
-## Anti-Patterns
-
-### ❌ Arbitrary Timeouts
-
-### ❌ CSS/XPath First
-
-### ❌ Single Browser Context for Everything
-
-## ⚠️ Sharp Edges
-
-| Issue | Severity | Solution |
-|-------|----------|----------|
-| Issue | critical | # REMOVE all waitForTimeout calls |
-| Issue | high | # Use user-facing locators instead: |
-| Issue | high | # Use stealth plugins: |
-| Issue | high | # Each test must be fully isolated: |
-| Issue | medium | # Enable traces for failures: |
-| Issue | medium | # Set consistent viewport: |
-| Issue | high | # Add delays between requests: |
-| Issue | medium | # Wait for popup BEFORE triggering it: |
-
-## Related Skills
-
-Works well with: `agent-tool-builder`, `workflow-automation`, `computer-use-agents`, `test-architect`
+### 1. [Test Isolation Pattern](./sub-skills/test-isolation-pattern.md)
+### 2. [User-Facing Locator Pattern](./sub-skills/user-facing-locator-pattern.md)
+### 3. [Auto-Wait Pattern](./sub-skills/auto-wait-pattern.md)
+### 4. [❌ Arbitrary Timeouts](./sub-skills/arbitrary-timeouts.md)
+### 5. [❌ CSS/XPath First](./sub-skills/cssxpath-first.md)
+### 6. [❌ Single Browser Context for Everything](./sub-skills/single-browser-context-for-everything.md)

@@ -131,7 +131,7 @@ export const availabilitySchema = z.object({
   day_of_week: z.number().int().min(0).max(6),
   start_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
   end_time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
-  is_available: z.boolean().default(true),
+  is_available: z.boolean(),
 });
 
 export type AvailabilityFormData = z.infer<typeof availabilitySchema>;
@@ -139,8 +139,8 @@ export type AvailabilityFormData = z.infer<typeof availabilitySchema>;
 // Image Schema
 export const imageSchema = z.object({
   url: z.string().url("Invalid image URL"),
-  is_primary: z.boolean().default(false),
-  display_order: z.number().int().nonnegative().default(0),
+  is_primary: z.boolean(),
+  display_order: z.number().int().nonnegative(),
 });
 
 export type ImageFormData = z.infer<typeof imageSchema>;
@@ -152,7 +152,7 @@ export const prizeSchema = z.object({
   image_url: z.string().url("Invalid URL").optional().or(z.literal("")),
   points_cost: z.number().int().nonnegative("Points cost must be non-negative"),
   quantity: z.number().int().nonnegative("Quantity must be non-negative"),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
 });
 
 export type PrizeFormData = z.infer<typeof prizeSchema>;

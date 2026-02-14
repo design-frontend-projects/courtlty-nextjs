@@ -1,4 +1,5 @@
 ---
+version: 4.1.0-fractal
 name: frontend-dev-guidelines
 description: Opinionated frontend development standards for modern React + TypeScript applications. Covers Suspense-first data fetching, lazy loading, feature-based architecture, MUI v7 styling, TanStack Router, performance optimization, and strict TypeScript practices.
 ---
@@ -357,3 +358,17 @@ Before finalizing code:
 **Status:** Stable, opinionated, and enforceable
 **Intended Use:** Production React codebases with long-term maintenance horizons
 
+
+
+## 🧠 Knowledge Modules (Fractal Skills)
+
+### 1. [common-patterns](./sub-skills/common-patterns.md)
+### 2. [complete-examples](./sub-skills/complete-examples.md)
+### 3. [component-patterns](./sub-skills/component-patterns.md)
+### 4. [data-fetching](./sub-skills/data-fetching.md)
+### 5. [file-organization](./sub-skills/file-organization.md)
+### 6. [loading-and-error-states](./sub-skills/loading-and-error-states.md)
+### 7. [performance](./sub-skills/performance.md)
+### 8. [routing-guide](./sub-skills/routing-guide.md)
+### 9. [styling-guide](./sub-skills/styling-guide.md)
+### 10. [typescript-standards](./sub-skills/typescript-standards.md)

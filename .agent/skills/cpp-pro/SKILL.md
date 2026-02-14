@@ -1,4 +1,5 @@
 ---
+version: 4.1.0-fractal
 name: cpp-pro
 description: Write idiomatic C++ code with modern features, RAII, smart
   pointers, and STL algorithms. Handles templates, move semantics, and

@@ -1,121 +1,73 @@
 ---
-name: vercel-react-best-practices
-description: React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
+name: react-best-practices
+description: React & Next.js engineering standards.
+category: development
+version: 4.1.0-fractal
+layer: master-skill
 ---
 
-# Vercel React Best Practices
+# React & Next.js Best Practices
 
-Comprehensive performance optimization guide for React and Next.js applications, maintained by Vercel. Contains 45 rules across 8 categories, prioritized by impact to guide automated refactoring and code generation.
+> **Goal**: Build high-performance, maintainable, and accessible React applications using modern patterns (React 19+, Next.js App Router).
 
-## When to Apply
+## 1. Architecture & Rendering
 
-Reference these guidelines when:
-- Writing new React components or Next.js pages
-- Implementing data fetching (client or server-side)
-- Reviewing code for performance issues
-- Refactoring existing React/Next.js code
-- Optimizing bundle size or load times
+- **App Router First**: Use Next.js App Router (`app/`) for all new projects.
+- **Server Components (RSC)**: Default to Server Components. Only add `'use client'` when interactivity (state, hooks, event listeners) is strictly needed.
+- **Suspense & Streaming**: Use `<Suspense>` boundaries to stream UI parts that depend on slow data.
+- **Data Fetching**: Fetch data in Server Components directly (async/await components). Avoid `useEffect` for data fetching.
 
-## Rule Categories by Priority
+## 2. Component Patterns
 
-| Priority | Category | Impact | Prefix |
-|----------|----------|--------|--------|
-| 1 | Eliminating Waterfalls | CRITICAL | `async-` |
-| 2 | Bundle Size Optimization | CRITICAL | `bundle-` |
-| 3 | Server-Side Performance | HIGH | `server-` |
-| 4 | Client-Side Data Fetching | MEDIUM-HIGH | `client-` |
-| 5 | Re-render Optimization | MEDIUM | `rerender-` |
-| 6 | Rendering Performance | MEDIUM | `rendering-` |
-| 7 | JavaScript Performance | LOW-MEDIUM | `js-` |
-| 8 | Advanced Patterns | LOW | `advanced-` |
+- **Composition**: Use `children` prop to tackle prop drilling.
+- **Atomic Design**: Organize components by atomicity (though feature-based folder structure is preferred for scale).
+- **Custom Hooks**: Extract complex logic into `useHookName`.
+- **Props**: Use strict TypeScript interfaces for props. Avoid `any`.
 
-## Quick Reference
+## 3. State Management
 
-### 1. Eliminating Waterfalls (CRITICAL)
+- **URL as State**: Store shareable state (filters, pagination) in URL Search Params.
+- **Server State**: Use React Query (TanStack Query) or SWR for client-side data fetching/caching if RSC is not applicable.
+- **Global State**: Minimal use of Zustand/Context. Prefer local state + composition.
 
-- `async-defer-await` - Move await into branches where actually used
-- `async-parallel` - Use Promise.all() for independent operations
-- `async-dependencies` - Use better-all for partial dependencies
-- `async-api-routes` - Start promises early, await late in API routes
-- `async-suspense-boundaries` - Use Suspense to stream content
+## 4. Performance Optimization
 
-### 2. Bundle Size Optimization (CRITICAL)
+- **Images**: Always use `next/image` with proper `width`, `height`, and `sizes`.
+- **Fonts**: Use `next/font` to eliminate layout shift (CLS).
+- **Lazy Loading**: Use `next/dynamic` or `React.lazy` for heavy client components below the fold.
+- **Bundle Analysis**: Regularly check bundle size with `@next/bundle-analyzer`.
 
-- `bundle-barrel-imports` - Import directly, avoid barrel files
-- `bundle-dynamic-imports` - Use next/dynamic for heavy components
-- `bundle-defer-third-party` - Load analytics/logging after hydration
-- `bundle-conditional` - Load modules only when feature is activated
-- `bundle-preload` - Preload on hover/focus for perceived speed
+## 5. Styling
 
-### 3. Server-Side Performance (HIGH)
+- **Tailwind CSS**: Use utility-first styling.
+- **CN Utility**: Use `clsx` + `tailwind-merge` (typically `cn()` helper) for conditional class merging.
+- **Mobile First**: Write styles for mobile first, then add `md:`, `lg:` prefixes.
 
-- `server-cache-react` - Use React.cache() for per-request deduplication
-- `server-cache-lru` - Use LRU cache for cross-request caching
-- `server-serialization` - Minimize data passed to client components
-- `server-parallel-fetching` - Restructure components to parallelize fetches
-- `server-after-nonblocking` - Use after() for non-blocking operations
+## 6. Directory Structure (Feature-First)
 
-### 4. Client-Side Data Fetching (MEDIUM-HIGH)
-
-- `client-swr-dedup` - Use SWR for automatic request deduplication
-- `client-event-listeners` - Deduplicate global event listeners
-
-### 5. Re-render Optimization (MEDIUM)
-
-- `rerender-defer-reads` - Don't subscribe to state only used in callbacks
-- `rerender-memo` - Extract expensive work into memoized components
-- `rerender-dependencies` - Use primitive dependencies in effects
-- `rerender-derived-state` - Subscribe to derived booleans, not raw values
-- `rerender-functional-setstate` - Use functional setState for stable callbacks
-- `rerender-lazy-state-init` - Pass function to useState for expensive values
-- `rerender-transitions` - Use startTransition for non-urgent updates
-
-### 6. Rendering Performance (MEDIUM)
-
-- `rendering-animate-svg-wrapper` - Animate div wrapper, not SVG element
-- `rendering-content-visibility` - Use content-visibility for long lists
-- `rendering-hoist-jsx` - Extract static JSX outside components
-- `rendering-svg-precision` - Reduce SVG coordinate precision
-- `rendering-hydration-no-flicker` - Use inline script for client-only data
-- `rendering-activity` - Use Activity component for show/hide
-- `rendering-conditional-render` - Use ternary, not && for conditionals
-
-### 7. JavaScript Performance (LOW-MEDIUM)
-
-- `js-batch-dom-css` - Group CSS changes via classes or cssText
-- `js-index-maps` - Build Map for repeated lookups
-- `js-cache-property-access` - Cache object properties in loops
-- `js-cache-function-results` - Cache function results in module-level Map
-- `js-cache-storage` - Cache localStorage/sessionStorage reads
-- `js-combine-iterations` - Combine multiple filter/map into one loop
-- `js-length-check-first` - Check array length before expensive comparison
-- `js-early-exit` - Return early from functions
-- `js-hoist-regexp` - Hoist RegExp creation outside loops
-- `js-min-max-loop` - Use loop for min/max instead of sort
-- `js-set-map-lookups` - Use Set/Map for O(1) lookups
-- `js-tosorted-immutable` - Use toSorted() for immutability
-
-### 8. Advanced Patterns (LOW)
-
-- `advanced-event-handler-refs` - Store event handlers in refs
-- `advanced-use-latest` - useLatest for stable callback refs
-
-## How to Use
-
-Read individual rule files for detailed explanations and code examples:
-
-```
-rules/async-parallel.md
-rules/bundle-barrel-imports.md
-rules/_sections.md
+```text
+app/
+├── (marketing)/     # Route group
+├── dashboard/
+│   ├── page.tsx
+│   ├── layout.tsx
+│   ├── _components/ # Private feature components
+│   └── loading.tsx
+components/          # Shared components (UI Kit)
+lib/                 # Utilities and helpers
+hooks/               # Shared hooks
+types/               # Global types
 ```
 
-Each rule file contains:
-- Brief explanation of why it matters
-- Incorrect code example with explanation
-- Correct code example with explanation
-- Additional context and references
+## 7. Security
 
-## Full Compiled Document
+- **XSS**: React escapes by default, but be careful with `dangerouslySetInnerHTML`.
+- **Auth**: Use `NextAuth.js` (Auth.js) or Clerk. Protect routes via Middleware.
 
-For the complete guide with all rules expanded: `AGENTS.md`
+---
+
+**Checklist before PR**:
+- [ ] Is `'use client'` used only where necessary?
+- [ ] Are lists using stable `key` props?
+- [ ] Is data fetched on the server where possible?
+- [ ] Are images optimized?

@@ -1,4 +1,5 @@
 ---
+version: 4.1.0-fractal
 name: graphql
 description: "GraphQL gives clients exactly the data they need - no more, no less. One endpoint, typed schema, introspection. But the flexibility that makes it powerful also makes it dangerous. Without proper controls, clients can craft queries that bring down your server.  This skill covers schema design, resolvers, DataLoader for N+1 prevention, federation for microservices, and client integration with Apollo/urql. Key insight: GraphQL is a contract. The schema is the API documentation. Design it carefully."
 source: vibeship-spawner-skills (Apache 2.0)
@@ -30,39 +31,11 @@ errors from empty data. You've l
 
 ## Patterns
 
-### Schema Design
+## 🧠 Knowledge Modules (Fractal Skills)
 
-Type-safe schema with proper nullability
-
-### DataLoader for N+1 Prevention
-
-Batch and cache database queries
-
-### Apollo Client Caching
-
-Normalized cache with type policies
-
-## Anti-Patterns
-
-### ❌ No DataLoader
-
-### ❌ No Query Depth Limiting
-
-### ❌ Authorization in Schema
-
-## ⚠️ Sharp Edges
-
-| Issue | Severity | Solution |
-|-------|----------|----------|
-| Each resolver makes separate database queries | critical | # USE DATALOADER |
-| Deeply nested queries can DoS your server | critical | # LIMIT QUERY DEPTH AND COMPLEXITY |
-| Introspection enabled in production exposes your schema | high | # DISABLE INTROSPECTION IN PRODUCTION |
-| Authorization only in schema directives, not resolvers | high | # AUTHORIZE IN RESOLVERS |
-| Authorization on queries but not on fields | high | # FIELD-LEVEL AUTHORIZATION |
-| Non-null field failure nullifies entire parent | medium | # DESIGN NULLABILITY INTENTIONALLY |
-| Expensive queries treated same as cheap ones | medium | # QUERY COST ANALYSIS |
-| Subscriptions not properly cleaned up | medium | # PROPER SUBSCRIPTION CLEANUP |
-
-## Related Skills
-
-Works well with: `backend`, `postgres-wizard`, `nextjs-app-router`, `react-patterns`
+### 1. [Schema Design](./sub-skills/schema-design.md)
+### 2. [DataLoader for N+1 Prevention](./sub-skills/dataloader-for-n1-prevention.md)
+### 3. [Apollo Client Caching](./sub-skills/apollo-client-caching.md)
+### 4. [❌ No DataLoader](./sub-skills/no-dataloader.md)
+### 5. [❌ No Query Depth Limiting](./sub-skills/no-query-depth-limiting.md)
+### 6. [❌ Authorization in Schema](./sub-skills/authorization-in-schema.md)

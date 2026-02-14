@@ -1,4 +1,5 @@
 ---
+version: 4.1.0-fractal
 name: nextjs-supabase-auth
 description: "Expert integration of Supabase Auth with Next.js App Router Use when: supabase auth next, authentication next.js, login supabase, auth middleware, protected route."
 source: vibeship-spawner-skills (Apache 2.0)
@@ -31,26 +32,11 @@ Your core principles:
 
 ## Patterns
 
-### Supabase Client Setup
+## 🧠 Knowledge Modules (Fractal Skills)
 
-Create properly configured Supabase clients for different contexts
-
-### Auth Middleware
-
-Protect routes and refresh sessions in middleware
-
-### Auth Callback Route
-
-Handle OAuth callback and exchange code for session
-
-## Anti-Patterns
-
-### ❌ getSession in Server Components
-
-### ❌ Auth State in Client Without Listener
-
-### ❌ Storing Tokens Manually
-
-## Related Skills
-
-Works well with: `nextjs-app-router`, `supabase-backend`
+### 1. [Supabase Client Setup](./sub-skills/supabase-client-setup.md)
+### 2. [Auth Middleware](./sub-skills/auth-middleware.md)
+### 3. [Auth Callback Route](./sub-skills/auth-callback-route.md)
+### 4. [❌ getSession in Server Components](./sub-skills/getsession-in-server-components.md)
+### 5. [❌ Auth State in Client Without Listener](./sub-skills/auth-state-in-client-without-listener.md)
+### 6. [❌ Storing Tokens Manually](./sub-skills/storing-tokens-manually.md)
