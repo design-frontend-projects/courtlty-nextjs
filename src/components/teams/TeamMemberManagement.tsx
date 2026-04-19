@@ -1,10 +1,12 @@
 "use client";
+
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { updateMemberStatus } from "@/lib/actions/teams";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
+
+import { updateMemberStatus } from "@/lib/actions/teams";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 type TeamMember = {
   id: string;
@@ -24,64 +26,58 @@ export function TeamMemberManagement({
   teamId: string;
 }) {
   const [pendingMembers, setPendingMembers] = useState(initialPendingMembers);
-  const handleAction = async (
-    memberId: string,
-    action: "approved" | "rejected",
-  ) => {
+
+  const handleAction = async (memberId: string, action: "approved" | "rejected") => {
     try {
       await updateMemberStatus(teamId, memberId, action);
-      toast.success(`Member ${action}`);
-      setPendingMembers((prev) => prev.filter((m) => m.player_id !== memberId));
+      toast.success(`Member ${action}.`);
+      setPendingMembers((current) => current.filter((member) => member.player_id !== memberId));
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : `Failed to ${action} member`;
-      toast.error(errorMessage);
+      toast.error(error instanceof Error ? error.message : `Failed to ${action} member`);
     }
   };
 
-  if (pendingMembers.length === 0)
-    return (
-      <div className="text-muted-foreground text-sm">No pending requests.</div>
-    );
+  if (!pendingMembers.length) {
+    return <p className="text-sm text-muted-foreground">No pending requests.</p>;
+  }
 
   return (
-    <div className="space-y-4">
+    <div className="grid gap-3">
       {pendingMembers.map((member) => (
         <div
           key={member.id}
-          className="flex items-center justify-between p-3 border rounded-lg bg-background shadow-sm"
+          className="flex flex-col gap-4 rounded-[1.45rem] border border-border/70 bg-accent/20 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
         >
           <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10 border">
+            <Avatar className="size-11 border border-border/70">
               <AvatarImage src={member.profiles?.avatar_url ?? undefined} />
-              <AvatarFallback>
-                {member.profiles?.email?.[0]?.toUpperCase()}
-              </AvatarFallback>
+              <AvatarFallback>{member.profiles?.email?.[0]?.toUpperCase() || "U"}</AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-sm font-medium">
-                {member.profiles?.first_name ||
-                  member.profiles?.email?.split("@")[0]}
+              <p className="font-medium text-foreground">
+                {member.profiles?.first_name || member.profiles?.email?.split("@")[0]}
               </p>
-              <p className="text-xs text-muted-foreground">Requested to join</p>
+              <p className="text-sm text-muted-foreground">Requested to join</p>
             </div>
           </div>
           <div className="flex gap-2">
             <Button
               size="sm"
               variant="outline"
-              className="text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+              className="rounded-full border-emerald-500/25 text-emerald-700 hover:bg-emerald-500/10 dark:text-emerald-300"
               onClick={() => handleAction(member.player_id, "approved")}
             >
-              <Check className="h-4 w-4" />
+              <Check data-icon="inline-start" />
+              Approve
             </Button>
             <Button
               size="sm"
               variant="outline"
-              className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              className="rounded-full border-destructive/25 text-destructive hover:bg-destructive/10"
               onClick={() => handleAction(member.player_id, "rejected")}
             >
-              <X className="h-4 w-4" />
+              <X data-icon="inline-start" />
+              Reject
             </Button>
           </div>
         </div>

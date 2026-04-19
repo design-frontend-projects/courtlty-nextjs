@@ -24,7 +24,9 @@ import {
 } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
-  Bell,
+  CalendarDays,
+  ChevronRight,
+  LayoutDashboard,
   User as UserIcon,
   LogOut,
   Users,
@@ -33,7 +35,7 @@ import {
 } from "lucide-react";
 
 const navLinks = [
-  { href: "/courts", label: "Find Courts", icon: MapPin },
+  { href: "/courts", label: "Courts", icon: MapPin },
   { href: "/teams", label: "Teams", icon: Users },
 ];
 
@@ -83,41 +85,85 @@ export function PublicNavbar() {
     return null;
   }
 
+  const isWorkspace =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/teams");
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     window.location.reload();
   };
 
   return (
-    <nav className="border-b bg-background/80 backdrop-blur-lg sticky top-0 z-50">
+    <nav className="sticky top-0 z-50 border-b border-border/60 bg-background/82 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          {/* Logo & Desktop Links */}
-          <div className="flex items-center">
-            <Link
-              href="/"
-              className="text-xl font-black bg-linear-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent"
-            >
-              Courtly
+        <div className="flex min-h-18 items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
+                <CalendarDays className="size-5" />
+              </div>
+              <div className="flex flex-col">
+                <span className="brand-wordmark text-2xl font-semibold leading-none text-foreground">
+                  Courtly
+                </span>
+                <span className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground md:block">
+                  Premium Athletic Booking
+                </span>
+              </div>
             </Link>
-            <div className="hidden md:flex ml-10 space-x-8">
+            <div className="hidden md:flex md:items-center md:gap-2">
+              {!isWorkspace ? (
+                <Link
+                  href="/"
+                  className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${
+                    pathname === "/" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  Home
+                </Link>
+              ) : null}
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-medium hover:text-primary transition-colors ${
-                    pathname === link.href
-                      ? "text-primary"
-                      : "text-muted-foreground"
+                  className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${
+                    pathname === link.href || pathname.startsWith(`${link.href}/`)
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
+              {user ? (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${
+                      pathname.startsWith("/dashboard")
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Dashboard
+                  </Link>
+                  <Link
+                    href="/profile"
+                    className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${
+                      pathname.startsWith("/profile")
+                        ? "bg-accent text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Profile
+                  </Link>
+                </>
+              ) : null}
             </div>
           </div>
 
-          {/* Right Side: Auth + Mobile Menu */}
           <div className="flex items-center gap-2">
             {user ? (
               <>
@@ -171,32 +217,46 @@ export function PublicNavbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
-            ) : (
-              <div className="hidden sm:flex items-center space-x-2">
+            ) : !isWorkspace ? (
+              <div className="hidden items-center space-x-2 sm:flex">
                 <Button variant="ghost" asChild>
                   <Link href="/login">Log in</Link>
                 </Button>
-                <Button asChild>
-                  <Link href="/login?tab=signup">Sign up</Link>
+                <Button asChild size="lg" className="rounded-full px-5">
+                  <Link href="/login?tab=signup">
+                    Start booking
+                    <ChevronRight data-icon="inline-end" />
+                  </Link>
                 </Button>
               </div>
-            )}
+            ) : null}
 
-            {/* Mobile Hamburger Menu */}
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
                   <Menu className="h-6 w-6" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[320px]">
-                <SheetHeader className="pb-6 border-b">
-                  <SheetTitle className="text-2xl font-black bg-linear-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">
+              <SheetContent side="right" className="w-[300px] sm:w-[340px]">
+                <SheetHeader className="border-b border-border/70 pb-6">
+                  <SheetTitle className="brand-wordmark text-3xl font-semibold text-foreground">
                     Courtly
                   </SheetTitle>
                 </SheetHeader>
 
                 <div className="flex flex-col gap-2 py-6">
+                  {!isWorkspace ? (
+                    <Link
+                      href="/"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition-colors ${
+                        pathname === "/" ? "bg-accent text-foreground" : "hover:bg-muted"
+                      }`}
+                    >
+                      <LayoutDashboard className="h-5 w-5" />
+                      Home
+                    </Link>
+                  ) : null}
                   {navLinks.map((link) => {
                     const Icon = link.icon;
                     return (
@@ -204,9 +264,9 @@ export function PublicNavbar() {
                         key={link.href}
                         href={link.href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-colors ${
-                          pathname === link.href
-                            ? "bg-primary/10 text-primary"
+                        className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition-colors ${
+                          pathname === link.href || pathname.startsWith(`${link.href}/`)
+                            ? "bg-accent text-foreground"
                             : "hover:bg-muted"
                         }`}
                       >
@@ -215,9 +275,33 @@ export function PublicNavbar() {
                       </Link>
                     );
                   })}
+                  {user ? (
+                    <>
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition-colors ${
+                          pathname.startsWith("/dashboard") ? "bg-accent text-foreground" : "hover:bg-muted"
+                        }`}
+                      >
+                        <LayoutDashboard className="h-5 w-5" />
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={`flex items-center gap-3 rounded-2xl px-4 py-3 font-medium transition-colors ${
+                          pathname.startsWith("/profile") ? "bg-accent text-foreground" : "hover:bg-muted"
+                        }`}
+                      >
+                        <UserIcon className="h-5 w-5" />
+                        Profile
+                      </Link>
+                    </>
+                  ) : null}
                 </div>
 
-                <div className="border-t pt-6">
+                <div className="border-t border-border/70 pt-6">
                   {user ? (
                     <div className="space-y-4">
                       <div className="flex items-center gap-3 px-4">
@@ -237,22 +321,14 @@ export function PublicNavbar() {
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
-                        <Link
-                          href="/profile"
-                          onClick={() => setMobileMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-muted transition-colors"
-                        >
-                          <UserIcon className="h-5 w-5" />
-                          Profile
-                        </Link>
                         {hasTeam && (
                           <Link
                             href="/dashboard"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium hover:bg-muted transition-colors"
+                            className="flex items-center gap-3 rounded-2xl px-4 py-3 font-medium hover:bg-muted transition-colors"
                           >
                             <Users className="h-5 w-5" />
-                            My Teams
+                            My squads
                           </Link>
                         )}
                         <button
@@ -260,7 +336,7 @@ export function PublicNavbar() {
                             handleSignOut();
                             setMobileMenuOpen(false);
                           }}
-                          className="flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-red-600 hover:bg-red-500/10 transition-colors w-full text-left"
+                          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-medium text-red-600 transition-colors hover:bg-red-500/10"
                         >
                           <LogOut className="h-5 w-5" />
                           Log out
@@ -269,7 +345,7 @@ export function PublicNavbar() {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3 px-4">
-                      <Button asChild className="w-full">
+                      <Button asChild className="w-full rounded-full">
                         <Link
                           href="/login"
                           onClick={() => setMobileMenuOpen(false)}
@@ -277,7 +353,7 @@ export function PublicNavbar() {
                           Log in
                         </Link>
                       </Button>
-                      <Button variant="outline" asChild className="w-full">
+                      <Button variant="outline" asChild className="w-full rounded-full">
                         <Link
                           href="/login?tab=signup"
                           onClick={() => setMobileMenuOpen(false)}

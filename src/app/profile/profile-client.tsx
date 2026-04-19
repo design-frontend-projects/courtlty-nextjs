@@ -1,53 +1,44 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import {
+  CalendarDays,
+  Camera,
+  Clock3,
+  Edit3,
+  Loader2,
+  Mail,
+  MapPin,
+  Phone,
+  Save,
+  ShieldCheck,
+  Trophy,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
+import { User } from "@supabase/supabase-js";
+
 import { createClient } from "@/lib/supabase/client";
 import { profileSchema, ProfileFormData } from "@/lib/validations/schemas";
 import { Profile } from "@/types";
-import { User } from "@supabase/supabase-js";
+import {
+  ActionRail,
+  EmptyState,
+  MetricTile,
+  PageHeader,
+  SectionShell,
+  WorkspaceShell,
+} from "@/components/shell/page-shell";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
-import {
-  Loader2,
-  User as UserIcon,
-  Settings,
-  Calendar,
-  Users,
-  MapPin,
-  Clock,
-  Edit3,
-  Camera,
-  Mail,
-  Phone,
-  Shield,
-  Star,
-  Trophy,
-  Target,
-  CheckCircle2,
-  XCircle,
-  Timer,
-} from "lucide-react";
-import {
-  FadeInUp,
-  StaggerContainer,
-  StaggerItem,
-} from "@/components/ui/motion";
 
 interface Team {
   id: string;
@@ -86,40 +77,13 @@ interface ProfilePageClientProps {
   recentBookings: Booking[];
 }
 
-const sportIcons: Record<string, string> = {
-  basketball: "🏀",
-  football: "⚽",
-  tennis: "🎾",
-  volleyball: "🏐",
-  badminton: "🏸",
-  padel: "🎾",
-};
-
-const statusColors: Record<
-  string,
-  { bg: string; text: string; icon: typeof CheckCircle2 }
-> = {
-  confirmed: {
-    bg: "bg-emerald-100 dark:bg-emerald-900/30",
-    text: "text-emerald-700 dark:text-emerald-300",
-    icon: CheckCircle2,
-  },
-  pending: {
-    bg: "bg-amber-100 dark:bg-amber-900/30",
-    text: "text-amber-700 dark:text-amber-300",
-    icon: Timer,
-  },
-  cancelled: {
-    bg: "bg-red-100 dark:bg-red-900/30",
-    text: "text-red-700 dark:text-red-300",
-    icon: XCircle,
-  },
-  completed: {
-    bg: "bg-blue-100 dark:bg-blue-900/30",
-    text: "text-blue-700 dark:text-blue-300",
-    icon: CheckCircle2,
-  },
-};
+const statusTone: Record<Booking["status"], string> = {
+  confirmed:
+    "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  pending: "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  cancelled: "border-destructive/20 bg-destructive/10 text-destructive",
+  completed: "border-primary/20 bg-primary/10 text-primary",
+} as const;
 
 export default function ProfilePageClient({
   user,
@@ -130,14 +94,15 @@ export default function ProfilePageClient({
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
+    setValue,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -146,57 +111,61 @@ export default function ProfilePageClient({
       full_name: profile?.full_name || "",
       phone: profile?.phone || "",
       avatar_url: profile?.avatar_url || "",
-      favorite_sports: profile?.favorite_sports || [],
+      favorite_sports: [],
     },
   });
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const completedBookings = recentBookings.filter((booking) => booking.status === "completed").length;
 
-    // Validate file type
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
     if (!file.type.startsWith("image/")) {
       toast.error("Please upload an image file");
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error("Image size must be less than 5MB");
       return;
     }
 
     setLoading(true);
+
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const fileName = `${user.id}-${Math.random().toString(36).slice(2)}.${fileExt}`;
       const filePath = `avatars/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(filePath, file);
+      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        throw uploadError;
+      }
 
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-      // Immediately update the profile avatar_url in database
       const { error: updateError } = await supabase
         .from("profiles")
         .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
         .eq("id", user.id);
 
-      if (updateError) throw updateError;
+      if (updateError) {
+        throw updateError;
+      }
 
       setAvatarUrl(publicUrl);
       setValue("avatar_url", publicUrl);
-      toast.success("Avatar updated successfully!");
+      toast.success("Avatar updated");
       router.refresh();
-    } catch (error) {
-      console.error("Error uploading avatar:", error);
-      toast.error("Failed to upload avatar");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to upload avatar");
     } finally {
       setLoading(false);
     }
@@ -204,610 +173,406 @@ export default function ProfilePageClient({
 
   const onSubmit = async (data: ProfileFormData) => {
     setLoading(true);
+
     try {
-      // Calculate full name if needed
-      const updatedFullName = `${data.first_name} ${data.last_name}`.trim();
+      const fullName = `${data.first_name} ${data.last_name}`.trim() || data.full_name;
 
       const { error } = await supabase
         .from("profiles")
         .update({
           first_name: data.first_name,
           last_name: data.last_name,
-          full_name: updatedFullName || data.full_name,
+          full_name: fullName,
           avatar_url: avatarUrl || data.avatar_url || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", user.id);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      toast.success("Profile updated successfully!");
+      toast.success("Profile updated");
       setIsEditing(false);
       router.refresh();
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      toast.error("Failed to update profile", {
-        description:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      });
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to update profile");
     } finally {
       setLoading(false);
     }
   };
 
-  const stats = [
-    {
-      icon: Calendar,
-      label: "Total Bookings",
-      value: recentBookings.length,
-      color: "text-emerald-500",
-    },
-    {
-      icon: Users,
-      label: "Teams Joined",
-      value: teams.length,
-      color: "text-violet-500",
-    },
-    {
-      icon: Trophy,
-      label: "Games Played",
-      value: recentBookings.filter((b) => b.status === "completed").length,
-      color: "text-amber-500",
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-linear-to-b from-slate-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20 pt-24 pb-16">
-      {/* Decorative background */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-20 left-[10%] w-72 h-72 bg-emerald-200/20 dark:bg-emerald-900/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[10%] w-96 h-96 bg-violet-200/20 dark:bg-violet-900/10 rounded-full blur-3xl" />
-      </div>
+    <WorkspaceShell>
+      <PageHeader
+        eyebrow="Player profile"
+        title={profile?.full_name || "Player profile"}
+        description="Keep identity, bookings, and squad activity aligned in one operational view."
+        actions={
+          <ActionRail>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/dashboard">Dashboard</Link>
+            </Button>
+            <Button
+              type="button"
+              variant={isEditing ? "outline" : "default"}
+              className="rounded-full"
+              onClick={() => setIsEditing((value) => !value)}
+            >
+              <Edit3 data-icon="inline-start" />
+              {isEditing ? "Stop editing" : "Edit profile"}
+            </Button>
+          </ActionRail>
+        }
+      />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Profile Header */}
-        <FadeInUp>
-          <div className="relative mb-8">
-            {/* Cover gradient */}
-            <div className="absolute inset-x-0 top-0 h-48 bg-linear-to-br from-emerald-500 via-cyan-500 to-violet-500 rounded-3xl" />
+      <section className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr]">
+        <SectionShell
+          title="Identity"
+          description="Primary contact data, role, and access state."
+          className="xl:col-span-1"
+          contentClassName="space-y-5"
+        >
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+            <div className="relative">
+              <Avatar className="size-28 border border-border/70">
+                <AvatarImage src={avatarUrl} alt={profile?.full_name || "Profile avatar"} />
+                <AvatarFallback className="bg-primary/10 font-display text-3xl font-semibold text-primary">
+                  {(profile?.full_name || user.email || "P").charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                className="absolute bottom-0 right-0 rounded-full border border-border/80"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="animate-spin" /> : <Camera />}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+            </div>
 
-            <div className="relative pt-24 px-6 sm:px-8">
-              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
-                {/* Avatar */}
-                <div className="relative group">
-                  <div className="absolute -inset-1 bg-linear-to-r from-emerald-500 to-cyan-500 rounded-full blur opacity-75 group-hover:opacity-100 transition-opacity" />
-                  <Avatar className="relative w-32 h-32 border-4 border-white dark:border-slate-800 shadow-2xl">
-                    <AvatarImage
-                      src={avatarUrl}
-                      alt={profile?.full_name || ""}
-                    />
-                    <AvatarFallback className="bg-linear-to-br from-emerald-400 to-cyan-400 text-white text-4xl font-bold">
-                      {profile?.full_name?.charAt(0) ||
-                        user.email?.charAt(0) ||
-                        "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={loading}
-                    className="absolute bottom-1 right-1 w-10 h-10 bg-white dark:bg-slate-800 rounded-full shadow-lg flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 transition-colors disabled:opacity-50"
-                  >
-                    {loading ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Camera className="w-5 h-5" />
-                    )}
-                  </button>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 text-center sm:text-left pb-4">
-                  <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">
-                    {profile?.full_name || "Player"}
-                  </h1>
-                  <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-slate-600 dark:text-slate-400">
-                    <span className="flex items-center gap-1">
-                      <Mail className="w-4 h-4" />
-                      {user.email}
-                    </span>
-                    {profile?.phone && (
-                      <span className="flex items-center gap-1">
-                        <Phone className="w-4 h-4" />
-                        {profile.phone}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-center sm:justify-start gap-2 mt-3">
-                    <Badge
-                      variant="secondary"
-                      className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
-                    >
-                      <Shield className="w-3 h-3 mr-1" />
-                      {profile?.role || "player"}
-                    </Badge>
-                    <Badge
-                      variant="secondary"
-                      className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300"
-                    >
-                      <Star className="w-3 h-3 mr-1" />
-                      Active Player
-                    </Badge>
-                  </div>
-                </div>
-
-                {/* Edit button */}
-                <Button
-                  onClick={() => setIsEditing(!isEditing)}
-                  variant={isEditing ? "destructive" : "default"}
-                  className={
-                    isEditing
-                      ? ""
-                      : "bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg"
-                  }
-                >
-                  {isEditing ? (
-                    <>Cancel</>
-                  ) : (
-                    <>
-                      <Edit3 className="w-4 h-4 mr-2" />
-                      Edit Profile
-                    </>
-                  )}
-                </Button>
+            <div className="space-y-3">
+              <div>
+                <h2 className="font-display text-3xl font-semibold tracking-tight">
+                  {profile?.full_name || "Player"}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {profile?.role === "admin"
+                    ? "Administrative privileges are enabled on this account."
+                    : "Player-facing account with booking and team access."}
+                </p>
               </div>
-
-              {/* Stats */}
-              <div className="grid grid-cols-3 gap-4 mt-8">
-                {stats.map((stat, index) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 + index * 0.1 }}
-                    className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg text-center"
-                  >
-                    <stat.icon
-                      className={`w-6 h-6 mx-auto mb-2 ${stat.color}`}
-                    />
-                    <div className="text-2xl font-bold text-slate-900 dark:text-white">
-                      {stat.value}
-                    </div>
-                    <div className="text-sm text-slate-500 dark:text-slate-400">
-                      {stat.label}
-                    </div>
-                  </motion.div>
-                ))}
+              <div className="flex flex-wrap items-center gap-2">
+                <Badge variant="secondary" className="rounded-full border-primary/20 bg-primary/10 text-primary">
+                  <ShieldCheck className="mr-1 size-3.5" />
+                  {profile?.role || "player"}
+                </Badge>
+                <Badge
+                  variant="secondary"
+                  className="rounded-full border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                >
+                  Active
+                </Badge>
               </div>
             </div>
           </div>
-        </FadeInUp>
 
-        {/* Main content */}
-        <Tabs defaultValue="overview" className="space-y-8">
-          <TabsList className="flex w-full max-w-lg mx-auto bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 rounded-2xl p-1 shadow-lg">
-            <TabsTrigger
-              value="overview"
-              className="flex-1 rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
-            >
-              <Target className="w-4 h-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger
-              value="teams"
-              className="flex-1 rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
-            >
-              <Users className="w-4 h-4 mr-2" />
-              Teams
-            </TabsTrigger>
-            <TabsTrigger
-              value="settings"
-              className="flex-1 rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-cyan-500 data-[state=active]:text-white"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Overview Tab */}
-          <TabsContent value="overview">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Recent Bookings */}
-              <div className="lg:col-span-2">
-                <StaggerContainer className="space-y-4">
-                  <StaggerItem>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                      <Calendar className="w-5 h-5 text-emerald-500" />
-                      Recent Bookings
-                    </h2>
-                  </StaggerItem>
-
-                  {recentBookings.length > 0 ? (
-                    recentBookings.map((booking) => {
-                      const status =
-                        statusColors[booking.status] || statusColors.pending;
-                      const StatusIcon = status.icon;
-                      return (
-                        <StaggerItem key={booking.id}>
-                          <motion.div
-                            whileHover={{
-                              y: -2,
-                              transition: { duration: 0.2 },
-                            }}
-                            className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all"
-                          >
-                            <div className="flex items-start gap-4">
-                              <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-3xl shadow-lg">
-                                {sportIcons[booking.sport.toLowerCase()] ||
-                                  "🏆"}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center justify-between mb-1">
-                                  <h3 className="font-semibold text-slate-900 dark:text-white">
-                                    {booking.court?.name || "Unknown Court"}
-                                  </h3>
-                                  <Badge
-                                    className={`${status.bg} ${status.text} border-0`}
-                                  >
-                                    <StatusIcon className="w-3 h-3 mr-1" />
-                                    {booking.status}
-                                  </Badge>
-                                </div>
-                                <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1 mb-2">
-                                  <MapPin className="w-3 h-3" />
-                                  {booking.court?.address || "No address"}
-                                </p>
-                                <div className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-300">
-                                  <span className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4 text-emerald-500" />
-                                    {new Date(
-                                      booking.booking_date,
-                                    ).toLocaleDateString()}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-4 h-4 text-cyan-500" />
-                                    {booking.start_time} - {booking.end_time}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </motion.div>
-                        </StaggerItem>
-                      );
-                    })
-                  ) : (
-                    <StaggerItem>
-                      <div className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-200/50 dark:border-slate-700/50 text-center">
-                        <Calendar className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-2">
-                          No bookings yet
-                        </h3>
-                        <p className="text-slate-500 dark:text-slate-400 mb-4">
-                          Start exploring courts and book your first game!
-                        </p>
-                        <Button className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white">
-                          Find Courts
-                        </Button>
-                      </div>
-                    </StaggerItem>
-                  )}
-                </StaggerContainer>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-[1.4rem] border border-border/70 bg-accent/18 px-4 py-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+                <Mail className="size-4 text-primary" />
+                Email
               </div>
-
-              {/* Quick Actions */}
-              <div>
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-violet-500" />
-                  Quick Actions
-                </h2>
-                <div className="space-y-3">
-                  {[
-                    {
-                      label: "Book a Court",
-                      href: "/courts",
-                      icon: MapPin,
-                      color: "from-emerald-500 to-cyan-500",
-                    },
-                    {
-                      label: "Join a Team",
-                      href: "/teams",
-                      icon: Users,
-                      color: "from-violet-500 to-purple-500",
-                    },
-                    {
-                      label: "View History",
-                      href: "/dashboard",
-                      icon: Calendar,
-                      color: "from-amber-500 to-orange-500",
-                    },
-                  ].map((action, index) => (
-                    <motion.a
-                      key={action.label}
-                      href={action.href}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 + index * 0.1 }}
-                      whileHover={{ x: 5 }}
-                      className="flex items-center gap-4 bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-4 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all group"
-                    >
-                      <div
-                        className={`w-12 h-12 rounded-xl bg-linear-to-br ${action.color} flex items-center justify-center shadow-lg`}
-                      >
-                        <action.icon className="w-6 h-6 text-white" />
-                      </div>
-                      <span className="font-medium text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                        {action.label}
-                      </span>
-                    </motion.a>
-                  ))}
-                </div>
-              </div>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
-          </TabsContent>
+            <div className="rounded-[1.4rem] border border-border/70 bg-accent/18 px-4 py-4">
+              <div className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+                <Phone className="size-4 text-primary" />
+                Phone
+              </div>
+              <p className="text-sm text-muted-foreground">{profile?.phone || "Not provided"}</p>
+            </div>
+          </div>
+        </SectionShell>
 
-          {/* Teams Tab */}
-          <TabsContent value="teams">
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teams.length > 0 ? (
-                teams.map((membership) => (
-                  <StaggerItem key={membership.id}>
-                    <motion.div
-                      whileHover={{ y: -5 }}
-                      className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-200/50 dark:border-slate-700/50 shadow-lg hover:shadow-xl transition-all"
-                    >
-                      <div className="flex items-center gap-4 mb-4">
-                        <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center text-3xl shadow-lg">
-                          {membership.team
-                            ? sportIcons[membership.team.sport.toLowerCase()] ||
-                              "🏆"
-                            : "🏆"}
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-slate-900 dark:text-white">
-                            {membership.team?.name || "Unknown Team"}
-                          </h3>
-                          <p className="text-sm text-slate-500 dark:text-slate-400 capitalize">
-                            {membership.team?.sport || "Sport"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-700">
-                        <Badge className="bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 border-0 capitalize">
-                          {membership.role}
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
+        <MetricTile
+          label="Recent bookings"
+          value={recentBookings.length}
+          icon={CalendarDays}
+          meta="Latest sessions visible across the booking flow."
+        />
+        <MetricTile
+          label="Team memberships"
+          value={teams.length}
+          icon={Users}
+          meta="Approved squads currently tied to your account."
+        />
+        <MetricTile
+          label="Completed sessions"
+          value={completedBookings}
+          icon={Trophy}
+          meta="Sessions that have already moved through the full flow."
+        />
+      </section>
+
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="flex h-auto w-full flex-wrap justify-start gap-2 rounded-[1.5rem] border border-border/70 bg-accent/20 p-2">
+          <TabsTrigger value="overview" className="rounded-full px-5">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="teams" className="rounded-full px-5">
+            Teams
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="rounded-full px-5">
+            Settings
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-0">
+          <SectionShell
+            title="Recent booking activity"
+            description="Upcoming and recently completed sessions in the order you need to scan them."
+            actions={
+              <Button asChild variant="outline" className="rounded-full">
+                <Link href="/courts">Book a court</Link>
+              </Button>
+            }
+          >
+            {recentBookings.length > 0 ? (
+              <div className="grid gap-4">
+                {recentBookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="flex flex-col gap-4 rounded-[1.5rem] border border-border/70 bg-accent/18 px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-foreground">{booking.court?.name || "Unknown court"}</p>
+                        <Badge
+                          variant="secondary"
+                          className={`rounded-full border ${statusTone[booking.status] || "border-border/70"}`}
                         >
-                          View Team
-                        </Button>
+                          {booking.status}
+                        </Badge>
+                        <Badge variant="secondary" className="rounded-full capitalize">
+                          {booking.sport}
+                        </Badge>
                       </div>
-                    </motion.div>
-                  </StaggerItem>
-                ))
-              ) : (
-                <StaggerItem className="md:col-span-2 lg:col-span-3">
-                  <div className="bg-white dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-12 border border-slate-200/50 dark:border-slate-700/50 text-center">
-                    <Users className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
-                      No teams yet
-                    </h3>
-                    <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-sm mx-auto">
-                      Join a team to start playing with others or create your
-                      own team!
-                    </p>
-                    <div className="flex gap-4 justify-center">
-                      <Button className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white">
-                        Browse Teams
+                      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+                        <span className="inline-flex items-center gap-1.5">
+                          <CalendarDays className="size-4 text-primary" />
+                          {booking.booking_date}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <Clock3 className="size-4 text-primary" />
+                          {booking.start_time} - {booking.end_time}
+                        </span>
+                        <span className="inline-flex items-center gap-1.5">
+                          <MapPin className="size-4 text-primary" />
+                          {booking.court?.address || "Address pending"}
+                        </span>
+                      </div>
+                    </div>
+                    {booking.court?.id ? (
+                      <Button asChild variant="ghost" className="rounded-full">
+                        <Link href={`/courts/${booking.court.id}`}>Open court</Link>
                       </Button>
-                      <Button variant="outline">Create Team</Button>
+                    ) : null}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={CalendarDays}
+                title="No booking activity yet"
+                description="Once you reserve a court, your schedule, status, and venue context will stay visible here."
+                action={
+                  <Button asChild className="rounded-full">
+                    <Link href="/courts">Discover courts</Link>
+                  </Button>
+                }
+              />
+            )}
+          </SectionShell>
+        </TabsContent>
+
+        <TabsContent value="teams" className="mt-0">
+          <SectionShell
+            title="Team workspace"
+            description="Squads connected to your account, including role and recruiting context."
+            actions={
+              <Button asChild className="rounded-full">
+                <Link href="/teams/create">Create team</Link>
+              </Button>
+            }
+          >
+            {teams.length > 0 ? (
+              <div className="grid gap-4 md:grid-cols-2">
+                {teams.map((membership) => (
+                  <div key={membership.id} className="surface-panel rounded-[1.6rem] px-5 py-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3">
+                          <div className="flex size-12 items-center justify-center rounded-[1rem] border border-primary/15 bg-primary/10 font-display text-xl font-semibold text-primary">
+                            {membership.team?.name?.charAt(0) || "T"}
+                          </div>
+                          <div>
+                            <p className="font-display text-2xl font-semibold tracking-tight">
+                              {membership.team?.name || "Unknown team"}
+                            </p>
+                            <p className="text-sm capitalize text-muted-foreground">
+                              {membership.team?.sport || "Sport not set"}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge variant="secondary" className="rounded-full capitalize">
+                            {membership.role}
+                          </Badge>
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                          >
+                            {membership.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      {membership.team?.id ? (
+                        <Button asChild variant="ghost" className="rounded-full">
+                          <Link href={`/teams/${membership.team.id}`}>Open team</Link>
+                        </Button>
+                      ) : null}
                     </div>
                   </div>
-                </StaggerItem>
-              )}
-            </StaggerContainer>
-          </TabsContent>
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                icon={Users}
+                title="No teams linked yet"
+                description="Create a new squad or join one to keep chat, roster, and session prep in the same workspace."
+                action={
+                  <Button asChild className="rounded-full">
+                    <Link href="/teams/create">Create a team</Link>
+                  </Button>
+                }
+              />
+            )}
+          </SectionShell>
+        </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <AnimatePresence mode="wait">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="max-w-2xl mx-auto"
-              >
-                <Card className="bg-white dark:bg-slate-800/50 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-xl">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <UserIcon className="w-5 h-5 text-emerald-500" />
-                      Personal Information
-                    </CardTitle>
-                    <CardDescription>
-                      Update your profile information and manage your account
-                      settings.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <form
-                      onSubmit={handleSubmit(onSubmit)}
-                      className="space-y-6"
+        <TabsContent value="settings" className="mt-0">
+          <SectionShell
+            title="Profile settings"
+            description="Use a single editing flow with clearer labels and mobile-friendly controls."
+          >
+            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="space-y-3">
+                  <Label htmlFor="first_name">First name</Label>
+                  <Input
+                    id="first_name"
+                    {...register("first_name")}
+                    disabled={!isEditing}
+                    className="h-12 rounded-2xl"
+                  />
+                  {errors.first_name ? (
+                    <p className="text-sm text-destructive">{errors.first_name.message}</p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="last_name">Last name</Label>
+                  <Input
+                    id="last_name"
+                    {...register("last_name")}
+                    disabled={!isEditing}
+                    className="h-12 rounded-2xl"
+                  />
+                  {errors.last_name ? (
+                    <p className="text-sm text-destructive">{errors.last_name.message}</p>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="grid gap-5 md:grid-cols-2">
+                <div className="space-y-3">
+                  <Label htmlFor="full_name">Display name</Label>
+                  <Input
+                    id="full_name"
+                    {...register("full_name")}
+                    disabled
+                    className="h-12 rounded-2xl bg-accent/22"
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    This is derived from your first and last name.
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  <Label htmlFor="phone">Phone number</Label>
+                  <Input
+                    id="phone"
+                    {...register("phone")}
+                    disabled={!isEditing}
+                    className="h-12 rounded-2xl"
+                  />
+                  {errors.phone ? (
+                    <p className="text-sm text-destructive">{errors.phone.message}</p>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      Keep this current for booking confirmations and team coordination.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="account_email">Email</Label>
+                <Input
+                  id="account_email"
+                  value={user.email || ""}
+                  disabled
+                  className="h-12 rounded-2xl bg-accent/22"
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center justify-end gap-3 border-t border-border/70 pt-6">
+                {isEditing ? (
+                  <>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="rounded-full"
+                      onClick={() => setIsEditing(false)}
+                      disabled={loading}
                     >
-                      {/* Avatar Section */}
-                      <div className="flex items-center gap-6 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl">
-                        <Avatar className="w-20 h-20 border-4 border-emerald-100 dark:border-emerald-900 shadow-lg">
-                          <AvatarImage
-                            src={avatarUrl}
-                            alt={profile?.full_name || ""}
-                          />
-                          <AvatarFallback className="bg-linear-to-br from-emerald-400 to-cyan-400 text-white text-2xl font-bold">
-                            {profile?.full_name?.charAt(0) || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 space-y-4">
-                          <div>
-                            <Label>Avatar Image</Label>
-                            <p className="text-sm text-slate-500 mb-4">
-                              Click on the avatar display to change your profile
-                              picture.
-                            </p>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => fileInputRef.current?.click()}
-                              disabled={!isEditing || loading}
-                              className="flex items-center gap-2"
-                            >
-                              <Camera className="w-4 h-4" />
-                              Change Image
-                            </Button>
-                          </div>
-                          {avatarUrl && (
-                            <div className="text-xs text-slate-500 truncate max-w-[200px]">
-                              Current: {avatarUrl}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Email (Read-only) */}
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={user.email}
-                          disabled
-                          className="bg-slate-100 dark:bg-slate-900"
-                        />
-                        <p className="text-sm text-slate-500">
-                          Email cannot be changed here. Contact support if
-                          needed.
-                        </p>
-                      </div>
-
-                      {/* Name Section */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <Label htmlFor="first_name">First Name</Label>
-                          <Input
-                            id="first_name"
-                            {...register("first_name")}
-                            placeholder="John"
-                            disabled={!isEditing}
-                            className="bg-white dark:bg-slate-800"
-                          />
-                          {errors.first_name && (
-                            <p className="text-sm text-red-500">
-                              {errors.first_name.message}
-                            </p>
-                          )}
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="last_name">Last Name</Label>
-                          <Input
-                            id="last_name"
-                            {...register("last_name")}
-                            placeholder="Doe"
-                            disabled={!isEditing}
-                            className="bg-white dark:bg-slate-800"
-                          />
-                          {errors.last_name && (
-                            <p className="text-sm text-red-500">
-                              {errors.last_name.message}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Full Name (Disabled) */}
-                      <div className="space-y-2">
-                        <Label htmlFor="full_name">
-                          Full Name (Display Name)
-                        </Label>
-                        <Input
-                          id="full_name"
-                          {...register("full_name")}
-                          placeholder="John Doe"
-                          disabled
-                          className="bg-slate-100 dark:bg-slate-900"
-                        />
-                        <p className="text-sm text-slate-500">
-                          Automatically generated from your first and last name.
-                        </p>
-                      </div>
-
-                      {/* Phone (Disabled) */}
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Phone Number</Label>
-                        <Input
-                          id="phone"
-                          {...register("phone")}
-                          placeholder="+1234567890"
-                          disabled
-                          className="bg-slate-100 dark:bg-slate-900"
-                        />
-                        <p className="text-sm text-slate-500">
-                          Phone number editing is currently disabled.
-                        </p>
-                      </div>
-
-                      {/* Role Badge */}
-                      <div className="space-y-2">
-                        <Label>Role</Label>
-                        <div className="flex items-center gap-3">
-                          <Badge className="bg-linear-to-r from-emerald-500 to-cyan-500 text-white">
-                            {profile?.role || "player"}
-                          </Badge>
-                          <p className="text-sm text-slate-500">
-                            Your account role
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Submit Button */}
-                      {isEditing && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          className="flex justify-end gap-4 pt-4 border-t"
-                        >
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setIsEditing(false)}
-                            disabled={loading}
-                          >
-                            Cancel
-                          </Button>
-                          <Button
-                            type="submit"
-                            disabled={loading}
-                            className="bg-linear-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white"
-                          >
-                            {loading && (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            )}
-                            Save Changes
-                          </Button>
-                        </motion.div>
-                      )}
-                    </form>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </AnimatePresence>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="rounded-full" disabled={loading}>
+                      {loading ? <Loader2 className="animate-spin" /> : <Save data-icon="inline-start" />}
+                      Save changes
+                    </Button>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Editing is locked until you enter edit mode from the header.
+                  </p>
+                )}
+              </div>
+            </form>
+          </SectionShell>
+        </TabsContent>
+      </Tabs>
+    </WorkspaceShell>
   );
 }

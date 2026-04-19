@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface CourtGalleryProps {
   images: Array<{
@@ -15,89 +15,53 @@ interface CourtGalleryProps {
 }
 
 export default function CourtGallery({ images, courtName }: CourtGalleryProps) {
-  const sortedImages = [...images].sort((a, b) => {
-    if (a.is_primary) return -1;
-    if (b.is_primary) return 1;
-    return a.display_order - b.display_order;
+  const sortedImages = [...images].sort((left, right) => {
+    if (left.is_primary) return -1;
+    if (right.is_primary) return 1;
+    return left.display_order - right.display_order;
   });
+  const [selectedImage, setSelectedImage] = useState(sortedImages[0]?.url || null);
 
-  const [selectedImage, setSelectedImage] = useState(
-    sortedImages[0]?.url || null,
-  );
-
-  if (!images || images.length === 0) {
+  if (!images.length) {
     return (
-      <div className="bg-linear-to-br from-blue-500 to-indigo-600 rounded-[2.5rem] h-96 flex items-center justify-center shadow-inner">
-        <span className="text-white text-6xl font-bold">
-          {courtName.charAt(0)}
-        </span>
+      <div className="flex h-[27rem] items-center justify-center bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.18),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.06),rgba(15,23,42,0.14))]">
+        <span className="brand-wordmark text-7xl font-semibold text-primary/50">{courtName.charAt(0)}</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Main Image */}
+    <div className="grid gap-4">
       <motion.div
-        layoutId="main-image"
-        className="relative h-96 bg-gray-200 dark:bg-gray-700 rounded-3xl overflow-hidden shadow-lg border border-white/10 ring-1 ring-black/5"
+        key={selectedImage}
+        initial={{ opacity: 0.72 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+        className="relative h-[27rem] overflow-hidden"
       >
-        <AnimatePresence mode="wait">
-          {selectedImage ? (
-            <motion.div
-              key={selectedImage}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="absolute inset-0"
-            >
-              <Image
-                src={selectedImage}
-                alt={courtName}
-                fill
-                className="object-cover"
-                priority
-              />
-            </motion.div>
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-linear-to-br from-blue-500 to-indigo-600">
-              <span className="text-white text-6xl font-black">
-                {courtName.charAt(0)}
-              </span>
-            </div>
-          )}
-        </AnimatePresence>
+        {selectedImage ? (
+          <Image src={selectedImage} alt={courtName} fill priority className="object-cover" />
+        ) : null}
       </motion.div>
 
-      {/* Thumbnails */}
-      {sortedImages.length > 1 && (
-        <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
-          {sortedImages.map((image, index) => (
-            <motion.button
+      {sortedImages.length > 1 ? (
+        <div className="grid grid-cols-4 gap-3 border-t border-border/70 p-4 sm:grid-cols-6">
+          {sortedImages.map((image) => (
+            <button
               key={image.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: 1.05, y: -2 }}
-              whileTap={{ scale: 0.95 }}
+              type="button"
               onClick={() => setSelectedImage(image.url)}
-              className={`relative h-20 rounded-2xl overflow-hidden border-2 transition-all ${
+              className={`relative h-18 overflow-hidden rounded-2xl border transition-all ${
                 selectedImage === image.url
-                  ? "border-blue-600 ring-4 ring-blue-500/20 shadow-lg"
-                  : "border-gray-200 dark:border-gray-800 hover:border-blue-400"
+                  ? "border-primary shadow-sm ring-2 ring-primary/15"
+                  : "border-border/70 opacity-82 hover:opacity-100"
               }`}
             >
-              <Image
-                src={image.url}
-                alt={`${courtName} - ${image.display_order}`}
-                fill
-                className="object-cover"
-              />
-            </motion.button>
+              <Image src={image.url} alt={`${courtName} preview`} fill className="object-cover" />
+            </button>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

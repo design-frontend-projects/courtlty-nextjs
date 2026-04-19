@@ -1,12 +1,25 @@
+import Link from "next/link";
+import { ArrowRight, LayoutDashboard, Plus } from "lucide-react";
+
 import { createClient } from "@/lib/supabase/server";
+import {
+  ActionRail,
+  PageHeader,
+} from "@/components/shell/page-shell";
+import { Button } from "@/components/ui/button";
 import BookingsCalendar from "@/components/admin/bookings/bookings-calendar";
 import BookingsTable from "@/components/admin/bookings/bookings-table";
 import DashboardStats from "@/components/admin/dashboard/dashboard-stats";
+import { Booking, Court, Profile } from "@/types";
 
-export default async function AdminDashboard() {
+type AdminBooking = Booking & {
+  courts: Pick<Court, "name"> | null;
+  profiles: Pick<Profile, "full_name" | "phone"> | null;
+};
+
+export default async function AdminPage() {
   const supabase = await createClient();
 
-  // Fetch all bookings for stats (limited to recent/future for performance)
   const { data: bookingsData } = await supabase
     .from("bookings")
     .select(
@@ -16,33 +29,48 @@ export default async function AdminDashboard() {
       profiles (full_name, phone)
     `,
     )
-    .order("booking_date", { ascending: false }) // Get recent ones first
+    .order("booking_date", { ascending: false })
     .limit(500);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const bookings = (bookingsData || []) as any[];
+  const bookings = (bookingsData || []) as AdminBooking[];
 
-  // Calculate Stats
   const totalRevenue = bookings.reduce(
-    (acc, b) => acc + (Number(b.total_amount) || 0),
+    (sum, booking) => sum + (Number(booking.total_amount) || 0),
     0,
   );
-  const pendingRequests = bookings.filter((b) => b.status === "pending").length;
-  // Unique active users in recent bookings
-  const activeUsers = new Set(bookings.map((b) => b.booked_by)).size;
-  // Unique courts
-  const activeCourts = new Set(bookings.map((b) => b.court_id)).size;
+  const pendingRequests = bookings.filter((booking) => booking.status === "pending").length;
+  const activeUsers = new Set(bookings.map((booking) => booking.booked_by)).size;
+  const activeCourts = new Set(bookings.map((booking) => booking.court_id)).size;
 
   return (
-    <div className="h-full flex flex-col gap-8 p-2">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-          Dashboard
-        </h1>
-        <p className="text-muted-foreground text-lg">
-          Overview of your court performance and schedule.
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-8">
+      <PageHeader
+        eyebrow="Admin bookings"
+        title="Operate the live booking floor."
+        description="Monitor court sessions, confirm requests, and react to schedule changes from one high-clarity board."
+        actions={
+          <ActionRail>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/admin/dashboard">
+                <LayoutDashboard data-icon="inline-start" />
+                Approvals
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="rounded-full">
+              <Link href="/admin/courts">
+                Courts
+                <ArrowRight data-icon="inline-end" />
+              </Link>
+            </Button>
+            <Button asChild className="rounded-full">
+              <Link href="/admin/bookings/new">
+                <Plus data-icon="inline-start" />
+                New booking
+              </Link>
+            </Button>
+          </ActionRail>
+        }
+      />
 
       <DashboardStats
         totalBookings={bookings.length}
@@ -52,19 +80,9 @@ export default async function AdminDashboard() {
         activeUsers={activeUsers}
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        {/* Main Calendar View - Takes up 2/3 space on large screens */}
-        <div className="xl:col-span-2 bg-white rounded-[24px] p-6 shadow-sm border border-gray-100">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-800">Court Schedule</h2>
-          </div>
-          <BookingsCalendar initialBookings={bookings || []} />
-        </div>
-
-        {/* Recent/Table View - Takes up 1/3 space on large screens */}
-        <div className="col-span-1 border-none shadow-none bg-transparent flex flex-col gap-6">
-          <BookingsTable initialBookings={bookings || []} />
-        </div>
+      <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
+        <BookingsCalendar initialBookings={bookings} />
+        <BookingsTable initialBookings={bookings} />
       </div>
     </div>
   );

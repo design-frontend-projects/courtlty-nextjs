@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { MessageSquareText, Star } from "lucide-react";
+
+import { createClient } from "@/lib/supabase/client";
+import { EmptyState } from "@/components/shell/page-shell";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Review {
   id: string;
@@ -18,9 +23,10 @@ interface Review {
 interface ReviewsListProps {
   reviews: Review[];
   courtId: string;
+  onReviewSubmitted?: () => void;
 }
 
-export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
+export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: ReviewsListProps) {
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -28,8 +34,8 @@ export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
 
     try {
@@ -42,8 +48,6 @@ export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
         return;
       }
 
-      // We need a booking_id to submit a review now
-      // For this demo/enhancement, we'll look for a recent booking for this court
       const { data: recentBooking } = await supabase
         .from("bookings")
         .select("id")
@@ -55,9 +59,7 @@ export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
         .single();
 
       if (!recentBooking) {
-        throw new Error(
-          "You must have a confirmed booking to review this court.",
-        );
+        throw new Error("You need a confirmed booking before leaving a review.");
       }
 
       const response = await fetch("/api/reviews", {
@@ -72,7 +74,6 @@ export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
       });
 
       const result = await response.json();
-
       if (!response.ok) {
         throw new Error(result.error || "Failed to submit review");
       }
@@ -80,123 +81,100 @@ export default function ReviewsList({ reviews, courtId }: ReviewsListProps) {
       setShowForm(false);
       setComment("");
       setRating(5);
+      onReviewSubmitted?.();
       router.refresh();
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unexpected error occurred";
-      alert(errorMessage);
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-          Reviews ({reviews.length})
-        </h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-        >
-          {showForm ? "Cancel" : "Write Review"}
-        </button>
+    <div className="grid gap-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="section-kicker">Court reviews</p>
+          <h2 className="font-display text-3xl font-semibold tracking-tight">Feedback from recent sessions</h2>
+        </div>
+        <Button variant={showForm ? "outline" : "default"} onClick={() => setShowForm((current) => !current)} className="rounded-full px-5">
+          {showForm ? "Cancel" : "Write a review"}
+        </Button>
       </div>
 
-      {/* Review Form */}
-      {showForm && (
-        <form
-          onSubmit={handleSubmit}
-          className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"
-        >
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Rating
-            </label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setRating(star)}
-                  className="text-3xl transition-colors"
-                >
-                  <span
-                    className={
-                      star <= rating ? "text-yellow-500" : "text-gray-300"
-                    }
+      {showForm ? (
+        <form onSubmit={handleSubmit} className="surface-panel rounded-[1.85rem] px-5 py-5">
+          <div className="grid gap-5">
+            <div className="grid gap-2">
+              <p className="section-kicker text-[0.68rem]">Rating</p>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    onClick={() => setRating(value)}
+                    className={`rounded-full p-2 transition-colors ${
+                      value <= rating ? "text-amber-500" : "text-muted-foreground/35"
+                    }`}
                   >
-                    ★
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Comment (optional)
-            </label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={4}
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Share your experience..."
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50"
-          >
-            {loading ? "Submitting..." : "Submit Review"}
-          </button>
-        </form>
-      )}
-
-      {/* Reviews List */}
-      <div className="space-y-4">
-        {reviews.length > 0 ? (
-          reviews.map((review) => (
-            <div
-              key={review.id}
-              className="border-b border-gray-200 dark:border-gray-700 pb-4 last:border-0"
-            >
-              <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shrink-0">
-                  {review.profiles?.full_name?.charAt(0) || "U"}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-semibold text-gray-900 dark:text-white">
-                      {review.profiles?.full_name || "Anonymous"}
-                    </span>
-                    <span className="text-yellow-500">
-                      {"★".repeat(review.rating)}
-                      {"☆".repeat(5 - review.rating)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                    {new Date(review.created_at).toLocaleDateString()}
-                  </p>
-                  {review.comment && (
-                    <p className="text-gray-700 dark:text-gray-300">
-                      {review.comment}
-                    </p>
-                  )}
-                </div>
+                    <Star className="size-6 fill-current" />
+                  </button>
+                ))}
               </div>
             </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-600 dark:text-gray-400 py-8">
-            No reviews yet. Be the first to review this court!
-          </p>
-        )}
-      </div>
+            <div className="grid gap-2">
+              <p className="section-kicker text-[0.68rem]">Comment</p>
+              <Textarea
+                value={comment}
+                onChange={(event) => setComment(event.target.value)}
+                placeholder="Describe the court, surface, atmosphere, and reliability of the booking."
+                className="min-h-32 rounded-[1.4rem]"
+              />
+            </div>
+            <div className="flex justify-end">
+              <Button type="submit" className="rounded-full px-6" disabled={loading}>
+                {loading ? "Submitting..." : "Submit review"}
+              </Button>
+            </div>
+          </div>
+        </form>
+      ) : null}
+
+      {reviews.length > 0 ? (
+        <div className="grid gap-4">
+          {reviews.map((review) => (
+            <article key={review.id} className="surface-panel rounded-[1.85rem] px-5 py-5">
+              <div className="flex items-start gap-4">
+                <div className="flex size-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 font-display text-lg font-semibold text-primary">
+                  {review.profiles?.full_name?.charAt(0) || "U"}
+                </div>
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <p className="font-medium text-foreground">{review.profiles?.full_name || "Anonymous"}</p>
+                    <div className="flex items-center gap-1 text-amber-500">
+                      {Array.from({ length: review.rating }).map((_, index) => (
+                        <Star key={index} className="size-4 fill-current" />
+                      ))}
+                    </div>
+                    <span className="text-sm text-muted-foreground">
+                      {new Date(review.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+                  {review.comment ? (
+                    <p className="text-sm leading-6 text-muted-foreground">{review.comment}</p>
+                  ) : null}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          icon={MessageSquareText}
+          title="No reviews yet"
+          description="Be the first player to share how the court felt, how the booking held up, and whether the venue matched the listing."
+        />
+      )}
     </div>
   );
 }

@@ -1,26 +1,23 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { CreditCard } from "lucide-react";
+
+import { EmptyState, PageHeader, SectionShell } from "@/components/shell/page-shell";
 
 export default function PaymentsPage() {
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Payments</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-          <CardDescription>
-            Manage and view recent payment activities.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">No payments found.</p>
-        </CardContent>
-      </Card>
+    <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-8">
+      <PageHeader
+        eyebrow="Admin payments"
+        title="Track settlements and transaction health."
+        description="This surface is ready for payout review, refund actions, and revenue monitoring as payment data is connected."
+      />
+
+      <SectionShell title="Transactions" description="Recent payment activity and payout status will appear here.">
+        <EmptyState
+          icon={CreditCard}
+          title="No payment records yet"
+          description="Once transactions are connected to the operator dashboard, this table will become the main finance review surface."
+        />
+      </SectionShell>
     </div>
   );
 }

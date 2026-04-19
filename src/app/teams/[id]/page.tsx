@@ -1,24 +1,47 @@
-import { createClient } from "@/lib/supabase/server";
+import { CalendarDays, Trophy, Users } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
+import {
+  ActionRail,
+  EmptyState,
+  MetricTile,
+  PageHeader,
+  SectionShell,
+  WorkspaceShell,
+} from "@/components/shell/page-shell";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TeamChat } from "@/components/teams/TeamChat";
 import { TeamMemberManagement } from "@/components/teams/TeamMemberManagement";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { CalendarDays, Users, Trophy } from "lucide-react";
 
-export default async function TeamDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+type TeamMemberRecord = {
+  id: string;
+  player_id: string;
+  status: string;
+  role: string;
+  profiles: {
+    id?: string;
+    email?: string | null;
+    first_name?: string | null;
+    avatar_url?: string | null;
+  } | null;
+};
+
+type TeamRecord = {
+  id: string;
+  name: string;
+  sport: string;
+  description?: string | null;
+  weekly_wins?: number | null;
+  total_games?: number | null;
+  logo_url?: string | null;
+  team_members: TeamMemberRecord[];
+};
+
+export default async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
 
@@ -32,43 +55,32 @@ export default async function TeamDetailPage({
 
   const { data: team, error } = await supabase
     .from("teams")
-    .select("*, team_members(team_id,player_id, status, role, profiles(*))")
+    .select("*, team_members(id, player_id, status, role, profiles(*))")
     .eq("id", id)
     .single();
-
-  console.log("check team", team);
 
   if (error || !team) {
     notFound();
   }
 
-  const currentMember = team.team_members.find(
-    (m: any) => m.player_id === user.id,
-  );
-  console.log("current member: ", currentMember);
-
+  const typedTeam = team as TeamRecord;
+  const currentMember = typedTeam.team_members.find((member) => member.player_id === user.id);
   const isMember = currentMember?.status === "approved";
-  const isOwner = currentMember?.role === "owner"; // Or check based on team.owner_id if reliable
-  const pendingMembers = team.team_members.filter(
-    (m: any) => m.status === "pending",
-  );
-  console.log("pending members: ", pendingMembers);
-
-  const approvedMembers = team.team_members.filter(
-    (m: any) => m.status === "approved",
-  );
+  const isOwner = currentMember?.role === "owner";
+  const pendingMembers = typedTeam.team_members.filter((member) => member.status === "pending");
+  const approvedMembers = typedTeam.team_members.filter((member) => member.status === "approved");
 
   async function joinTeam() {
     "use server";
-    const supabase = await createClient();
+    const supabaseServer = await createClient();
     const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    if (!user) return;
+      data: { user: activeUser },
+    } = await supabaseServer.auth.getUser();
+    if (!activeUser) return;
 
-    await supabase.from("team_members").insert({
+    await supabaseServer.from("team_members").insert({
       team_id: id,
-      player_id: user.id,
+      player_id: activeUser.id,
       status: "pending",
       role: "member",
     });
@@ -76,144 +88,100 @@ export default async function TeamDetailPage({
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-6xl">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Team Info */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card>
-            <CardHeader className="text-center">
-              <div className="mx-auto w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                {team.logo_url ? (
-                  <Avatar className="w-24 h-24">
-                    <AvatarImage src={team.logo_url} />
-                    <AvatarFallback>{team.name[0]}</AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <Trophy className="w-12 h-12 text-primary" />
-                )}
-              </div>
-              <CardTitle className="text-2xl">{team.name}</CardTitle>
-              <CardDescription>{team.sport} Team</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-center text-muted-foreground">
-                {team.description || "No description provided."}
-              </p>
-              <div className="flex justify-around py-4 border-t border-b">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{team.weekly_wins || 0}</p>
-                  <p className="text-xs text-muted-foreground">Wins</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{team.total_games || 0}</p>
-                  <p className="text-xs text-muted-foreground">Games</p>
-                </div>
-              </div>
-
-              {!isMember && !currentMember && (
-                <form action={joinTeam}>
-                  <Button className="w-full" size="lg">
-                    Join Team
-                  </Button>
-                </form>
-              )}
-              {currentMember?.status === "pending" && (
-                <Button variant="secondary" className="w-full" disabled>
-                  Request Pending
+    <WorkspaceShell>
+      <PageHeader
+        eyebrow="Team workspace"
+        title={typedTeam.name}
+        description={typedTeam.description || `${typedTeam.sport} team workspace for members, scheduling, and approvals.`}
+        actions={
+          <ActionRail>
+            <Badge variant="secondary" className="rounded-full capitalize">
+              {typedTeam.sport}
+            </Badge>
+            {!isMember && !currentMember ? (
+              <form action={joinTeam}>
+                <Button type="submit" className="rounded-full px-6">
+                  Join team
                 </Button>
-              )}
-            </CardContent>
-          </Card>
+              </form>
+            ) : null}
+            {currentMember?.status === "pending" ? (
+              <Button variant="outline" className="rounded-full px-6" disabled>
+                Request pending
+              </Button>
+            ) : null}
+          </ActionRail>
+        }
+      />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Users className="w-4 h-4" /> Members ({approvedMembers.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {approvedMembers.map((member: any) => (
-                  <div
-                    key={member.player_id}
-                    className="flex items-center gap-3"
-                  >
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={member.profiles?.avatar_url} />
-                      <AvatarFallback>
-                        {member.profiles?.email?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="overflow-hidden">
-                      <p className="text-sm font-medium truncate">
-                        {member.profiles?.first_name || member.profiles?.email}
-                      </p>
-                      <p className="text-xs text-muted-foreground capitalize">
-                        {member.role}
-                      </p>
-                    </div>
+      <section className="grid gap-5 md:grid-cols-3">
+        <MetricTile label="Approved players" value={approvedMembers.length} icon={Users} meta="Current active roster." />
+        <MetricTile label="Weekly wins" value={typedTeam.weekly_wins || 0} icon={Trophy} meta="Running win count." />
+        <MetricTile label="Total games" value={typedTeam.total_games || 0} icon={CalendarDays} meta="Matches and scheduled fixtures." />
+      </section>
+
+      <div className="grid gap-6 xl:grid-cols-[0.86fr_1.14fr]">
+        <SectionShell title="Roster" description="Members currently approved on this squad.">
+          <div className="grid gap-3">
+            {approvedMembers.map((member) => (
+              <div
+                key={member.player_id}
+                className="flex items-center justify-between rounded-[1.45rem] border border-border/70 bg-accent/18 px-4 py-3"
+              >
+                <div className="flex items-center gap-3">
+                  <Avatar className="size-11 border border-border/70">
+                    <AvatarImage src={member.profiles?.avatar_url || undefined} />
+                    <AvatarFallback>{member.profiles?.email?.[0]?.toUpperCase() || "U"}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium text-foreground">
+                      {member.profiles?.first_name || member.profiles?.email || "Player"}
+                    </p>
+                    <p className="text-sm capitalize text-muted-foreground">{member.role}</p>
                   </div>
-                ))}
+                </div>
+                {member.role === "owner" ? (
+                  <Badge variant="secondary" className="rounded-full">
+                    Owner
+                  </Badge>
+                ) : null}
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            ))}
+          </div>
+        </SectionShell>
 
-        {/* Right Column: Content */}
-        <div className="lg:col-span-2">
-          <Tabs defaultValue={isMember ? "chat" : "games"}>
-            <TabsList className="mb-4">
-              {isMember && <TabsTrigger value="chat">Team Chat</TabsTrigger>}
-              <TabsTrigger value="games">Upcoming Games</TabsTrigger>
-              {isOwner && (
-                <TabsTrigger value="management">Management</TabsTrigger>
-              )}
-            </TabsList>
+        <Tabs defaultValue={isMember ? "chat" : "games"} className="grid gap-5">
+          <TabsList className="h-12 rounded-full bg-accent/45 p-1">
+            {isMember ? <TabsTrigger value="chat" className="rounded-full">Team chat</TabsTrigger> : null}
+            <TabsTrigger value="games" className="rounded-full">Upcoming games</TabsTrigger>
+            {isOwner ? <TabsTrigger value="management" className="rounded-full">Management</TabsTrigger> : null}
+          </TabsList>
 
-            {isMember && (
-              <TabsContent value="chat">
-                <TeamChat teamId={team.id} currentUserId={user.id} />
-              </TabsContent>
-            )}
-
-            <TabsContent value="games">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upcoming Games</CardTitle>
-                  <CardDescription>
-                    Scheduled matches for this team.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8 text-muted-foreground">
-                    <CalendarDays className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                    <p>No upcoming games scheduled.</p>
-                  </div>
-                </CardContent>
-              </Card>
+          {isMember ? (
+            <TabsContent value="chat">
+              <TeamChat teamId={typedTeam.id} currentUserId={user.id} />
             </TabsContent>
+          ) : null}
 
-            {isOwner && (
-              <TabsContent value="management">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Pending Requests</CardTitle>
-                    <CardDescription>
-                      Approve or reject users requesting to join.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <TeamMemberManagement
-                      initialPendingMembers={pendingMembers}
-                      teamId={team.id}
-                    />
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            )}
-          </Tabs>
-        </div>
+          <TabsContent value="games">
+            <SectionShell title="Upcoming fixtures" description="Game scheduling is ready for the next phase of the product.">
+              <EmptyState
+                icon={CalendarDays}
+                title="No upcoming games"
+                description="Once matches are scheduled, the team will be able to track them here alongside roster communication."
+              />
+            </SectionShell>
+          </TabsContent>
+
+          {isOwner ? (
+            <TabsContent value="management">
+              <SectionShell title="Pending join requests" description="Approve or reject new players without leaving the team workspace.">
+                <TeamMemberManagement initialPendingMembers={pendingMembers} teamId={typedTeam.id} />
+              </SectionShell>
+            </TabsContent>
+          ) : null}
+        </Tabs>
       </div>
-    </div>
+    </WorkspaceShell>
   );
 }

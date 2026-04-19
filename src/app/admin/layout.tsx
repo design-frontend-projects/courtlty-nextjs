@@ -1,44 +1,23 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { AdminSidebar } from "@/components/admin/admin-sidebar";
-import { AdminNavbar } from "@/components/admin/admin-navbar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { AdminNavbar, AdminSidebar } from "@/components/admin";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-
-  // const {
-  //   data: { user },
-  // } = await supabase.auth.getUser();
-
-  // const { data: profile } = await supabase
-  //   .from("profiles")
-  //   .select("role")
-  //   .eq("id", user?.id)
-  //   .single();
-
-  // if (!user || profile?.role !== "admin") {
-  //   redirect("/login");
-  // }
-
-  // if (profile?.role === "admin") {
-  //   redirect("/admin");
-  // } else {
-  //   redirect("/");
-  // }
-
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen>
       <AdminSidebar />
-      <SidebarInset>
-        <AdminNavbar />
-        <main className="flex-1 p-4 md:p-8 bg-gray-50 dark:bg-gray-900 min-h-[calc(100vh-4rem)]">
-          {children}
-        </main>
+      <SidebarInset className="bg-transparent">
+        <div className="relative min-h-screen bg-background">
+          <div className="pointer-events-none absolute inset-0">
+            <div className="absolute left-[-10rem] top-16 size-[26rem] rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute bottom-[-12rem] right-[-10rem] size-[28rem] rounded-full bg-emerald-500/8 blur-3xl" />
+          </div>
+          <AdminNavbar />
+          <main className="relative flex-1 px-4 pb-8 pt-4 md:px-6 lg:px-8">{children}</main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

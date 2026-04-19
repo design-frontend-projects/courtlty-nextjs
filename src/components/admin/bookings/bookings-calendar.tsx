@@ -1,164 +1,199 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
-import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { Booking } from "@/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import type { DatesSetArg, EventClickArg, EventInput } from "@fullcalendar/core";
+import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import { Booking } from "@/types";
 import { Badge } from "@/components/ui/badge";
+import { createClient } from "@/lib/supabase/client";
+
+type CalendarBooking = Booking & {
+  courts?: { name: string | null } | null;
+  profiles?: { full_name: string | null } | null;
+};
 
 interface BookingsCalendarProps {
-  initialBookings: Booking[];
+  initialBookings: CalendarBooking[];
 }
 
-export default function BookingsCalendar({
-  initialBookings,
-}: BookingsCalendarProps) {
-  const [events, setEvents] = useState<any[]>([]);
+type FetchedBooking = {
+  id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  total_amount: number | null;
+  courts: { name: string | null } | null;
+  profiles: { full_name: string | null } | null;
+};
+
+const statusTone: Record<string, { background: string; border: string }> = {
+  confirmed: { background: "#0f766e", border: "#14b8a6" },
+  pending: { background: "#a16207", border: "#f59e0b" },
+  cancelled: { background: "#b91c1c", border: "#ef4444" },
+  completed: { background: "#1d4ed8", border: "#60a5fa" },
+};
+
+function toCalendarEvent(booking: CalendarBooking): EventInput {
+  const tone = statusTone[booking.status] || { background: "#334155", border: "#64748b" };
+
+  return {
+    id: booking.id,
+    title: `${booking.profiles?.full_name || "Guest"} @ ${booking.courts?.name || "Court"}`,
+    start: `${booking.booking_date}T${booking.start_time}`,
+    end: `${booking.booking_date}T${booking.end_time}`,
+    backgroundColor: tone.background,
+    borderColor: tone.border,
+    extendedProps: {
+      status: booking.status,
+      total: booking.total_amount,
+    },
+  };
+}
+
+export default function BookingsCalendar({ initialBookings }: BookingsCalendarProps) {
+  const [events, setEvents] = useState<EventInput[]>([]);
   const calendarRef = useRef<FullCalendar>(null);
   const router = useRouter();
   const supabase = createClient();
 
   useEffect(() => {
-    // Transform initial bookings to calendar events
-    const transformedEvents = initialBookings.map((booking) => ({
-      id: booking.id,
-      title: `Booking #${booking.id.slice(0, 4)}`,
-      start: `${booking.booking_date}T${booking.start_time}`,
-      end: `${booking.booking_date}T${booking.end_time}`,
-      extendedProps: {
-        status: booking.status,
-        total_price: booking.total_amount,
-      },
-      backgroundColor: getEventColor(booking.status),
-      borderColor: getEventColor(booking.status),
-    }));
-    setEvents(transformedEvents);
+    setEvents(initialBookings.map(toCalendarEvent));
   }, [initialBookings]);
 
   const fetchBookings = async (start: Date, end: Date) => {
     try {
       const { data, error } = await supabase
         .from("bookings")
-        .select("*, courts(name), profiles(full_name)")
+        .select("id, booking_date, start_time, end_time, status, total_amount, courts(name), profiles(full_name)")
         .gte("booking_date", start.toISOString().split("T")[0])
         .lte("booking_date", end.toISOString().split("T")[0]);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      const newEvents = data.map((booking: any) => ({
-        id: booking.id,
-        title: `${booking.profiles?.full_name || "Unknown"} @ ${
-          booking.courts?.name || "Court"
-        }`,
-        start: `${booking.booking_date}T${booking.start_time}`,
-        end: `${booking.booking_date}T${booking.end_time}`,
-        extendedProps: {
-          status: booking.status,
-          courtName: booking.courts?.name,
-          userName: booking.profiles?.full_name,
-        },
-        backgroundColor: getEventColor(booking.status),
-        borderColor: getEventColor(booking.status),
-      }));
-
-      setEvents(newEvents);
+      setEvents(((data || []) as FetchedBooking[]).map((booking) => toCalendarEvent(booking)));
     } catch (error) {
-      console.error("Error fetching bookings:", error);
+      console.error("Error fetching bookings", error);
       toast.error("Failed to fetch bookings");
     }
   };
 
-  const handleDatesSet = (arg: any) => {
-    // Fetch bookings for the view range
-    // debouncing could be added here
-    fetchBookings(arg.start, arg.end);
+  const handleDatesSet = (arg: DatesSetArg) => {
+    void fetchBookings(arg.start, arg.end);
   };
 
-  const handleEventClick = (info: any) => {
+  const handleEventClick = (info: EventClickArg) => {
     router.push(`/admin/bookings/${info.event.id}`);
   };
 
-  const getEventColor = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return "#10B981"; // emerald-500
-      case "pending":
-        return "#F59E0B"; // amber-500
-      case "cancelled":
-        return "#EF4444"; // red-500
-      default:
-        return "#6B7280"; // gray-500
-    }
-  };
-
   return (
-    <Card className="col-span-1 lg:col-span-2 shadow-md rounded-[24px] border-none overflow-hidden">
-      <CardHeader className="bg-white px-6 py-4 border-b">
-        <CardTitle className="text-xl font-bold flex items-center justify-between">
-          <span>Calendar Schedule</span>
-          <div className="flex gap-2 text-xs font-normal">
-            <Badge className="bg-emerald-500">Confirmed</Badge>
-            <Badge className="bg-amber-500">Pending</Badge>
-            <Badge className="bg-red-500">Cancelled</Badge>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-0 bg-white">
+    <div className="operator-panel overflow-hidden">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-5">
+        <div className="space-y-1">
+          <h2 className="font-display text-2xl font-semibold tracking-tight">Schedule board</h2>
+          <p className="text-sm text-muted-foreground">
+            View sessions by day, week, or month and open them directly from the board.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Badge className="rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+            Confirmed
+          </Badge>
+          <Badge className="rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300">
+            Pending
+          </Badge>
+          <Badge className="rounded-full bg-destructive/15 text-destructive">Cancelled</Badge>
+        </div>
+      </div>
+
+      <div className="bg-card/70 px-2 pb-3 pt-2">
         <style jsx global>{`
-          .fc {
-            --fc-border-color: #e5e7eb;
-            --fc-button-bg-color: #ffffff;
-            --fc-button-border-color: #e5e7eb;
-            --fc-button-text-color: #374151;
-            --fc-button-hover-bg-color: #f3f4f6;
-            --fc-button-hover-border-color: #d1d5db;
-            --fc-button-active-bg-color: #e5e7eb;
+          .courtly-admin-calendar {
+            --fc-border-color: color-mix(in oklab, var(--border) 86%, transparent);
+            --fc-button-bg-color: color-mix(in oklab, var(--card) 95%, transparent);
+            --fc-button-border-color: color-mix(in oklab, var(--border) 86%, transparent);
+            --fc-button-text-color: var(--foreground);
+            --fc-button-hover-bg-color: color-mix(in oklab, var(--accent) 62%, transparent);
+            --fc-button-hover-border-color: color-mix(in oklab, var(--border) 86%, transparent);
+            --fc-button-active-bg-color: color-mix(in oklab, var(--primary) 16%, var(--card) 84%);
             --fc-event-border-color: transparent;
+            --fc-page-bg-color: transparent;
+            --fc-neutral-bg-color: transparent;
           }
-          .fc-toolbar-title {
-            font-size: 1.25rem !important;
-            font-weight: 700 !important;
+
+          .courtly-admin-calendar .fc-toolbar {
+            padding: 0.9rem 0.8rem 0.4rem;
           }
-          .fc-header-toolbar {
-            padding: 1rem;
-            margin-bottom: 0 !important;
-          }
-          .fc-daygrid-day-frame {
-            min-height: 100px;
-          }
-          .fc-event {
-            cursor: pointer;
-            border-radius: 4px;
-            padding: 2px 4px;
-            font-size: 0.8rem;
+
+          .courtly-admin-calendar .fc-toolbar-title {
+            font-family: var(--font-display), sans-serif;
+            font-size: 1.2rem;
             font-weight: 600;
+            letter-spacing: -0.03em;
+          }
+
+          .courtly-admin-calendar .fc-button {
+            border-radius: 999px;
+            box-shadow: none;
+            padding-inline: 0.85rem;
+          }
+
+          .courtly-admin-calendar .fc-scrollgrid,
+          .courtly-admin-calendar .fc-theme-standard td,
+          .courtly-admin-calendar .fc-theme-standard th {
+            border-color: color-mix(in oklab, var(--border) 70%, transparent);
+          }
+
+          .courtly-admin-calendar .fc-daygrid-day-frame {
+            min-height: 104px;
+          }
+
+          .courtly-admin-calendar .fc-event {
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1.25;
           }
         `}</style>
-        <FullCalendar
-          ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-          initialView="timeGridDay"
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "dayGridMonth,timeGridWeek,timeGridDay",
-          }}
-          events={events}
-          eventClick={handleEventClick}
-          datesSet={handleDatesSet}
-          height="auto"
-          allDaySlot={false}
-          slotMinTime="06:00:00"
-          slotMaxTime="24:00:00"
-          expandRows={true}
-        />
-      </CardContent>
-    </Card>
+
+        <div className="courtly-admin-calendar">
+          <FullCalendar
+            ref={calendarRef}
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="timeGridDay"
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title",
+              right: "dayGridMonth,timeGridWeek,timeGridDay",
+            }}
+            events={events}
+            eventClick={handleEventClick}
+            datesSet={handleDatesSet}
+            height="auto"
+            allDaySlot={false}
+            slotMinTime="06:00:00"
+            slotMaxTime="24:00:00"
+            expandRows
+            dayHeaderFormat={{ weekday: "short", day: "numeric" }}
+            noEventsContent={() => (
+              <div className="flex flex-col items-center gap-2 py-10 text-sm text-muted-foreground">
+                <CalendarDays className="size-5 text-primary" />
+                No bookings in this range
+              </div>
+            )}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

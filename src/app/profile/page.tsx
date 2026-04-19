@@ -57,9 +57,7 @@ export default async function ProfilePage() {
     { data: teamMembershipsRaw },
     { data: recentBookingsRaw },
   ] = await Promise.all([
-    // Fetch user profile
     supabase.from("profiles").select("*").eq("id", user.id).single(),
-    // Fetch user's teams - cast the result properly
     supabase
       .from("team_members")
       .select(
@@ -75,9 +73,8 @@ export default async function ProfilePage() {
       )
     `,
       )
-      .eq("user_id", user.id)
+      .eq("player_id", user.id)
       .eq("status", "approved"),
-    // Fetch user's recent bookings - cast the result properly
     supabase
       .from("bookings")
       .select(
@@ -95,12 +92,11 @@ export default async function ProfilePage() {
       )
     `,
       )
-      .eq("user_id", user.id)
+      .eq("booked_by", user.id)
       .order("booking_date", { ascending: false })
       .limit(5),
   ]);
 
-  // Transform the data to handle Supabase's array wrapping for single relations
   const teamMemberships = (teamMembershipsRaw || []).map((item) => {
     const rawItem = item as unknown as {
       id: string;

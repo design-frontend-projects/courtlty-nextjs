@@ -1,5 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/shell/page-shell";
 import ProfileClient from "./profile-client";
 
 export default async function AdminProfilePage() {
@@ -13,9 +15,8 @@ export default async function AdminProfilePage() {
     redirect("/login");
   }
 
-  // Fetch user profile
   const { data: profile, error } = await supabase
-    .from("auth.users")
+    .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
@@ -25,13 +26,12 @@ export default async function AdminProfilePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
-        <p className="text-muted-foreground">
-          Manage your personal information and preferences.
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-8">
+      <PageHeader
+        eyebrow="Admin profile"
+        title="Keep operator identity current."
+        description="Update the account details attached to approvals, bookings, notifications, and payout actions."
+      />
       <ProfileClient initialProfile={profile} userEmail={user.email || ""} />
     </div>
   );

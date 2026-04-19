@@ -1,5 +1,7 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+
+import { createClient } from "@/lib/supabase/server";
+import { PageHeader } from "@/components/shell/page-shell";
 import SettingsClient from "./settings-client";
 
 export default async function AdminSettingsPage() {
@@ -13,7 +15,6 @@ export default async function AdminSettingsPage() {
     redirect("/login");
   }
 
-  // Fetch user profile for notification preferences
   const { data: profile } = await supabase
     .from("auth.users")
     .select("notification_preferences")
@@ -21,13 +22,12 @@ export default async function AdminSettingsPage() {
     .single();
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">
-          Manage your application preferences and account settings.
-        </p>
-      </div>
+    <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-8">
+      <PageHeader
+        eyebrow="Admin settings"
+        title="Tune the operator environment."
+        description="Adjust notifications, appearance, privacy, and other preferences without leaving the admin shell."
+      />
       <SettingsClient
         userId={user.id}
         initialPreferences={

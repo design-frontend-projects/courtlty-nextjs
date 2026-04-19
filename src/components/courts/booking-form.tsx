@@ -1,13 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { format } from "date-fns";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { CalendarIcon, Clock, ReceiptText } from "lucide-react";
 import { toast } from "sonner";
+
 import { createClient } from "@/lib/supabase/client";
 import { bookingSchema, type BookingFormData } from "@/lib/validations/schemas";
+import { generateReceiptPDF } from "@/lib/pdf/receipt-generator";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Form,
   FormControl,
@@ -16,6 +23,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -23,20 +36,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon, Clock, CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 import { PaymentDialog } from "./payment-dialog";
-import { generateReceiptPDF } from "@/lib/pdf/receipt-generator";
 
 interface BookingFormProps {
   courtId: string;
@@ -51,11 +52,10 @@ export default function BookingForm({
   sports,
   pricePerHour,
 }: BookingFormProps) {
-  const [loading, setLoading] = useState(false);
   const [showPayment, setShowPayment] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [lastBookingId, setLastBookingId] = useState<string>("");
+  const [lastBookingId, setLastBookingId] = useState("");
   const router = useRouter();
   const supabase = createClient();
 
@@ -65,8 +65,8 @@ export default function BookingForm({
       court_id: courtId,
       sport: sports[0] || "",
       booking_date: format(new Date(), "yyyy-MM-dd"),
-      start_time: "09:00",
-      end_time: "10:00",
+      start_time: "19:00",
+      end_time: "20:30",
     },
   });
 
@@ -85,15 +85,9 @@ export default function BookingForm({
 
   const totalAmount = calculateTotalAmount();
 
-  const handleFormSubmit = async (data: BookingFormData) => {
-    setShowPayment(true);
-  };
-
   const handlePaymentConfirm = async () => {
     setPaymentProcessing(true);
-
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 1800));
 
     try {
       const data = form.getValues();
@@ -103,7 +97,7 @@ export default function BookingForm({
 
       if (!user) {
         toast.error("Please log in to book a court.");
-        router.push("/login?redirect=/courts/" + courtId);
+        router.push(`/login?redirect=/courts/${courtId}`);
         return;
       }
 
@@ -118,14 +112,13 @@ export default function BookingForm({
       });
 
       const result = await response.json();
-      if (!response.ok)
-        throw new Error(result.error || "Failed to create booking");
+      if (!response.ok) throw new Error(result.error || "Failed to create booking");
 
-      setLastBookingId(result.id || "ID-123456"); // Assuming API returns ID
+      setLastBookingId(result.id || "ID-123456");
       setPaymentSuccess(true);
-      toast.success("Booking confirmed!");
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "An error occurred");
+      toast.success("Booking confirmed.");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "An error occurred");
       setPaymentProcessing(false);
     }
   };
@@ -137,13 +130,13 @@ export default function BookingForm({
 
     generateReceiptPDF({
       bookingId: lastBookingId,
-      courtName: courtName,
+      courtName,
       sport: form.getValues().sport,
       date: form.getValues().booking_date,
       startTime: form.getValues().start_time,
       endTime: form.getValues().end_time,
-      pricePerHour: pricePerHour,
-      totalAmount: totalAmount,
+      pricePerHour,
+      totalAmount,
       userName: user?.user_metadata?.full_name || user?.email || "Guest User",
     });
   };
@@ -159,34 +152,22 @@ export default function BookingForm({
   return (
     <div className="space-y-6">
       <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleFormSubmit)}
-          className="space-y-5"
-        >
+        <form onSubmit={form.handleSubmit(() => setShowPayment(true))} className="grid gap-5">
           <FormField
             control={form.control}
             name="sport"
             render={({ field }) => (
-              <FormItem className="space-y-1.5">
-                <FormLabel className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">
-                  Choose Sport
-                </FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+              <FormItem>
+                <FormLabel className="section-kicker text-[0.68rem]">Sport</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger className="h-12 rounded-xl border-gray-200 shadow-sm focus:ring-blue-500">
-                      <SelectValue placeholder="Select a sport" />
+                    <SelectTrigger className="h-12 rounded-2xl">
+                      <SelectValue placeholder="Select sport" />
                     </SelectTrigger>
                   </FormControl>
-                  <SelectContent className="rounded-xl">
+                  <SelectContent>
                     {sports.map((sport) => (
-                      <SelectItem
-                        key={sport}
-                        value={sport}
-                        className="capitalize py-3"
-                      >
+                      <SelectItem key={sport} value={sport}>
                         {sport}
                       </SelectItem>
                     ))}
@@ -201,43 +182,29 @@ export default function BookingForm({
             control={form.control}
             name="booking_date"
             render={({ field }) => (
-              <FormItem className="flex flex-col space-y-1.5">
-                <FormLabel className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">
-                  Select Date
-                </FormLabel>
+              <FormItem className="flex flex-col">
+                <FormLabel className="section-kicker text-[0.68rem]">Date</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
-                          "h-12 pl-3 text-left font-normal rounded-xl border-gray-200 shadow-sm hover:bg-gray-50",
-                          !field.value && "text-muted-foreground"
+                          "h-12 justify-between rounded-2xl px-4 text-left font-medium",
+                          !field.value && "text-muted-foreground",
                         )}
                       >
-                        {field.value ? (
-                          format(new Date(field.value), "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        {field.value ? format(new Date(field.value), "PPP") : "Pick a date"}
+                        <CalendarIcon className="size-4 text-muted-foreground" />
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent
-                    className="w-auto p-0 rounded-2xl shadow-2xl border-0"
-                    align="start"
-                  >
+                  <PopoverContent className="w-auto rounded-[1.5rem] p-0" align="start">
                     <Calendar
                       mode="single"
                       selected={field.value ? new Date(field.value) : undefined}
-                      onSelect={(date) =>
-                        date &&
-                        setValue("booking_date", format(date, "yyyy-MM-dd"))
-                      }
-                      disabled={(date) =>
-                        date < new Date() || date < new Date("1900-01-01")
-                      }
+                      onSelect={(date) => date && setValue("booking_date", format(date, "yyyy-MM-dd"))}
+                      disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
                       initialFocus
                       className="p-4"
                     />
@@ -253,18 +220,12 @@ export default function BookingForm({
               control={form.control}
               name="start_time"
               render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">
-                    Start
-                  </FormLabel>
+                <FormItem>
+                  <FormLabel className="section-kicker text-[0.68rem]">Start</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                      <Input
-                        type="time"
-                        {...field}
-                        className="h-12 pl-10 rounded-xl border-gray-200 shadow-sm focus:ring-blue-500"
-                      />
+                      <Clock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input type="time" {...field} className="h-12 rounded-2xl pl-11" />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -276,18 +237,12 @@ export default function BookingForm({
               control={form.control}
               name="end_time"
               render={({ field }) => (
-                <FormItem className="space-y-1.5">
-                  <FormLabel className="text-xs font-black uppercase tracking-wider text-muted-foreground/80">
-                    End
-                  </FormLabel>
+                <FormItem>
+                  <FormLabel className="section-kicker text-[0.68rem]">End</FormLabel>
                   <FormControl>
                     <div className="relative">
-                      <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                      <Input
-                        type="time"
-                        {...field}
-                        className="h-12 pl-10 rounded-xl border-gray-200 shadow-sm focus:ring-blue-500"
-                      />
+                      <Clock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                      <Input type="time" {...field} className="h-12 rounded-2xl pl-11" />
                     </div>
                   </FormControl>
                   <FormMessage />
@@ -296,43 +251,24 @@ export default function BookingForm({
             />
           </div>
 
-          <div className="py-2">
-            <div className="rounded-2xl bg-blue-50/50 dark:bg-blue-900/10 p-5 border border-blue-100 dark:border-blue-800/50 space-y-1">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-bold text-blue-900/60 dark:text-blue-200/60 uppercase tracking-widest">
-                  Total Cost
-                </span>
-                <Badge
-                  variant="secondary"
-                  className="bg-blue-100 text-blue-700 dark:bg-blue-800 dark:text-blue-100 border-0 font-bold"
-                >
-                  ${pricePerHour}/hr
-                </Badge>
+          <div className="surface-panel rounded-[1.75rem] px-5 py-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="section-kicker text-[0.68rem]">Booking total</p>
+                <p className="font-display text-4xl font-semibold text-primary">${totalAmount.toFixed(2)}</p>
               </div>
-              <div className="flex justify-between items-baseline">
-                <span className="text-4xl font-black text-blue-600 dark:text-blue-400">
-                  ${totalAmount.toFixed(2)}
-                </span>
-              </div>
+              <Badge variant="secondary" className="rounded-full px-3 py-1">
+                ${pricePerHour}/hour
+              </Badge>
             </div>
+            <p className="mt-3 text-sm text-muted-foreground">
+              Includes the selected session length. Payment confirmation will generate the receipt.
+            </p>
           </div>
 
-          <Button
-            type="submit"
-            className="w-full h-14 rounded-2xl text-lg font-bold bg-blue-600 hover:bg-blue-700 shadow-xl shadow-blue-500/20"
-            disabled={loading || totalAmount <= 0}
-          >
-            {loading ? (
-              <div className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                Processing...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-5 w-5" />
-                Book Securely
-              </div>
-            )}
+          <Button type="submit" className="h-12 rounded-full text-base" disabled={totalAmount <= 0}>
+            <ReceiptText data-icon="inline-start" />
+            Continue to payment
           </Button>
         </form>
       </Form>
@@ -343,7 +279,7 @@ export default function BookingForm({
         onConfirm={handlePaymentConfirm}
         amount={totalAmount}
         bookingDetails={{
-          courtName: courtName,
+          courtName,
           date: form.getValues().booking_date,
           time: `${startTime} - ${endTime}`,
         }}

@@ -1,19 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Bell, Eye, Globe, Loader2, Moon, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import { createClient } from "@/lib/supabase/client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Label } from "@/components/ui/label";
+import { SectionShell } from "@/components/shell/page-shell";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -22,8 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { toast } from "sonner";
-import { Bell, Globe, Moon, Shield, Eye, Loader2 } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface SettingsClientProps {
   userId: string;
@@ -42,28 +37,23 @@ export default function SettingsClient({
   const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
   const [emailNotifications, setEmailNotifications] = useState(
-    initialPreferences?.emailNotifications ?? true
+    initialPreferences?.emailNotifications ?? true,
   );
   const [pushNotifications, setPushNotifications] = useState(
-    initialPreferences?.pushNotifications ?? true
+    initialPreferences?.pushNotifications ?? true,
   );
   const [bookingReminders, setBookingReminders] = useState(
-    initialPreferences?.bookingReminders ?? true
+    initialPreferences?.bookingReminders ?? true,
   );
   const [marketingEmails, setMarketingEmails] = useState(
-    initialPreferences?.marketingEmails ?? false
+    initialPreferences?.marketingEmails ?? false,
   );
-
   const router = useRouter();
   const supabase = createClient();
 
-  // Load theme from sessionStorage
   useEffect(() => {
-    const savedTheme = sessionStorage.getItem("theme") as
-      | "light"
-      | "dark"
-      | "system"
-      | null;
+    const savedTheme = sessionStorage.getItem("theme") as "light" | "dark" | "system" | null;
+
     if (savedTheme) {
       setTheme(savedTheme);
       applyTheme(savedTheme);
@@ -75,14 +65,13 @@ export default function SettingsClient({
     root.classList.remove("light", "dark");
 
     if (newTheme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(newTheme);
+      root.classList.add(
+        window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light",
+      );
+      return;
     }
+
+    root.classList.add(newTheme);
   };
 
   const handleThemeChange = (newTheme: "light" | "dark" | "system") => {
@@ -94,6 +83,7 @@ export default function SettingsClient({
 
   const handleSaveNotifications = async () => {
     setLoading(true);
+
     try {
       const { error } = await supabase
         .from("auth.users")
@@ -108,48 +98,49 @@ export default function SettingsClient({
         })
         .eq("id", userId);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast.success("Notification preferences saved");
       router.refresh();
-    } catch (error) {
-      console.error("Error saving preferences:", error);
-      toast.error("Failed to save preferences", {
-        description:
-          error instanceof Error ? error.message : "An unknown error occurred",
-      });
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Failed to save preferences");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Tabs defaultValue="general" className="max-w-3xl">
-      <TabsList className="grid w-full grid-cols-5">
-        <TabsTrigger value="general">General</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        <TabsTrigger value="appearance">Appearance</TabsTrigger>
-        <TabsTrigger value="security">Security</TabsTrigger>
-        <TabsTrigger value="privacy">Privacy</TabsTrigger>
+    <Tabs defaultValue="general" className="space-y-6">
+      <TabsList className="flex h-auto w-full flex-wrap justify-start gap-2 rounded-[1.5rem] border border-border/70 bg-accent/20 p-2">
+        <TabsTrigger value="general" className="rounded-full px-5">
+          General
+        </TabsTrigger>
+        <TabsTrigger value="notifications" className="rounded-full px-5">
+          Notifications
+        </TabsTrigger>
+        <TabsTrigger value="appearance" className="rounded-full px-5">
+          Appearance
+        </TabsTrigger>
+        <TabsTrigger value="security" className="rounded-full px-5">
+          Security
+        </TabsTrigger>
+        <TabsTrigger value="privacy" className="rounded-full px-5">
+          Privacy
+        </TabsTrigger>
       </TabsList>
 
-      {/* General Settings */}
-      <TabsContent value="general" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              <CardTitle>General Settings</CardTitle>
-            </div>
-            <CardDescription>
-              Configure your language and regional preferences.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="language">Language</Label>
+      <TabsContent value="general" className="mt-0">
+        <SectionShell
+          title="Regional defaults"
+          description="Set language and timezone defaults for the operator environment."
+        >
+          <div className="grid gap-5 md:grid-cols-2">
+            <div className="space-y-3">
+              <Label htmlFor="admin_language">Language</Label>
               <Select defaultValue="en">
-                <SelectTrigger id="language">
+                <SelectTrigger id="admin_language" className="h-12 rounded-2xl">
                   <SelectValue placeholder="Select language" />
                 </SelectTrigger>
                 <SelectContent>
@@ -160,265 +151,195 @@ export default function SettingsClient({
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Timezone</Label>
+            <div className="space-y-3">
+              <Label htmlFor="admin_timezone">Timezone</Label>
               <Select defaultValue="UTC">
-                <SelectTrigger id="timezone">
+                <SelectTrigger id="admin_timezone" className="h-12 rounded-2xl">
                   <SelectValue placeholder="Select timezone" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="UTC">UTC</SelectItem>
                   <SelectItem value="America/New_York">Eastern Time</SelectItem>
-                  <SelectItem value="America/Los_Angeles">
-                    Pacific Time
-                  </SelectItem>
+                  <SelectItem value="America/Los_Angeles">Pacific Time</SelectItem>
                   <SelectItem value="Europe/London">London</SelectItem>
-                  <SelectItem value="Asia/Dubai">Dubai</SelectItem>
+                  <SelectItem value="Africa/Cairo">Cairo</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="flex justify-end pt-4">
-              <Button disabled>Save General Settings</Button>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionShell>
       </TabsContent>
 
-      {/* Notifications */}
-      <TabsContent value="notifications" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              <CardTitle>Notification Preferences</CardTitle>
-            </div>
-            <CardDescription>
-              Choose what notifications you want to receive.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="email-notifications">Email Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive notifications via email
-                </p>
+      <TabsContent value="notifications" className="mt-0">
+        <SectionShell
+          title="Notification controls"
+          description="Choose which alerts reach the operator account."
+          actions={
+            <Button onClick={handleSaveNotifications} className="rounded-full" disabled={loading}>
+              {loading ? <Loader2 className="animate-spin" /> : "Save notifications"}
+            </Button>
+          }
+        >
+          <div className="grid gap-5">
+            {[
+              {
+                id: "email_notifications",
+                icon: Bell,
+                label: "Email notifications",
+                description: "Receive approval and booking updates by email.",
+                checked: emailNotifications,
+                onCheckedChange: setEmailNotifications,
+              },
+              {
+                id: "push_notifications",
+                icon: Bell,
+                label: "Push notifications",
+                description: "Browser-level alerts for urgent operator actions.",
+                checked: pushNotifications,
+                onCheckedChange: setPushNotifications,
+              },
+              {
+                id: "booking_reminders",
+                icon: Bell,
+                label: "Booking reminders",
+                description: "Upcoming session reminders before the operating window starts.",
+                checked: bookingReminders,
+                onCheckedChange: setBookingReminders,
+              },
+              {
+                id: "marketing_emails",
+                icon: Globe,
+                label: "Marketing emails",
+                description: "Optional announcements about product changes and platform growth.",
+                checked: marketingEmails,
+                onCheckedChange: setMarketingEmails,
+              },
+            ].map((item, index) => (
+              <div key={item.id}>
+                <div className="flex items-center justify-between gap-4 rounded-[1.35rem] border border-border/70 bg-accent/14 px-4 py-4">
+                  <div className="flex items-start gap-3">
+                    <div className="rounded-xl border border-border/70 bg-background/80 p-2 text-primary">
+                      <item.icon className="size-4" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={item.id}>{item.label}</Label>
+                      <p className="text-sm leading-6 text-muted-foreground">{item.description}</p>
+                    </div>
+                  </div>
+                  <Switch
+                    id={item.id}
+                    checked={item.checked}
+                    onCheckedChange={item.onCheckedChange}
+                  />
+                </div>
+                {index < 3 ? <Separator className="my-1 opacity-0" /> : null}
               </div>
-              <Switch
-                id="email-notifications"
-                checked={emailNotifications}
-                onCheckedChange={setEmailNotifications}
-              />
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="push-notifications">Push Notifications</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive push notifications in your browser
-                </p>
-              </div>
-              <Switch
-                id="push-notifications"
-                checked={pushNotifications}
-                onCheckedChange={setPushNotifications}
-              />
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="booking-reminders">Booking Reminders</Label>
-                <p className="text-sm text-muted-foreground">
-                  Get reminders about upcoming bookings
-                </p>
-              </div>
-              <Switch
-                id="booking-reminders"
-                checked={bookingReminders}
-                onCheckedChange={setBookingReminders}
-              />
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="marketing-emails">Marketing Emails</Label>
-                <p className="text-sm text-muted-foreground">
-                  Receive promotional emails and updates
-                </p>
-              </div>
-              <Switch
-                id="marketing-emails"
-                checked={marketingEmails}
-                onCheckedChange={setMarketingEmails}
-              />
-            </div>
-
-            <div className="flex justify-end pt-4">
-              <Button onClick={handleSaveNotifications} disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Notification Settings
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            ))}
+          </div>
+        </SectionShell>
       </TabsContent>
 
-      {/* Appearance */}
-      <TabsContent value="appearance" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Moon className="h-5 w-5" />
-              <CardTitle>Appearance</CardTitle>
-            </div>
-            <CardDescription>
-              Customize how the application looks.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="theme">Theme</Label>
-              <Select
-                value={theme}
-                onValueChange={(value: "light" | "dark" | "system") =>
-                  handleThemeChange(value)
-                }
-              >
-                <SelectTrigger id="theme">
-                  <SelectValue placeholder="Select theme" />
+      <TabsContent value="appearance" className="mt-0">
+        <SectionShell title="Theme control" description="Set the color mode for the operator workspace.">
+          <div className="grid gap-3 md:max-w-sm">
+            <Label htmlFor="admin_theme">Theme</Label>
+            <Select
+              value={theme}
+              onValueChange={(value: "light" | "dark" | "system") => handleThemeChange(value)}
+            >
+              <SelectTrigger id="admin_theme" className="h-12 rounded-2xl">
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">Light</SelectItem>
+                <SelectItem value="dark">Dark</SelectItem>
+                <SelectItem value="system">System</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-muted-foreground">
+              The admin UI respects reduced motion and the system theme when set to automatic.
+            </p>
+          </div>
+        </SectionShell>
+      </TabsContent>
+
+      <TabsContent value="security" className="mt-0">
+        <SectionShell title="Security controls" description="Reserved actions for password, session, and account hardening.">
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              {
+                icon: Shield,
+                title: "Password",
+                copy: "Password management will be connected here.",
+                action: "Change password",
+              },
+              {
+                icon: Shield,
+                title: "Two-factor auth",
+                copy: "Add a second factor for operator accounts.",
+                action: "Enable 2FA",
+              },
+              {
+                icon: Shield,
+                title: "Sessions",
+                copy: "Review all active devices and revoke access if needed.",
+                action: "View sessions",
+              },
+            ].map((item) => (
+              <div key={item.title} className="operator-panel px-4 py-4">
+                <item.icon className="mb-3 size-5 text-primary" />
+                <h2 className="font-display text-2xl font-semibold tracking-tight">{item.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.copy}</p>
+                <Button variant="outline" className="mt-5 rounded-full" disabled>
+                  {item.action}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </SectionShell>
+      </TabsContent>
+
+      <TabsContent value="privacy" className="mt-0">
+        <SectionShell title="Privacy controls" description="Visibility, export, and account lifecycle settings.">
+          <div className="grid gap-5">
+            <div className="space-y-3">
+              <Label htmlFor="admin_visibility">Data visibility</Label>
+              <Select defaultValue="public">
+                <SelectTrigger id="admin_visibility" className="h-12 rounded-2xl md:max-w-sm">
+                  <SelectValue placeholder="Select visibility" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="light">Light</SelectItem>
-                  <SelectItem value="dark">Dark</SelectItem>
-                  <SelectItem value="system">System</SelectItem>
+                  <SelectItem value="public">Public</SelectItem>
+                  <SelectItem value="friends">Friends Only</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
                 </SelectContent>
               </Select>
-              <p className="text-sm text-muted-foreground">
-                Choose your preferred color scheme
-              </p>
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
 
-      {/* Security */}
-      <TabsContent value="security" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
-              <CardTitle>Security</CardTitle>
-            </div>
-            <CardDescription>
-              Manage your account security settings.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium mb-2">Password</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Change your password to keep your account secure
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="operator-panel px-4 py-4">
+                <Eye className="mb-3 size-5 text-primary" />
+                <h2 className="font-display text-2xl font-semibold tracking-tight">Download data</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Request a portable copy of your operator data.
                 </p>
-                <Button variant="outline">Change Password</Button>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="text-sm font-medium mb-2">
-                  Two-Factor Authentication
-                </h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Add an extra layer of security to your account
-                </p>
-                <Button variant="outline" disabled>
-                  Enable 2FA
+                <Button variant="outline" className="mt-5 rounded-full" disabled>
+                  Request export
                 </Button>
               </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="text-sm font-medium mb-2">Active Sessions</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Manage devices where you&apos;re currently logged in
+              <div className="operator-panel px-4 py-4">
+                <Moon className="mb-3 size-5 text-destructive" />
+                <h2 className="font-display text-2xl font-semibold tracking-tight">Delete account</h2>
+                <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                  Permanently remove the operator account and related access.
                 </p>
-                <Button variant="outline" disabled>
-                  View Sessions
+                <Button variant="destructive" className="mt-5 rounded-full" disabled>
+                  Delete account
                 </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      </TabsContent>
-
-      {/* Privacy */}
-      <TabsContent value="privacy" className="space-y-4">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              <CardTitle>Privacy</CardTitle>
-            </div>
-            <CardDescription>
-              Control your data and privacy settings.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium mb-2">Data Visibility</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Control who can see your profile information
-                </p>
-                <Select defaultValue="public">
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select visibility" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="friends">Friends Only</SelectItem>
-                    <SelectItem value="private">Private</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="text-sm font-medium mb-2">Download Your Data</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Request a copy of your personal data
-                </p>
-                <Button variant="outline" disabled>
-                  Request Data Export
-                </Button>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="text-sm font-medium mb-2 text-red-600">
-                  Delete Account
-                </h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Permanently delete your account and all associated data
-                </p>
-                <Button variant="destructive" disabled>
-                  Delete Account
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </SectionShell>
       </TabsContent>
     </Tabs>
   );

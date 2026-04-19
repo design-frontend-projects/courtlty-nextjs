@@ -1,49 +1,61 @@
 "use client";
 
-import {
-  CreditCard,
-  LayoutDashboard,
-  PlusCircle,
-  Trophy,
-  User,
-  Settings,
-} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  Bell,
+  CalendarDays,
+  CreditCard,
+  LayoutDashboard,
+  Settings2,
+  Trophy,
+  UserRound,
+} from "lucide-react";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarHeader,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
-// Menu items.
-const items = [
+const managementItems = [
   {
-    title: "Bookings",
+    title: "Bookings hub",
     url: "/admin",
-    icon: LayoutDashboard,
+    icon: CalendarDays,
+    match: (pathname: string) => pathname === "/admin" || pathname.startsWith("/admin/bookings"),
   },
   {
-    title: "Create Booking",
-    url: "/admin/bookings/new",
-    icon: PlusCircle,
+    title: "Approvals",
+    url: "/admin/dashboard",
+    icon: LayoutDashboard,
+    match: (pathname: string) => pathname.startsWith("/admin/dashboard"),
   },
   {
     title: "Courts",
     url: "/admin/courts",
     icon: Trophy,
+    match: (pathname: string) => pathname.startsWith("/admin/courts"),
   },
   {
     title: "Payments",
     url: "/admin/payments",
     icon: CreditCard,
+    match: (pathname: string) => pathname.startsWith("/admin/payments"),
+  },
+  {
+    title: "Notifications",
+    url: "/admin/notifications",
+    icon: Bell,
+    match: (pathname: string) => pathname.startsWith("/admin/notifications"),
   },
 ];
 
@@ -51,12 +63,14 @@ const accountItems = [
   {
     title: "Profile",
     url: "/admin/profile",
-    icon: User,
+    icon: UserRound,
+    match: (pathname: string) => pathname.startsWith("/admin/profile"),
   },
   {
     title: "Settings",
     url: "/admin/settings",
-    icon: Settings,
+    icon: Settings2,
+    match: (pathname: string) => pathname.startsWith("/admin/settings"),
   },
 ];
 
@@ -64,22 +78,41 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar>
-      <SidebarHeader className="p-4 border-b">
-        <h2 className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-blue-600 to-indigo-600">
-          Courtly Admin
-        </h2>
+    <Sidebar variant="inset" collapsible="icon" className="border-none">
+      <SidebarHeader className="px-3 py-4">
+        <Link href="/admin" className="operator-panel-strong block px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-11 items-center justify-center rounded-[1rem] border border-primary/20 bg-primary/10 font-display text-lg font-semibold text-primary">
+              C
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-display text-xl font-semibold tracking-tight text-sidebar-foreground">
+                Courtly Admin
+              </p>
+              <p className="truncate text-xs uppercase tracking-[0.18em] text-sidebar-foreground/60">
+                Operator suite
+              </p>
+            </div>
+          </div>
+        </Link>
       </SidebarHeader>
-      <SidebarContent>
+
+      <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Management</SidebarGroupLabel>
+          <SidebarGroupLabel>Operations</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {managementItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    size="lg"
+                    isActive={item.match(pathname)}
+                    tooltip={item.title}
+                    className="rounded-xl"
+                  >
                     <Link href={item.url}>
-                      <item.icon className="w-5 h-5" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -89,15 +122,22 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        <SidebarSeparator />
+
         <SidebarGroup>
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {accountItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={item.match(pathname)}
+                    tooltip={item.title}
+                    className="rounded-xl"
+                  >
                     <Link href={item.url}>
-                      <item.icon className="w-5 h-5" />
+                      <item.icon />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -107,6 +147,12 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="px-3 pb-4">
+        <div className="rounded-[1.2rem] border border-sidebar-border/80 bg-sidebar-accent/60 px-4 py-4 text-sm leading-6 text-sidebar-foreground/70">
+          Keep approvals, payouts, and venue quality in one high-clarity workspace.
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 }

@@ -2,233 +2,146 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { MapPin, Users, Calendar, ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, CalendarDays, MapPin, Users } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
-// Animated floating orbs background
-const FloatingOrbs = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none">
-    {/* Gradient orbs */}
-    <motion.div
-      className="absolute top-20 left-[10%] w-72 h-72 md:w-96 md:h-96 rounded-full bg-gradient-to-br from-emerald-400/30 to-cyan-400/30 blur-3xl"
-      animate={{
-        x: [0, 50, 0],
-        y: [0, 30, 0],
-        scale: [1, 1.1, 1],
-      }}
-      transition={{
-        duration: 8,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    />
-    <motion.div
-      className="absolute top-40 right-[5%] w-64 h-64 md:w-80 md:h-80 rounded-full bg-gradient-to-br from-violet-400/25 to-fuchsia-400/25 blur-3xl"
-      animate={{
-        x: [0, -40, 0],
-        y: [0, 50, 0],
-        scale: [1, 1.15, 1],
-      }}
-      transition={{
-        duration: 10,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: 1,
-      }}
-    />
-    <motion.div
-      className="absolute bottom-20 left-[30%] w-56 h-56 md:w-72 md:h-72 rounded-full bg-gradient-to-br from-amber-400/20 to-orange-400/20 blur-3xl"
-      animate={{
-        x: [0, 30, 0],
-        y: [0, -40, 0],
-        scale: [1, 1.2, 1],
-      }}
-      transition={{
-        duration: 12,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: 2,
-      }}
-    />
-
-    {/* Subtle grid pattern */}
-    <div className="absolute inset-0 bg-[linear-gradient(rgba(99,102,241,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(99,102,241,0.03)_1px,transparent_1px)] bg-[size:50px_50px]" />
-  </div>
-);
-
-// Feature pill component
-const FeaturePill = ({
-  icon: Icon,
-  text,
-  delay,
-}: {
-  icon: typeof MapPin;
-  text: string;
-  delay: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 0.5, delay }}
-    className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50 shadow-lg shadow-slate-200/20 dark:shadow-slate-900/20"
-  >
-    <Icon className="w-4 h-4 text-emerald-500" />
-    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-      {text}
-    </span>
-  </motion.div>
-);
+const proofPoints = [
+  { label: "Live court inventory", value: "500+" },
+  { label: "Active players", value: "10K+" },
+  { label: "Weekly team sessions", value: "3.2K" },
+];
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-slate-50 via-white to-emerald-50/30 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/20">
-      <FloatingOrbs />
+    <section className="relative overflow-hidden border-b border-border/60">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.36),rgba(15,23,42,0.72)),url('https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=2070')] bg-cover bg-center" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(90,126,255,0.42),transparent_34%),radial-gradient(circle_at_bottom_right,rgba(34,197,154,0.18),transparent_28%)]" />
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-        <div className="max-w-5xl mx-auto text-center">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border border-emerald-500/20 mb-8"
-          >
-            <Sparkles className="w-4 h-4 text-emerald-500" />
-            <span className="text-sm font-semibold bg-gradient-to-r from-emerald-600 to-cyan-600 bg-clip-text text-transparent">
-              #1 Sports Court Booking Platform
-            </span>
-          </motion.div>
-
-          {/* Main heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-white mb-6 leading-tight"
-          >
-            Book Courts.{" "}
-            <span className="relative">
-              <span className="bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 bg-clip-text text-transparent">
-                Build Teams.
-              </span>
-              <motion.span
-                className="absolute -bottom-2 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 rounded-full"
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.8, delay: 0.8 }}
-              />
-            </span>
-            <br />
-            <span className="text-slate-700 dark:text-slate-300">
-              Play Together.
-            </span>
-          </motion.h1>
-
-          {/* Subtitle */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed"
-          >
-            Discover and book sports courts near you, create or join teams, and
-            organize games with friends. The ultimate platform for sports
-            enthusiasts.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12"
-          >
-            <Link href="/courts">
-              <Button
-                size="lg"
-                className="group h-14 px-8 text-lg bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transition-all duration-300"
-              >
-                Find Courts Near You
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-            <Link href="/teams">
-              <Button
-                variant="outline"
-                size="lg"
-                className="h-14 px-8 text-lg border-2 border-slate-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all duration-300"
-              >
-                Explore Teams
-              </Button>
-            </Link>
-          </motion.div>
-
-          {/* Feature pills */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.6 }}
-            className="flex flex-wrap gap-3 justify-center"
-          >
-            <FeaturePill icon={MapPin} text="500+ Courts" delay={0.7} />
-            <FeaturePill icon={Users} text="10K+ Players" delay={0.8} />
-            <FeaturePill icon={Calendar} text="Easy Booking" delay={0.9} />
-          </motion.div>
-        </div>
-
-        {/* Floating sports icons */}
+      <div className="relative mx-auto grid min-h-[calc(100svh-72px)] max-w-7xl items-end gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.2fr_0.8fr] lg:px-8 lg:py-18">
         <motion.div
-          className="hidden lg:block absolute left-[8%] top-[30%]"
-          animate={{ y: [0, -15, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-3xl space-y-8"
         >
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-500 shadow-lg shadow-orange-500/30 flex items-center justify-center text-3xl">
-            🏀
+          <div className="flex flex-wrap items-center gap-3 text-white/78">
+            <span className="pill-label border-white/15 bg-white/8 text-white/82">
+              Premium athletic booking
+            </span>
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <span className="status-dot" />
+              Book, recruit, and play from one flow
+            </span>
+          </div>
+
+          <div className="space-y-5">
+            <p className="section-kicker text-white/70">Courtly</p>
+            <h1 className="max-w-4xl text-5xl font-semibold leading-[0.94] text-white sm:text-6xl lg:text-7xl">
+              Book the court.
+              <br />
+              Build the squad.
+              <br />
+              Keep the session moving.
+            </h1>
+            <p className="max-w-2xl text-base leading-7 text-white/74 sm:text-lg">
+              Discover high-quality venues, manage your next match, and keep team logistics in one
+              sharp, mobile-first workspace.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <Button asChild size="lg" className="h-12 rounded-full px-6">
+              <Link href="/courts">
+                Explore courts
+                <ArrowRight data-icon="inline-end" />
+              </Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-12 rounded-full border-white/25 bg-white/10 px-6 text-white hover:bg-white/16 hover:text-white dark:border-white/25 dark:bg-white/10 dark:hover:bg-white/16"
+            >
+              <Link href="/teams">Browse teams</Link>
+            </Button>
+          </div>
+
+          <div className="grid gap-5 rounded-[2rem] border border-white/12 bg-white/8 p-5 backdrop-blur-md md:grid-cols-3">
+            {proofPoints.map((point) => (
+              <div key={point.label} className="space-y-1">
+                <p className="font-display text-3xl font-semibold text-white">{point.value}</p>
+                <p className="text-sm text-white/68">{point.label}</p>
+              </div>
+            ))}
           </div>
         </motion.div>
 
         <motion.div
-          className="hidden lg:block absolute right-[10%] top-[25%]"
-          animate={{ y: [0, 15, 0], rotate: [0, -5, 0] }}
-          transition={{
-            duration: 5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 0.5,
-          }}
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+          className="surface-panel-strong hidden bg-slate-950/35 p-6 text-white lg:flex lg:flex-col"
         >
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-500 shadow-lg shadow-emerald-500/30 flex items-center justify-center text-2xl">
-            ⚽
+          <div className="flex items-center justify-between border-b border-white/12 pb-4">
+            <div>
+              <p className="section-kicker text-white/56">Session board</p>
+              <h2 className="mt-1 text-2xl font-semibold text-white">Tonight at 7:30 PM</h2>
+            </div>
+            <span className="rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200">
+              Available
+            </span>
           </div>
-        </motion.div>
 
-        <motion.div
-          className="hidden lg:block absolute left-[15%] bottom-[15%]"
-          animate={{ y: [0, 12, 0], rotate: [0, -3, 0] }}
-          transition={{
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1,
-          }}
-        >
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-500 shadow-lg shadow-yellow-500/30 flex items-center justify-center text-xl">
-            🎾
-          </div>
-        </motion.div>
+          <div className="grid gap-4 py-5">
+            <div className="rounded-[1.5rem] border border-white/10 bg-black/18 p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="font-display text-2xl font-semibold">Cairo Match Court</p>
+                  <p className="flex items-center gap-2 text-sm text-white/64">
+                    <MapPin className="size-4 text-primary" />
+                    Nasr City, Cairo
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/12 bg-white/8 px-3 py-2 text-right">
+                  <p className="text-xs uppercase tracking-[0.18em] text-white/48">Rate</p>
+                  <p className="font-display text-2xl font-semibold">$34</p>
+                </div>
+              </div>
+            </div>
 
-        <motion.div
-          className="hidden lg:block absolute right-[12%] bottom-[20%]"
-          animate={{ y: [0, -12, 0], rotate: [0, 3, 0] }}
-          transition={{
-            duration: 4.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-            delay: 1.5,
-          }}
-        >
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-500 shadow-lg shadow-blue-500/30 flex items-center justify-center text-2xl">
-            🏐
+            <div className="grid gap-3 md:grid-cols-2">
+              <div className="rounded-[1.5rem] border border-white/10 bg-black/18 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-white/48">Roster</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/8 p-3 text-primary">
+                    <Users className="size-5" />
+                  </div>
+                  <div>
+                    <p className="font-display text-2xl font-semibold">8 / 10</p>
+                    <p className="text-sm text-white/64">Players confirmed</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-[1.5rem] border border-white/10 bg-black/18 p-4">
+                <p className="text-xs uppercase tracking-[0.18em] text-white/48">Schedule</p>
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/8 p-3 text-primary">
+                    <CalendarDays className="size-5" />
+                  </div>
+                  <div>
+                    <p className="font-display text-2xl font-semibold">90 min</p>
+                    <p className="text-sm text-white/64">Warm-up to final whistle</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm leading-6 text-white/62">
+              Courtly keeps search, booking, team status, and reminders on one board so the game
+              does not stall between messages.
+            </p>
           </div>
         </motion.div>
       </div>

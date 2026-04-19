@@ -60,7 +60,10 @@ export default async function AdminEditCourtPage({
 
   // Extract related data
   const courtImages = court.court_images || [];
-  const courtAvailability = court.court_availability || [];
+  const courtAvailability = (court.court_availability || []).map((slot) => ({
+    ...slot,
+    day_of_week: Number(slot.day_of_week),
+  }));
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
