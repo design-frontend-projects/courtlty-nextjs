@@ -23,10 +23,10 @@ type TeamMemberRecord = {
   status: string;
   role: string;
   profiles: {
-    id?: string;
-    email?: string | null;
-    first_name?: string | null;
-    avatar_url?: string | null;
+    id: string;
+    email: string | null;
+    first_name: string | null;
+    avatar_url: string | null;
   } | null;
 };
 

@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import CourtSubmissionForm from "@/components/courts/court-submission-form";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function SubmitCourtPage() {
   const supabase = await createClient();
@@ -22,40 +24,37 @@ export default async function SubmitCourtPage() {
 
   if (profile?.role !== "admin" && profile?.role !== "moderator") {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md text-center">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="operator-panel flex w-full max-w-md flex-col gap-4 px-7 py-8 text-center">
+          <h1 className="font-display text-3xl font-semibold tracking-tight">
             Access Denied
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-sm leading-6 text-muted-foreground">
             Only court owners can submit courts. Please contact support to
             upgrade your account.
           </p>
-          <a
-            href="/dashboard"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors inline-block"
-          >
-            Back to Dashboard
-          </a>
+          <Button asChild className="rounded-full">
+            <Link href="/dashboard">Back to Dashboard</Link>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+    <div className="page-shell-tight">
+      <header className="operator-panel px-6 py-6 sm:px-8">
+        <div className="flex flex-col gap-2">
+          <h1 className="font-display text-4xl font-semibold tracking-tight">
             Submit Your Court
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-sm text-muted-foreground">
             List your court and start accepting bookings
           </p>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main>
         <CourtSubmissionForm />
       </main>
     </div>

@@ -168,7 +168,7 @@ export default function TeamCreationForm() {
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.6rem] border border-border/70 bg-accent/22 px-5 py-4">
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <p className="section-kicker text-[0.68rem]">Team setup</p>
           <p className="text-sm text-muted-foreground">Courtly will create the roster shell and redirect you to the team workspace.</p>
         </div>

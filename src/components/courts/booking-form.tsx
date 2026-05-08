@@ -150,7 +150,7 @@ export default function BookingForm({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(() => setShowPayment(true))} className="grid gap-5">
           <FormField
@@ -253,7 +253,7 @@ export default function BookingForm({
 
           <div className="surface-panel rounded-[1.75rem] px-5 py-5">
             <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <p className="section-kicker text-[0.68rem]">Booking total</p>
                 <p className="font-display text-4xl font-semibold text-primary">${totalAmount.toFixed(2)}</p>
               </div>

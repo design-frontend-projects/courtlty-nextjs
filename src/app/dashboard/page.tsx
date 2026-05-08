@@ -80,8 +80,19 @@ export default async function DashboardPage() {
       .eq("player_id", user.id),
   ]);
 
-  const joinedTeams = memberTeams?.map((membership) => membership.teams).filter(Boolean) || [];
-  const allTeams = [...(ownedTeams || [])];
+  const joinedTeams =
+    memberTeams
+      ?.flatMap((membership) => {
+        const teams = membership.teams as unknown;
+        if (!teams) {
+          return [];
+        }
+        return Array.isArray(teams) ? teams : [teams];
+      })
+      .filter((team): team is { id: string; name: string; sport: string; team_members?: { length: number } } => {
+        return typeof team === "object" && team !== null && "id" in team;
+      }) || [];
+  const allTeams = [...((ownedTeams as typeof joinedTeams) || [])];
   const existingTeamIds = new Set(allTeams.map((team) => team.id));
 
   joinedTeams.forEach((team) => {
@@ -158,7 +169,7 @@ export default async function DashboardPage() {
                   key={booking.id}
                   className="flex flex-col gap-4 rounded-[1.5rem] border border-border/70 bg-accent/18 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div className="space-y-1">
+                  <div className="flex flex-col gap-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-foreground">{booking.courts?.name}</p>
                       <Badge variant="secondary" className="rounded-full capitalize">
@@ -212,7 +223,7 @@ export default async function DashboardPage() {
                           {team.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="space-y-2">
+                      <div className="flex flex-col gap-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-display text-2xl font-semibold text-foreground">{team.name}</p>
                           <Badge variant="secondary" className="rounded-full capitalize">

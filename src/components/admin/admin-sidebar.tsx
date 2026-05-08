@@ -25,56 +25,65 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 const managementItems = [
   {
-    title: "Bookings hub",
+    titleKey: "admin.sidebar.bookings",
+    fallbackTitle: "Bookings hub",
     url: "/admin",
     icon: CalendarDays,
     match: (pathname: string) => pathname === "/admin" || pathname.startsWith("/admin/bookings"),
   },
   {
-    title: "Approvals",
+    titleKey: "admin.sidebar.approvals",
+    fallbackTitle: "Approvals",
     url: "/admin/dashboard",
     icon: LayoutDashboard,
     match: (pathname: string) => pathname.startsWith("/admin/dashboard"),
   },
   {
-    title: "Courts",
+    titleKey: "admin.sidebar.courts",
+    fallbackTitle: "Courts",
     url: "/admin/courts",
     icon: Trophy,
     match: (pathname: string) => pathname.startsWith("/admin/courts"),
   },
   {
-    title: "Payments",
+    titleKey: "admin.sidebar.payments",
+    fallbackTitle: "Payments",
     url: "/admin/payments",
     icon: CreditCard,
     match: (pathname: string) => pathname.startsWith("/admin/payments"),
   },
   {
-    title: "Notifications",
+    titleKey: "admin.sidebar.notifications",
+    fallbackTitle: "Notifications",
     url: "/admin/notifications",
     icon: Bell,
     match: (pathname: string) => pathname.startsWith("/admin/notifications"),
   },
-];
+] as const;
 
 const accountItems = [
   {
-    title: "Profile",
+    titleKey: "admin.sidebar.profile",
+    fallbackTitle: "Profile",
     url: "/admin/profile",
     icon: UserRound,
     match: (pathname: string) => pathname.startsWith("/admin/profile"),
   },
   {
-    title: "Settings",
+    titleKey: "admin.sidebar.settings",
+    fallbackTitle: "Settings",
     url: "/admin/settings",
     icon: Settings2,
     match: (pathname: string) => pathname.startsWith("/admin/settings"),
   },
-];
+] as const;
 
 export function AdminSidebar() {
+  const { t } = useI18n();
   const pathname = usePathname();
 
   return (
@@ -90,7 +99,7 @@ export function AdminSidebar() {
                 Courtly Admin
               </p>
               <p className="truncate text-xs uppercase tracking-[0.18em] text-sidebar-foreground/60">
-                Operator suite
+                {t("admin.suiteTagline", "Operator suite")}
               </p>
             </div>
           </div>
@@ -99,21 +108,21 @@ export function AdminSidebar() {
 
       <SidebarContent className="px-2">
         <SidebarGroup>
-          <SidebarGroupLabel>Operations</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("admin.operations", "Operations")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {managementItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.fallbackTitle}>
                   <SidebarMenuButton
                     asChild
                     size="lg"
                     isActive={item.match(pathname)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey, item.fallbackTitle)}
                     className="rounded-xl"
                   >
                     <Link href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey, item.fallbackTitle)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -125,20 +134,20 @@ export function AdminSidebar() {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("admin.account", "Account")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {accountItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.fallbackTitle}>
                   <SidebarMenuButton
                     asChild
                     isActive={item.match(pathname)}
-                    tooltip={item.title}
+                    tooltip={t(item.titleKey, item.fallbackTitle)}
                     className="rounded-xl"
                   >
                     <Link href={item.url}>
                       <item.icon />
-                      <span>{item.title}</span>
+                      <span>{t(item.titleKey, item.fallbackTitle)}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -150,9 +159,13 @@ export function AdminSidebar() {
 
       <SidebarFooter className="px-3 pb-4">
         <div className="rounded-[1.2rem] border border-sidebar-border/80 bg-sidebar-accent/60 px-4 py-4 text-sm leading-6 text-sidebar-foreground/70">
-          Keep approvals, payouts, and venue quality in one high-clarity workspace.
+          {t(
+            "admin.footerCopy",
+            "Keep approvals, payouts, and venue quality in one high-clarity workspace.",
+          )}
         </div>
       </SidebarFooter>
     </Sidebar>
   );
 }
+

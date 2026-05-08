@@ -100,8 +100,8 @@ export default async function CourtsPage(props: { searchParams: Promise<SearchPa
                   </div>
                 </div>
 
-                <CardContent className="space-y-5 px-6 py-6">
-                  <div className="space-y-2">
+                <CardContent className="flex flex-col gap-5 px-6 py-6">
+                  <div className="flex flex-col gap-2">
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <h2 className="font-display text-3xl font-semibold tracking-tight text-foreground">

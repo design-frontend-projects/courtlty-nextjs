@@ -155,9 +155,9 @@ export default function NotificationManager() {
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6"
+                className="flex flex-col gap-6"
               >
-                <div className="space-y-4">
+                <div className="flex flex-col gap-4">
                   <FormField
                     control={form.control}
                     name="type"
@@ -241,7 +241,7 @@ export default function NotificationManager() {
                     name="sendToAll"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
-                        <div className="space-y-0.5">
+                        <div className="flex flex-col gap-0.5">
                           <FormLabel className="text-base">
                             Broadcast to All Users
                           </FormLabel>
@@ -300,7 +300,7 @@ export default function NotificationManager() {
           </CardHeader>
           <CardContent className="flex-1 min-h-0">
             <ScrollArea className="h-[400px] w-full rounded-md border p-2">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 {filteredUsers.map((user) => (
                   <div
                     key={user.id}

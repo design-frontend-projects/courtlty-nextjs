@@ -88,7 +88,7 @@ async function fetchCourtById(courtId: string): Promise<CourtData> {
 function CourtDetailLoadingState() {
   return (
     <WorkspaceShell className="gap-6">
-      <div className="surface-panel-strong space-y-4 px-6 py-7 sm:px-8 sm:py-8">
+      <div className="surface-panel-strong flex flex-col gap-4 px-6 py-7 sm:px-8 sm:py-8">
         <Skeleton className="h-5 w-28 rounded-full" />
         <Skeleton className="h-12 w-2/3 rounded-xl" />
         <Skeleton className="h-6 w-1/2 rounded-xl" />
@@ -202,7 +202,7 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
                 description="Make the booking decision with the essentials first: quality, location, amenities, and trust signals."
               >
                 <div className="grid gap-8 lg:grid-cols-[1fr_0.92fr]">
-                  <div className="space-y-6">
+                  <div className="flex flex-col gap-6">
                     <p className="text-sm leading-7 text-muted-foreground">
                       {court.description ||
                         "Professional sports facility designed for recurring team sessions, weekend play, and competitive bookings."}
@@ -298,7 +298,7 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
 
         <aside className="grid gap-4 xl:sticky xl:top-24 xl:self-start">
           <div className="surface-panel-strong rounded-[2rem] px-6 py-6">
-            <div className="space-y-2 border-b border-border/70 pb-5">
+            <div className="flex flex-col gap-2 border-b border-border/70 pb-5">
               <p className="section-kicker text-[0.68rem]">Starting rate</p>
               <div className="flex items-baseline gap-2">
                 <span className="font-display text-5xl font-semibold text-primary">${court.price_per_hour}</span>
@@ -318,7 +318,7 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
           <div className="surface-panel rounded-[1.85rem] px-5 py-5">
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-300" />
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <p className="font-medium text-foreground">Courtly booking protection</p>
                 <p className="text-sm leading-6 text-muted-foreground">
                   Booking details, rate visibility, and confirmation status stay visible all the way through checkout.

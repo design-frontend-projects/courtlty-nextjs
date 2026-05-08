@@ -28,8 +28,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export default function LoginPage() {
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
@@ -93,9 +96,9 @@ export default function LoginPage() {
       }
 
       setOtpSent(true);
-      toast.success("Access code sent");
+      toast.success(t("login.toasts.accessCodeSent", "Access code sent"));
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Unable to send code");
+      toast.error(error instanceof Error ? error.message : t("login.toasts.sendCodeError", "Unable to send code"));
     } finally {
       setLoading(false);
     }
@@ -119,7 +122,7 @@ export default function LoginPage() {
       const userId = data.user?.id;
 
       if (!userId) {
-        throw new Error("No authenticated user returned");
+        throw new Error(t("login.toasts.missingUser", "No authenticated user returned"));
       }
 
       const { data: profile, error: profileError } = await supabase
@@ -135,7 +138,7 @@ export default function LoginPage() {
 
       router.replace("/dashboard");
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Unable to verify code");
+      toast.error(error instanceof Error ? error.message : t("login.toasts.verifyCodeError", "Unable to verify code"));
     } finally {
       setLoading(false);
     }
@@ -145,20 +148,23 @@ export default function LoginPage() {
     <div className="relative min-h-screen overflow-hidden bg-background">
       <div className="app-grid absolute inset-0 opacity-35" />
       <div className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-primary/50 to-transparent" />
-      <div className="absolute left-[-12rem] top-12 size-[28rem] rounded-full bg-primary/12 blur-3xl" />
-      <div className="absolute bottom-[-14rem] right-[-10rem] size-[30rem] rounded-full bg-emerald-500/10 blur-3xl" />
+      <div className="absolute start-[-12rem] top-12 size-[28rem] rounded-full bg-primary/12 blur-3xl" />
+      <div className="absolute bottom-[-14rem] end-[-10rem] size-[30rem] rounded-full bg-emerald-500/10 blur-3xl" />
 
       <div className="relative mx-auto flex min-h-screen w-full max-w-7xl flex-col px-4 pb-8 pt-6 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <Button asChild variant="ghost" className="rounded-full">
             <Link href="/">
               <ArrowLeft data-icon="inline-start" />
-              Home
+              {t("login.home", "Home")}
             </Link>
           </Button>
-          <Badge variant="secondary" className="rounded-full px-3 py-1">
-            Premium athletic access
-          </Badge>
+          <div className="flex items-center gap-2">
+            <LanguageSwitcher className="h-9 rounded-full" />
+            <Badge variant="secondary" className="rounded-full px-3 py-1">
+              {t("login.badge", "Premium athletic access")}
+            </Badge>
+          </div>
         </div>
 
         <div className="grid flex-1 items-center gap-10 py-8 lg:grid-cols-[1.05fr_0.95fr] lg:py-12">
@@ -170,15 +176,17 @@ export default function LoginPage() {
           >
             <div className="surface-panel-strong max-w-3xl overflow-hidden px-6 py-7 sm:px-8 sm:py-8">
               <div className="flex flex-col gap-8 lg:min-h-[33rem] lg:justify-between">
-                <div className="space-y-4">
-                  <p className="section-kicker">Courtly access</p>
-                  <div className="space-y-4">
+                <div className="flex flex-col gap-4">
+                  <p className="section-kicker">{t("login.accessKicker", "Courtly access")}</p>
+                  <div className="flex flex-col gap-4">
                     <h1 className="max-w-xl text-5xl font-semibold tracking-tight text-foreground sm:text-6xl">
-                      Book faster. Organize better. Stay game ready.
+                      {t("login.title", "Book faster. Organize better. Stay game ready.")}
                     </h1>
                     <p className="max-w-lg text-base leading-7 text-muted-foreground">
-                      One sign-in gets you from discovery to booking, team coordination, and
-                      operator tools without switching mental gears.
+                      {t(
+                        "login.copy",
+                        "One sign-in gets you from discovery to booking, team coordination, and operator tools without switching mental gears.",
+                      )}
                     </p>
                   </div>
                 </div>
@@ -187,18 +195,21 @@ export default function LoginPage() {
                   {[
                     {
                       icon: Sparkles,
-                      title: "Faster access",
-                      copy: "Email or phone OTP with no password friction.",
+                      title: t("login.featureFast", "Faster access"),
+                      copy: t("login.featureFastCopy", "Email or phone OTP with no password friction."),
                     },
                     {
                       icon: ShieldCheck,
-                      title: "Role-aware routing",
-                      copy: "Admins land in review mode, players land in their workspace.",
+                      title: t("login.featureRole", "Role-aware routing"),
+                      copy: t(
+                        "login.featureRoleCopy",
+                        "Admins land in review mode, players land in their workspace.",
+                      ),
                     },
                     {
                       icon: TimerReset,
-                      title: "Low-noise flow",
-                      copy: "Clear state changes from request to verification.",
+                      title: t("login.featureFlow", "Low-noise flow"),
+                      copy: t("login.featureFlowCopy", "Clear state changes from request to verification."),
                     },
                   ].map((item) => (
                     <div
@@ -224,13 +235,16 @@ export default function LoginPage() {
             <Card className="surface-panel border-border/70 py-0 shadow-xl">
               <CardHeader className="border-b border-border/70 px-6 py-6 sm:px-8">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-2">
-                    <p className="section-kicker">Sign in</p>
+                  <div className="flex flex-col gap-2">
+                    <p className="section-kicker">{t("login.cardKicker", "Sign in")}</p>
                     <CardTitle className="text-3xl font-semibold tracking-tight">
-                      Enter Courtly
+                      {t("login.cardTitle", "Enter Courtly")}
                     </CardTitle>
                     <CardDescription className="max-w-md text-sm leading-6">
-                      Use the delivery channel that gets you into the booking flow fastest.
+                      {t(
+                        "login.cardDescription",
+                        "Use the delivery channel that gets you into the booking flow fastest.",
+                      )}
                     </CardDescription>
                   </div>
                   <div className="flex size-12 items-center justify-center rounded-[1.1rem] border border-primary/20 bg-primary/10 font-display text-lg font-semibold text-primary">
@@ -259,30 +273,30 @@ export default function LoginPage() {
                         <TabsList className="grid h-12 w-full grid-cols-2 rounded-full border border-border/80 bg-accent/35 p-1">
                           <TabsTrigger value="email" className="rounded-full">
                             <Mail data-icon="inline-start" />
-                            Email
+                            {t("login.email", "Email")}
                           </TabsTrigger>
                           <TabsTrigger value="phone" className="rounded-full">
                             <Phone data-icon="inline-start" />
-                            Phone
+                            {t("login.phone", "Phone")}
                           </TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="email" className="mt-5">
                           <div className="flex flex-col gap-3">
                             <Label htmlFor="email" className="text-sm font-medium">
-                              Work email
+                              {t("login.workEmail", "Work email")}
                             </Label>
                             <Input
                               id="email"
                               type="email"
                               value={email}
                               onChange={(event) => setEmail(event.target.value)}
-                              placeholder="player@courtly.com"
+                              placeholder={t("login.emailPlaceholder", "player@courtly.com")}
                               required
                               className="h-12 rounded-2xl"
                             />
                             <p className="text-sm leading-6 text-muted-foreground">
-                              Best for desktop access and longer operator sessions.
+                              {t("login.emailHelp", "Best for desktop access and longer operator sessions.")}
                             </p>
                           </div>
                         </TabsContent>
@@ -290,26 +304,26 @@ export default function LoginPage() {
                         <TabsContent value="phone" className="mt-5">
                           <div className="flex flex-col gap-3">
                             <Label htmlFor="phone" className="text-sm font-medium">
-                              Mobile number
+                              {t("login.mobileNumber", "Mobile number")}
                             </Label>
                             <Input
                               id="phone"
                               type="tel"
                               value={phone}
                               onChange={(event) => setPhone(event.target.value)}
-                              placeholder="+20 100 000 0000"
+                              placeholder={t("login.phonePlaceholder", "+20 100 000 0000")}
                               required
                               className="h-12 rounded-2xl"
                             />
                             <p className="text-sm leading-6 text-muted-foreground">
-                              Best when you need to jump from discovery to booking quickly.
+                              {t("login.phoneHelp", "Best when you need to jump from discovery to booking quickly.")}
                             </p>
                           </div>
                         </TabsContent>
                       </Tabs>
 
                       <Button type="submit" disabled={loading} className="h-12 rounded-full">
-                        {loading ? <Loader2 className="animate-spin" /> : "Send access code"}
+                        {loading ? <Loader2 className="animate-spin" /> : t("login.sendAccessCode", "Send access code")}
                       </Button>
                     </motion.form>
                   ) : (
@@ -322,19 +336,23 @@ export default function LoginPage() {
                       onSubmit={handleVerifyOTP}
                       className="flex flex-col gap-6"
                     >
-                      <div className="space-y-2">
-                        <p className="section-kicker">Verify code</p>
+                      <div className="flex flex-col gap-2">
+                        <p className="section-kicker">{t("login.verifyKicker", "Verify code")}</p>
                         <h2 className="font-display text-2xl font-semibold tracking-tight">
-                          Check your {method === "email" ? "inbox" : "messages"}
+                          {method === "email"
+                            ? t("login.checkInbox", "Check your inbox")
+                            : t("login.checkMessages", "Check your messages")}
                         </h2>
                         <p className="text-sm leading-6 text-muted-foreground">
-                          Enter the code sent to {method === "email" ? email : phone}.
+                          {t("login.enterCode", "Enter the code sent to {target}.", {
+                            target: method === "email" ? email : phone,
+                          })}
                         </p>
                       </div>
 
                       <div className="flex flex-col gap-3">
                         <Label htmlFor="otp" className="text-sm font-medium">
-                          One-time passcode
+                          {t("login.otpLabel", "One-time passcode")}
                         </Label>
                         <Input
                           id="otp"
@@ -343,7 +361,7 @@ export default function LoginPage() {
                           maxLength={10}
                           value={otp}
                           onChange={(event) => setOtp(event.target.value)}
-                          placeholder="000000"
+                          placeholder={t("login.otpPlaceholder", "000000")}
                           required
                           className="h-14 rounded-[1.35rem] text-center font-display text-3xl tracking-[0.35em]"
                         />
@@ -351,7 +369,9 @@ export default function LoginPage() {
 
                       <div className="flex flex-col gap-3 sm:flex-row">
                         <Button type="submit" disabled={loading} className="h-12 flex-1 rounded-full">
-                          {loading ? <Loader2 className="animate-spin" /> : "Confirm and continue"}
+                          {loading
+                            ? <Loader2 className="animate-spin" />
+                            : t("login.confirmAndContinue", "Confirm and continue")}
                         </Button>
                         <Button
                           type="button"
@@ -362,7 +382,7 @@ export default function LoginPage() {
                           }}
                           className="h-12 rounded-full"
                         >
-                          Change method
+                          {t("login.changeMethod", "Change method")}
                         </Button>
                       </div>
                     </motion.form>
@@ -376,3 +396,4 @@ export default function LoginPage() {
     </div>
   );
 }
+

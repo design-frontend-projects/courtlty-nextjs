@@ -21,6 +21,25 @@ type ChatMessage = {
   } | null;
 };
 
+type RawChatMessage = Omit<ChatMessage, "profiles"> & {
+  profiles:
+    | {
+        first_name: string | null;
+        last_name: string | null;
+        avatar_url: string | null;
+        email: string | null;
+      }[]
+    | ChatMessage["profiles"];
+};
+
+function normalizeChatMessage(message: RawChatMessage): ChatMessage {
+  const profileRecord = Array.isArray(message.profiles) ? message.profiles[0] : message.profiles;
+  return {
+    ...message,
+    profiles: profileRecord ?? null,
+  };
+}
+
 export function TeamChat({
   teamId,
   currentUserId,
@@ -41,7 +60,7 @@ export function TeamChat({
         .eq("team_id", teamId)
         .order("created_at", { ascending: true });
       if (data) {
-        setMessages(data as ChatMessage[]);
+        setMessages((data as RawChatMessage[]).map((message) => normalizeChatMessage(message)));
       }
     };
 

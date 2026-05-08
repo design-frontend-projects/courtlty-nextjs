@@ -34,12 +34,16 @@ import {
   MapPin,
 } from "lucide-react";
 
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { useI18n } from "@/components/providers/i18n-provider";
+
 const navLinks = [
-  { href: "/courts", label: "Courts", icon: MapPin },
-  { href: "/teams", label: "Teams", icon: Users },
-];
+  { href: "/courts", labelKey: "common.courts", icon: MapPin },
+  { href: "/teams", labelKey: "common.teams", icon: Users },
+] as const;
 
 export function PublicNavbar() {
+  const { t } = useI18n();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
   const [hasTeam, setHasTeam] = useState(false);
@@ -67,14 +71,14 @@ export function PublicNavbar() {
         setHasTeam((count || 0) > 0 || (ownedCount || 0) > 0);
       }
     };
-    getUserData();
+    void getUserData();
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
       if (session?.user) {
-        getUserData();
+        void getUserData();
       }
     });
 
@@ -109,7 +113,7 @@ export function PublicNavbar() {
                   Courtly
                 </span>
                 <span className="hidden text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-muted-foreground md:block">
-                  Premium Athletic Booking
+                  {t("navbar.brandTagline", "Premium Athletic Booking")}
                 </span>
               </div>
             </Link>
@@ -118,10 +122,12 @@ export function PublicNavbar() {
                 <Link
                   href="/"
                   className={`rounded-full px-3 py-2 text-sm font-medium transition-colors ${
-                    pathname === "/" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground"
+                    pathname === "/"
+                      ? "bg-accent text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  Home
+                  {t("common.home", "Home")}
                 </Link>
               ) : null}
               {navLinks.map((link) => (
@@ -134,7 +140,7 @@ export function PublicNavbar() {
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {link.label}
+                  {t(link.labelKey, link.href === "/courts" ? "Courts" : "Teams")}
                 </Link>
               ))}
               {user ? (
@@ -147,7 +153,7 @@ export function PublicNavbar() {
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    Dashboard
+                    {t("common.dashboard", "Dashboard")}
                   </Link>
                   <Link
                     href="/profile"
@@ -157,7 +163,7 @@ export function PublicNavbar() {
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    Profile
+                    {t("common.profile", "Profile")}
                   </Link>
                 </>
               ) : null}
@@ -165,6 +171,7 @@ export function PublicNavbar() {
           </div>
 
           <div className="flex items-center gap-2">
+            <LanguageSwitcher className="hidden h-9 rounded-full sm:inline-flex" />
             {user ? (
               <>
                 <NotificationBell />
@@ -187,8 +194,8 @@ export function PublicNavbar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-56" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
-                      <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">User</p>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-sm font-medium leading-none">{t("navbar.user", "User")}</p>
                         <p className="text-xs leading-none text-muted-foreground">
                           {user.email}
                         </p>
@@ -197,34 +204,34 @@ export function PublicNavbar() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/profile">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
+                        <UserIcon className="me-2 h-4 w-4" />
+                        <span>{t("common.profile", "Profile")}</span>
                       </Link>
                     </DropdownMenuItem>
                     {hasTeam && (
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard">
-                          <Users className="mr-2 h-4 w-4" />
-                          <span>My Teams</span>
+                          <Users className="me-2 h-4 w-4" />
+                          <span>{t("navbar.myTeams", "My Teams")}</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      <LogOut className="me-2 h-4 w-4" />
+                      <span>{t("common.logout", "Log out")}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
             ) : !isWorkspace ? (
-              <div className="hidden items-center space-x-2 sm:flex">
+              <div className="hidden items-center flex gap-2 sm:flex">
                 <Button variant="ghost" asChild>
-                  <Link href="/login">Log in</Link>
+                  <Link href="/login">{t("common.login", "Log in")}</Link>
                 </Button>
                 <Button asChild size="lg" className="rounded-full px-5">
                   <Link href="/login?tab=signup">
-                    Start booking
+                    {t("navbar.startBooking", "Start booking")}
                     <ChevronRight data-icon="inline-end" />
                   </Link>
                 </Button>
@@ -254,7 +261,7 @@ export function PublicNavbar() {
                       }`}
                     >
                       <LayoutDashboard className="h-5 w-5" />
-                      Home
+                      {t("common.home", "Home")}
                     </Link>
                   ) : null}
                   {navLinks.map((link) => {
@@ -271,7 +278,7 @@ export function PublicNavbar() {
                         }`}
                       >
                         <Icon className="h-5 w-5" />
-                        {link.label}
+                        {t(link.labelKey, link.href === "/courts" ? "Courts" : "Teams")}
                       </Link>
                     );
                   })}
@@ -285,7 +292,7 @@ export function PublicNavbar() {
                         }`}
                       >
                         <LayoutDashboard className="h-5 w-5" />
-                        Dashboard
+                        {t("common.dashboard", "Dashboard")}
                       </Link>
                       <Link
                         href="/profile"
@@ -295,7 +302,7 @@ export function PublicNavbar() {
                         }`}
                       >
                         <UserIcon className="h-5 w-5" />
-                        Profile
+                        {t("common.profile", "Profile")}
                       </Link>
                     </>
                   ) : null}
@@ -303,7 +310,7 @@ export function PublicNavbar() {
 
                 <div className="border-t border-border/70 pt-6">
                   {user ? (
-                    <div className="space-y-4">
+                    <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-3 px-4">
                         <Avatar className="h-10 w-10">
                           <AvatarImage src={user.user_metadata?.avatar_url} />
@@ -316,11 +323,14 @@ export function PublicNavbar() {
                             {user.email}
                           </p>
                           <p className="text-xs text-muted-foreground">
-                            Logged in
+                            {t("navbar.loggedIn", "Logged in")}
                           </p>
                         </div>
                       </div>
                       <div className="flex flex-col gap-2">
+                        <div className="px-4 py-1">
+                          <LanguageSwitcher className="h-10 w-full justify-center rounded-full" />
+                        </div>
                         {hasTeam && (
                           <Link
                             href="/dashboard"
@@ -328,29 +338,30 @@ export function PublicNavbar() {
                             className="flex items-center gap-3 rounded-2xl px-4 py-3 font-medium hover:bg-muted transition-colors"
                           >
                             <Users className="h-5 w-5" />
-                            My squads
+                            {t("navbar.mySquads", "My squads")}
                           </Link>
                         )}
                         <button
                           onClick={() => {
-                            handleSignOut();
+                            void handleSignOut();
                             setMobileMenuOpen(false);
                           }}
                           className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-left font-medium text-red-600 transition-colors hover:bg-red-500/10"
                         >
                           <LogOut className="h-5 w-5" />
-                          Log out
+                          {t("common.logout", "Log out")}
                         </button>
                       </div>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-3 px-4">
+                      <LanguageSwitcher className="h-10 w-full justify-center rounded-full" />
                       <Button asChild className="w-full rounded-full">
                         <Link
                           href="/login"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          Log in
+                          {t("common.login", "Log in")}
                         </Link>
                       </Button>
                       <Button variant="outline" asChild className="w-full rounded-full">
@@ -358,7 +369,7 @@ export function PublicNavbar() {
                           href="/login?tab=signup"
                           onClick={() => setMobileMenuOpen(false)}
                         >
-                          Sign up
+                          {t("navbar.signUp", "Sign up")}
                         </Link>
                       </Button>
                     </div>
@@ -372,3 +383,4 @@ export function PublicNavbar() {
     </nav>
   );
 }
+

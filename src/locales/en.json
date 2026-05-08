@@ -1,0 +1,216 @@
+{
+  "common": {
+    "language": "Language",
+    "english": "English",
+    "arabic": "Arabic",
+    "switchLanguage": "Switch language",
+    "loading": "Loading...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "home": "Home",
+    "login": "Log in",
+    "logout": "Log out",
+    "profile": "Profile",
+    "settings": "Settings",
+    "dashboard": "Dashboard",
+    "teams": "Teams",
+    "courts": "Courts"
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "updating": "Updating..."
+  },
+  "navbar": {
+    "brandTagline": "Premium Athletic Booking",
+    "user": "User",
+    "myTeams": "My Teams",
+    "loggedIn": "Logged in",
+    "mySquads": "My squads",
+    "signUp": "Sign up",
+    "startBooking": "Start booking"
+  },
+  "admin": {
+    "operatorMode": "Operator mode",
+    "liveSite": "Live site",
+    "courtlyOperator": "Courtly operator",
+    "suiteTagline": "Operator suite",
+    "operations": "Operations",
+    "account": "Account",
+    "footerCopy": "Keep approvals, payouts, and venue quality in one high-clarity workspace.",
+    "route": {
+      "bookingsTitle": "Bookings hub",
+      "bookingsDescription": "Calendar, requests, and session changes.",
+      "approvalsTitle": "Approvals",
+      "approvalsDescription": "Venue submissions, growth signals, and fast decisions.",
+      "courtsTitle": "Courts",
+      "courtsDescription": "Venue inventory, listing health, and status control.",
+      "paymentsTitle": "Payments",
+      "paymentsDescription": "Settlement visibility and transaction oversight.",
+      "notificationsTitle": "Notifications",
+      "notificationsDescription": "System-wide and targeted operator communication.",
+      "profileTitle": "Profile",
+      "profileDescription": "Identity and account-level operating preferences.",
+      "settingsTitle": "Settings",
+      "settingsDescription": "Environment defaults, alerts, and privacy controls."
+    },
+    "sidebar": {
+      "bookings": "Bookings hub",
+      "approvals": "Approvals",
+      "courts": "Courts",
+      "payments": "Payments",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "toasts": {
+      "signedOut": "Signed out",
+      "signOutError": "Error signing out"
+    },
+    "settings": {
+      "page": {
+        "eyebrow": "Admin settings",
+        "title": "Tune the operator environment.",
+        "description": "Adjust notifications, appearance, privacy, and other preferences without leaving the admin shell."
+      },
+      "general": {
+        "regionalDefaultsTitle": "Regional defaults",
+        "regionalDefaultsDescription": "Set language and timezone defaults for the operator environment.",
+        "selectLanguage": "Select language"
+      },
+      "toasts": {
+        "themeUpdated": "Theme updated",
+        "notificationsSaved": "Notification preferences saved",
+        "savePreferencesFailed": "Failed to save preferences"
+      }
+    }
+  },
+  "homePage": {
+    "title": "Courtly - Book Sports Courts, Build Teams, Play Together",
+    "description": "Discover and book sports courts near you, create or join teams, and organize games with friends. The ultimate platform for sports enthusiasts."
+  },
+  "home": {
+    "hero": {
+      "badge": "Premium athletic booking",
+      "flow": "Book, recruit, and play from one flow",
+      "kicker": "Courtly",
+      "line1": "Book the court.",
+      "line2": "Build the squad.",
+      "line3": "Keep the session moving.",
+      "copy": "Discover high-quality venues, manage your next match, and keep team logistics in one sharp, mobile-first workspace.",
+      "exploreCourts": "Explore courts",
+      "browseTeams": "Browse teams",
+      "proof1Label": "Live court inventory",
+      "proof2Label": "Active players",
+      "proof3Label": "Weekly team sessions",
+      "sessionBoard": "Session board",
+      "tonight": "Tonight at 7:30 PM",
+      "available": "Available",
+      "rate": "Rate",
+      "roster": "Roster",
+      "playersConfirmed": "Players confirmed",
+      "schedule": "Schedule",
+      "duration": "Warm-up to final whistle",
+      "summary": "Courtly keeps search, booking, team status, and reminders on one board so the game does not stall between messages."
+    },
+    "features": {
+      "kicker": "How Courtly works",
+      "title": "One platform for venue search, booking, and team operations.",
+      "copy": "The product should feel sharp enough for operators and clear enough for casual players. Each workflow is reduced to the few decisions that actually move a session forward.",
+      "items": {
+        "discoveryTitle": "Discovery that feels local",
+        "discoveryDescription": "Search by city, sport, and price without losing the fast scan of court quality.",
+        "bookingTitle": "Booking built for momentum",
+        "bookingDescription": "Schedule time slots quickly, confirm availability, and keep payment tied to the booking flow.",
+        "squadsTitle": "Recruit and manage squads",
+        "squadsDescription": "Run open roster spots, member approvals, and team chat from the same operator surface.",
+        "paymentTitle": "Clear payment state",
+        "paymentDescription": "Keep totals, confirmations, and receipts visible so players know the booking is locked.",
+        "remindersTitle": "Reminders that reduce drop-off",
+        "remindersDescription": "Give players the session status they need without burying core actions under notification clutter.",
+        "trustTitle": "Trust at decision points",
+        "trustDescription": "Use proof, operator clarity, and consistent UI states to keep bookings credible."
+      }
+    },
+    "testimonials": {
+      "kicker": "Player feedback",
+      "title": "Built for people who need the session to happen on time.",
+      "copy": "The product earns trust when it removes friction from the last mile: finding a court, confirming who is in, and making the match feel locked.",
+      "items": {
+        "aName": "Ahmed Hassan",
+        "aRole": "Basketball captain",
+        "aQuote": "We stopped juggling chats, screenshots, and separate payment reminders. Courtly gave the whole session one control room.",
+        "sName": "Sarah Mitchell",
+        "sRole": "Tennis regular",
+        "sQuote": "The difference is speed. I can find a court, confirm a slot, and bring doubles together without getting lost in the flow.",
+        "mName": "Mohamed Ali",
+        "mRole": "Football team manager",
+        "mQuote": "Our squad finally has a clean system for approvals, match planning, and session details. It feels built for actual weekly play."
+      }
+    },
+    "cta": {
+      "kicker": "Start now",
+      "title": "Make the next match easier to book, easier to organize, and harder to drop.",
+      "copy": "Courtly is built for recurring sports sessions, not one-off booking widgets.",
+      "createAccount": "Create your account",
+      "browseCourts": "Browse courts"
+    },
+    "footer": {
+      "tagline": "Premium athletic booking and team ops.",
+      "copy": "Search high-quality venues, keep your team organized, and run the session with one reliable operating layer.",
+      "explore": "Explore",
+      "account": "Account",
+      "product": "Product",
+      "findCourts": "Find courts",
+      "browseTeams": "Browse teams",
+      "listCourt": "List your court",
+      "logIn": "Log in",
+      "dashboard": "Dashboard",
+      "profile": "Profile",
+      "courtManagement": "Court management",
+      "notifications": "Notifications",
+      "settings": "Settings",
+      "copyright": "Copyright {year} Courtly. Built for recurring play.",
+      "currency": "EGP"
+    }
+  },
+  "login": {
+    "home": "Home",
+    "badge": "Premium athletic access",
+    "accessKicker": "Courtly access",
+    "title": "Book faster. Organize better. Stay game ready.",
+    "copy": "One sign-in gets you from discovery to booking, team coordination, and operator tools without switching mental gears.",
+    "cardKicker": "Sign in",
+    "cardTitle": "Enter Courtly",
+    "cardDescription": "Use the delivery channel that gets you into the booking flow fastest.",
+    "email": "Email",
+    "phone": "Phone",
+    "workEmail": "Work email",
+    "mobileNumber": "Mobile number",
+    "emailPlaceholder": "player@courtly.com",
+    "phonePlaceholder": "+20 100 000 0000",
+    "emailHelp": "Best for desktop access and longer operator sessions.",
+    "phoneHelp": "Best when you need to jump from discovery to booking quickly.",
+    "sendAccessCode": "Send access code",
+    "verifyKicker": "Verify code",
+    "checkInbox": "Check your inbox",
+    "checkMessages": "Check your messages",
+    "enterCode": "Enter the code sent to {target}.",
+    "otpLabel": "One-time passcode",
+    "otpPlaceholder": "000000",
+    "confirmAndContinue": "Confirm and continue",
+    "changeMethod": "Change method",
+    "featureFast": "Faster access",
+    "featureFastCopy": "Email or phone OTP with no password friction.",
+    "featureRole": "Role-aware routing",
+    "featureRoleCopy": "Admins land in review mode, players land in their workspace.",
+    "featureFlow": "Low-noise flow",
+    "featureFlowCopy": "Clear state changes from request to verification.",
+    "toasts": {
+      "accessCodeSent": "Access code sent",
+      "sendCodeError": "Unable to send code",
+      "verifyCodeError": "Unable to verify code",
+      "missingUser": "No authenticated user returned"
+    }
+  }
+}
+

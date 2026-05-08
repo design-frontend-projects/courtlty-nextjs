@@ -21,46 +21,63 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 const routeMeta = [
   {
     match: (pathname: string) => pathname === "/admin" || pathname.startsWith("/admin/bookings"),
-    title: "Bookings hub",
-    description: "Calendar, requests, and session changes.",
+    titleKey: "admin.route.bookingsTitle",
+    descriptionKey: "admin.route.bookingsDescription",
+    fallbackTitle: "Bookings hub",
+    fallbackDescription: "Calendar, requests, and session changes.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/admin/dashboard"),
-    title: "Approvals",
-    description: "Venue submissions, growth signals, and fast decisions.",
+    titleKey: "admin.route.approvalsTitle",
+    descriptionKey: "admin.route.approvalsDescription",
+    fallbackTitle: "Approvals",
+    fallbackDescription: "Venue submissions, growth signals, and fast decisions.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/admin/courts"),
-    title: "Courts",
-    description: "Venue inventory, listing health, and status control.",
+    titleKey: "admin.route.courtsTitle",
+    descriptionKey: "admin.route.courtsDescription",
+    fallbackTitle: "Courts",
+    fallbackDescription: "Venue inventory, listing health, and status control.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/admin/payments"),
-    title: "Payments",
-    description: "Settlement visibility and transaction oversight.",
+    titleKey: "admin.route.paymentsTitle",
+    descriptionKey: "admin.route.paymentsDescription",
+    fallbackTitle: "Payments",
+    fallbackDescription: "Settlement visibility and transaction oversight.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/admin/notifications"),
-    title: "Notifications",
-    description: "System-wide and targeted operator communication.",
+    titleKey: "admin.route.notificationsTitle",
+    descriptionKey: "admin.route.notificationsDescription",
+    fallbackTitle: "Notifications",
+    fallbackDescription: "System-wide and targeted operator communication.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/admin/profile"),
-    title: "Profile",
-    description: "Identity and account-level operating preferences.",
+    titleKey: "admin.route.profileTitle",
+    descriptionKey: "admin.route.profileDescription",
+    fallbackTitle: "Profile",
+    fallbackDescription: "Identity and account-level operating preferences.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/admin/settings"),
-    title: "Settings",
-    description: "Environment defaults, alerts, and privacy controls.",
+    titleKey: "admin.route.settingsTitle",
+    descriptionKey: "admin.route.settingsDescription",
+    fallbackTitle: "Settings",
+    fallbackDescription: "Environment defaults, alerts, and privacy controls.",
   },
-];
+] as const;
 
 export function AdminNavbar() {
+  const { t } = useI18n();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [userData, setUserData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -105,11 +122,11 @@ export function AdminNavbar() {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      toast.success("Signed out");
+      toast.success(t("admin.toasts.signedOut", "Signed out"));
       router.push("/login");
       router.refresh();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Error signing out");
+      toast.error(error instanceof Error ? error.message : t("admin.toasts.signOutError", "Error signing out"));
     }
   };
 
@@ -121,21 +138,24 @@ export function AdminNavbar() {
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="truncate font-display text-2xl font-semibold tracking-tight">
-                {currentRoute.title}
+                {t(currentRoute.titleKey, currentRoute.fallbackTitle)}
               </h1>
               <Badge variant="secondary" className="rounded-full">
-                Operator mode
+                {t("admin.operatorMode", "Operator mode")}
               </Badge>
             </div>
-            <p className="truncate text-sm text-muted-foreground">{currentRoute.description}</p>
+            <p className="truncate text-sm text-muted-foreground">
+              {t(currentRoute.descriptionKey, currentRoute.fallbackDescription)}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher className="h-9 rounded-full" />
           <Button asChild variant="outline" className="hidden rounded-full md:inline-flex">
             <Link href="/">
               <Globe2 data-icon="inline-start" />
-              Live site
+              {t("admin.liveSite", "Live site")}
             </Link>
           </Button>
 
@@ -158,9 +178,9 @@ export function AdminNavbar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 rounded-2xl">
                 <DropdownMenuLabel className="font-normal">
-                  <div className="space-y-1">
+                  <div className="flex flex-col gap-1">
                     <p className="text-sm font-medium text-foreground">
-                      {profile?.full_name || "Courtly operator"}
+                      {profile?.full_name || t("admin.courtlyOperator", "Courtly operator")}
                     </p>
                     <p className="text-sm text-muted-foreground">{userData.email}</p>
                   </div>
@@ -169,13 +189,13 @@ export function AdminNavbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/admin/profile">
                     <UserRound />
-                    Profile
+                    {t("common.profile", "Profile")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/admin/settings">
                     <Settings2 />
-                    Settings
+                    {t("common.settings", "Settings")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -184,13 +204,13 @@ export function AdminNavbar() {
                   className="text-destructive focus:text-destructive"
                 >
                   <LogOut />
-                  Log out
+                  {t("common.logout", "Log out")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <Button asChild className="rounded-full">
-              <Link href="/login">Login</Link>
+              <Link href="/login">{t("common.login", "Log in")}</Link>
             </Button>
           )}
         </div>
@@ -198,3 +218,4 @@ export function AdminNavbar() {
     </header>
   );
 }
+

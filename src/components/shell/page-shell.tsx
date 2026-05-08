@@ -43,9 +43,9 @@ export function PageHeader({
         className,
       )}
     >
-      <div className="space-y-3">
+      <div className="flex flex-col gap-3">
         {eyebrow ? <p className="section-kicker">{eyebrow}</p> : null}
-        <div className="space-y-2">
+        <div className="flex flex-col gap-2">
           <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
             {title}
           </h1>
@@ -73,7 +73,7 @@ export function MetricTile({
   return (
     <Card className={cn("surface-panel gap-4 rounded-[1.75rem] py-5", className)}>
       <CardHeader className="flex flex-row items-start justify-between gap-4 pb-0">
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <CardDescription className="section-kicker text-[0.68rem]">{label}</CardDescription>
           <CardTitle className="text-3xl font-semibold tracking-tight">{value}</CardTitle>
         </div>
@@ -107,7 +107,7 @@ export function SectionShell({
     <Card className={cn("surface-panel gap-5 rounded-[2rem] py-0", className)}>
       <CardHeader className="border-b border-border/70 py-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div className="space-y-1">
+          <div className="flex flex-col gap-1">
             <CardTitle className="text-2xl font-semibold tracking-tight">{title}</CardTitle>
             {description ? <CardDescription>{description}</CardDescription> : null}
           </div>
@@ -144,7 +144,7 @@ export function EmptyState({
           <Icon className="size-7" />
         </div>
       ) : null}
-      <div className="space-y-2">
+      <div className="flex flex-col gap-2">
         <h3 className="font-display text-2xl font-semibold text-foreground">{title}</h3>
         <p className="mx-auto max-w-md text-sm leading-6 text-muted-foreground">{description}</p>
       </div>

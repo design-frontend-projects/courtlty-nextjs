@@ -148,7 +148,7 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
                 <div className="flex size-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 font-display text-lg font-semibold text-primary">
                   {review.profiles?.full_name?.charAt(0) || "U"}
                 </div>
-                <div className="min-w-0 flex-1 space-y-2">
+                <div className="min-w-0 flex-1 flex flex-col gap-2">
                   <div className="flex flex-wrap items-center gap-3">
                     <p className="font-medium text-foreground">{review.profiles?.full_name || "Anonymous"}</p>
                     <div className="flex items-center gap-1 text-amber-500">

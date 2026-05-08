@@ -39,6 +39,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { statusToBadgeVariant } from "@/components/ui/status";
 
 interface Team {
   id: string;
@@ -77,12 +78,11 @@ interface ProfilePageClientProps {
   recentBookings: Booking[];
 }
 
-const statusTone: Record<Booking["status"], string> = {
-  confirmed:
-    "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  pending: "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  cancelled: "border-destructive/20 bg-destructive/10 text-destructive",
-  completed: "border-primary/20 bg-primary/10 text-primary",
+const statusTone: Record<Booking["status"], "success" | "pending" | "destructive" | "info"> = {
+  confirmed: "success",
+  pending: "pending",
+  cancelled: "destructive",
+  completed: "info",
 } as const;
 
 export default function ProfilePageClient({
@@ -231,7 +231,7 @@ export default function ProfilePageClient({
           title="Identity"
           description="Primary contact data, role, and access state."
           className="xl:col-span-1"
-          contentClassName="space-y-5"
+          contentClassName="flex flex-col gap-5"
         >
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
             <div className="relative">
@@ -260,7 +260,7 @@ export default function ProfilePageClient({
               />
             </div>
 
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               <div>
                 <h2 className="font-display text-3xl font-semibold tracking-tight">
                   {profile?.full_name || "Player"}
@@ -276,10 +276,7 @@ export default function ProfilePageClient({
                   <ShieldCheck className="mr-1 size-3.5" />
                   {profile?.role || "player"}
                 </Badge>
-                <Badge
-                  variant="secondary"
-                  className="rounded-full border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                >
+                <Badge variant="success" className="rounded-full">
                   Active
                 </Badge>
               </div>
@@ -324,7 +321,7 @@ export default function ProfilePageClient({
         />
       </section>
 
-      <Tabs defaultValue="overview" className="space-y-6">
+      <Tabs defaultValue="overview" className="flex flex-col gap-6">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-2 rounded-[1.5rem] border border-border/70 bg-accent/20 p-2">
           <TabsTrigger value="overview" className="rounded-full px-5">
             Overview
@@ -354,13 +351,10 @@ export default function ProfilePageClient({
                     key={booking.id}
                     className="flex flex-col gap-4 rounded-[1.5rem] border border-border/70 bg-accent/18 px-4 py-4 lg:flex-row lg:items-center lg:justify-between"
                   >
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <p className="font-medium text-foreground">{booking.court?.name || "Unknown court"}</p>
-                        <Badge
-                          variant="secondary"
-                          className={`rounded-full border ${statusTone[booking.status] || "border-border/70"}`}
-                        >
+                        <Badge variant={statusTone[booking.status] ?? "secondary"} className="rounded-full capitalize">
                           {booking.status}
                         </Badge>
                         <Badge variant="secondary" className="rounded-full capitalize">
@@ -420,7 +414,7 @@ export default function ProfilePageClient({
                 {teams.map((membership) => (
                   <div key={membership.id} className="surface-panel rounded-[1.6rem] px-5 py-5">
                     <div className="flex items-start justify-between gap-4">
-                      <div className="space-y-3">
+                      <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-3">
                           <div className="flex size-12 items-center justify-center rounded-[1rem] border border-primary/15 bg-primary/10 font-display text-xl font-semibold text-primary">
                             {membership.team?.name?.charAt(0) || "T"}
@@ -439,8 +433,10 @@ export default function ProfilePageClient({
                             {membership.role}
                           </Badge>
                           <Badge
-                            variant="secondary"
-                            className="rounded-full border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                            variant={statusToBadgeVariant[
+                              membership.status === "pending" ? "pending" : "success"
+                            ]}
+                            className="rounded-full capitalize"
                           >
                             {membership.status}
                           </Badge>
@@ -477,7 +473,7 @@ export default function ProfilePageClient({
           >
             <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
               <div className="grid gap-5 md:grid-cols-2">
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3">
                   <Label htmlFor="first_name">First name</Label>
                   <Input
                     id="first_name"
@@ -490,7 +486,7 @@ export default function ProfilePageClient({
                   ) : null}
                 </div>
 
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3">
                   <Label htmlFor="last_name">Last name</Label>
                   <Input
                     id="last_name"
@@ -505,7 +501,7 @@ export default function ProfilePageClient({
               </div>
 
               <div className="grid gap-5 md:grid-cols-2">
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3">
                   <Label htmlFor="full_name">Display name</Label>
                   <Input
                     id="full_name"
@@ -518,7 +514,7 @@ export default function ProfilePageClient({
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="flex flex-col gap-3">
                   <Label htmlFor="phone">Phone number</Label>
                   <Input
                     id="phone"
@@ -536,7 +532,7 @@ export default function ProfilePageClient({
                 </div>
               </div>
 
-              <div className="space-y-3">
+              <div className="flex flex-col gap-3">
                 <Label htmlFor="account_email">Email</Label>
                 <Input
                   id="account_email"

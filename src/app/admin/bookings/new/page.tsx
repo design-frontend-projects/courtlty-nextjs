@@ -18,7 +18,7 @@ export default async function CreateBookingPage() {
     .order("full_name", { ascending: true });
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">Create New Booking</h1>
       <AdminBookingForm courts={courts || []} users={users || []} />
     </div>

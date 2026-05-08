@@ -6,7 +6,6 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import type { DatesSetArg, EventClickArg, EventInput } from "@fullcalendar/core";
-import { CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -15,6 +14,17 @@ import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/client";
 
 type CalendarBooking = Booking & {
+  courts?: { name: string | null } | null;
+  profiles?: { full_name: string | null } | null;
+};
+
+type CalendarEventBooking = {
+  id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  total_amount: number | null;
   courts?: { name: string | null } | null;
   profiles?: { full_name: string | null } | null;
 };
@@ -34,6 +44,25 @@ type FetchedBooking = {
   profiles: { full_name: string | null } | null;
 };
 
+function normalizeFetchedBooking(booking: {
+  id: string;
+  booking_date: string;
+  start_time: string;
+  end_time: string;
+  status: string;
+  total_amount: number | null;
+  courts: { name: string | null }[] | { name: string | null } | null;
+  profiles: { full_name: string | null }[] | { full_name: string | null } | null;
+}): FetchedBooking {
+  const courtRecord = Array.isArray(booking.courts) ? booking.courts[0] : booking.courts;
+  const profileRecord = Array.isArray(booking.profiles) ? booking.profiles[0] : booking.profiles;
+  return {
+    ...booking,
+    courts: courtRecord ?? null,
+    profiles: profileRecord ?? null,
+  };
+}
+
 const statusTone: Record<string, { background: string; border: string }> = {
   confirmed: { background: "#0f766e", border: "#14b8a6" },
   pending: { background: "#a16207", border: "#f59e0b" },
@@ -41,7 +70,7 @@ const statusTone: Record<string, { background: string; border: string }> = {
   completed: { background: "#1d4ed8", border: "#60a5fa" },
 };
 
-function toCalendarEvent(booking: CalendarBooking): EventInput {
+function toCalendarEvent(booking: CalendarEventBooking): EventInput {
   const tone = statusTone[booking.status] || { background: "#334155", border: "#64748b" };
 
   return {
@@ -80,7 +109,10 @@ export default function BookingsCalendar({ initialBookings }: BookingsCalendarPr
         throw error;
       }
 
-      setEvents(((data || []) as FetchedBooking[]).map((booking) => toCalendarEvent(booking)));
+      const normalized = ((data || []) as unknown as FetchedBooking[]).map((booking) =>
+        normalizeFetchedBooking(booking as unknown as Parameters<typeof normalizeFetchedBooking>[0]),
+      );
+      setEvents(normalized.map((booking) => toCalendarEvent(booking)));
     } catch (error) {
       console.error("Error fetching bookings", error);
       toast.error("Failed to fetch bookings");
@@ -98,17 +130,17 @@ export default function BookingsCalendar({ initialBookings }: BookingsCalendarPr
   return (
     <div className="operator-panel overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-5">
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           <h2 className="font-display text-2xl font-semibold tracking-tight">Schedule board</h2>
           <p className="text-sm text-muted-foreground">
             View sessions by day, week, or month and open them directly from the board.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge className="rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+          <Badge variant="success" className="rounded-full">
             Confirmed
           </Badge>
-          <Badge className="rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300">
+          <Badge variant="pending" className="rounded-full">
             Pending
           </Badge>
           <Badge className="rounded-full bg-destructive/15 text-destructive">Cancelled</Badge>
@@ -185,12 +217,6 @@ export default function BookingsCalendar({ initialBookings }: BookingsCalendarPr
             slotMaxTime="24:00:00"
             expandRows
             dayHeaderFormat={{ weekday: "short", day: "numeric" }}
-            noEventsContent={() => (
-              <div className="flex flex-col items-center gap-2 py-10 text-sm text-muted-foreground">
-                <CalendarDays className="size-5 text-primary" />
-                No bookings in this range
-              </div>
-            )}
           />
         </div>
       </div>

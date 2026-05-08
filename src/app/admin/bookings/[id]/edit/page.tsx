@@ -38,7 +38,7 @@ export default async function EditBookingPage({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-bold">Edit Booking</h1>
       <AdminBookingForm
         courts={courts || []}

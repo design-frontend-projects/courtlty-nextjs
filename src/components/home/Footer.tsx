@@ -3,43 +3,51 @@
 import Link from "next/link";
 import { CalendarDays, Mail, MapPin, Phone } from "lucide-react";
 
-const footerGroups = {
-  Explore: [
-    { label: "Find courts", href: "/courts" },
-    { label: "Browse teams", href: "/teams" },
-    { label: "List your court", href: "/courts/submit" },
-  ],
-  Account: [
-    { label: "Log in", href: "/login" },
-    { label: "Dashboard", href: "/dashboard" },
-    { label: "Profile", href: "/profile" },
-  ],
-  Product: [
-    { label: "Court management", href: "/admin" },
-    { label: "Notifications", href: "/admin/notifications" },
-    { label: "Settings", href: "/admin/settings" },
-  ],
-};
+import { useI18n } from "@/components/providers/i18n-provider";
 
 export default function Footer() {
+  const { t } = useI18n();
+
+  const footerGroups = {
+    [t("home.footer.explore", "Explore")]: [
+      { label: t("home.footer.findCourts", "Find courts"), href: "/courts" },
+      { label: t("home.footer.browseTeams", "Browse teams"), href: "/teams" },
+      { label: t("home.footer.listCourt", "List your court"), href: "/courts/submit" },
+    ],
+    [t("home.footer.account", "Account")]: [
+      { label: t("home.footer.logIn", "Log in"), href: "/login" },
+      { label: t("home.footer.dashboard", "Dashboard"), href: "/dashboard" },
+      { label: t("home.footer.profile", "Profile"), href: "/profile" },
+    ],
+    [t("home.footer.product", "Product")]: [
+      { label: t("home.footer.courtManagement", "Court management"), href: "/admin" },
+      { label: t("home.footer.notifications", "Notifications"), href: "/admin/notifications" },
+      { label: t("home.footer.settings", "Settings"), href: "/admin/settings" },
+    ],
+  };
+
   return (
     <footer className="border-t border-border/70 bg-card/60">
       <div className="page-shell gap-12 pt-10">
         <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
-          <div className="space-y-5">
+          <div className="flex flex-col gap-5">
             <Link href="/" className="flex items-center gap-3">
               <div className="flex size-11 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
                 <CalendarDays className="size-5" />
               </div>
               <div>
                 <p className="brand-wordmark text-3xl font-semibold text-foreground">Courtly</p>
-                <p className="text-sm text-muted-foreground">Premium athletic booking and team ops.</p>
+                <p className="text-sm text-muted-foreground">
+                  {t("home.footer.tagline", "Premium athletic booking and team ops.")}
+                </p>
               </div>
             </Link>
 
             <p className="max-w-md text-sm leading-6 text-muted-foreground">
-              Search high-quality venues, keep your team organized, and run the session with one
-              reliable operating layer.
+              {t(
+                "home.footer.copy",
+                "Search high-quality venues, keep your team organized, and run the session with one reliable operating layer.",
+              )}
             </p>
 
             <div className="grid gap-3 text-sm text-muted-foreground">
@@ -64,7 +72,7 @@ export default function Footer() {
 
           <div className="grid gap-8 sm:grid-cols-3">
             {Object.entries(footerGroups).map(([group, links]) => (
-              <div key={group} className="space-y-4">
+              <div key={group} className="flex flex-col gap-4">
                 <p className="section-kicker text-[0.68rem]">{group}</p>
                 <div className="flex flex-col gap-3">
                   {links.map((link) => (
@@ -83,13 +91,14 @@ export default function Footer() {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-border/70 pt-5 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-          <p>Copyright {new Date().getFullYear()} Courtly. Built for recurring play.</p>
+          <p>{t("home.footer.copyright", "Copyright {year} Courtly. Built for recurring play.", { year: new Date().getFullYear() })}</p>
           <div className="flex items-center gap-4">
-            <span>English</span>
-            <span>EGP</span>
+            <span>{t("common.english", "English")}</span>
+            <span>{t("home.footer.currency", "EGP")}</span>
           </div>
         </div>
       </div>
     </footer>
   );
 }
+

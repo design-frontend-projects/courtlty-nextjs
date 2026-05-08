@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { getServerI18n } from "@/lib/i18n/server";
 import { PageHeader } from "@/components/shell/page-shell";
 import SettingsClient from "./settings-client";
 
 export default async function AdminSettingsPage() {
+  const { t } = await getServerI18n();
   const supabase = await createClient();
 
   const {
@@ -24,9 +26,9 @@ export default async function AdminSettingsPage() {
   return (
     <div className="mx-auto flex w-full max-w-[88rem] flex-col gap-8">
       <PageHeader
-        eyebrow="Admin settings"
-        title="Tune the operator environment."
-        description="Adjust notifications, appearance, privacy, and other preferences without leaving the admin shell."
+        eyebrow={t("admin.settings.page.eyebrow", "Admin settings")}
+        title={t("admin.settings.page.title", "Tune the operator environment.")}
+        description={t("admin.settings.page.description", "Adjust notifications, appearance, privacy, and other preferences without leaving the admin shell.")}
       />
       <SettingsClient
         userId={user.id}

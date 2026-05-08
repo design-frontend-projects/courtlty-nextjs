@@ -219,7 +219,7 @@ export default function CourtImageUploader({
         </CardDescription>
       </CardHeader>
 
-      <CardContent className="space-y-6">
+      <CardContent className="flex flex-col gap-6">
         {/* Upload Area */}
         <div
           onDrop={handleDrop}

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Navigation, Search, Crosshair } from "lucide-react";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 const containerStyle = {
   width: "100%",
@@ -208,8 +209,11 @@ export function CourtMap({
 
   if (!isLoaded)
     return (
-      <div className="h-[400px] bg-muted animate-pulse rounded-xl flex items-center justify-center">
-        Loading Map...
+      <div className="flex h-[400px] items-center justify-center rounded-xl bg-muted/40">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Spinner />
+          Loading map...
+        </div>
       </div>
     );
 
@@ -227,7 +231,7 @@ export function CourtMap({
   if (!isInteractive && !courtLocation && !address) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {/* Header / Search Section */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
@@ -258,7 +262,7 @@ export function CourtMap({
               >
                 <Input
                   placeholder="Search for a place..."
-                  className="pl-9 bg-white dark:bg-gray-800"
+                  className="bg-card pl-9"
                 />
               </Autocomplete>
             </div>

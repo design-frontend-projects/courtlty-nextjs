@@ -132,7 +132,7 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
   );
 
   return (
-    <FilterBar className="space-y-4 px-4 py-4 sm:px-5">
+    <FilterBar className="flex flex-col gap-4 px-4 py-4 sm:px-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="section-kicker">Discovery controls</p>

@@ -19,6 +19,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface SettingsClientProps {
   userId: string;
@@ -34,6 +35,7 @@ export default function SettingsClient({
   userId,
   initialPreferences,
 }: SettingsClientProps) {
+  const { locale, setLocale, t } = useI18n();
   const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("system");
   const [emailNotifications, setEmailNotifications] = useState(
@@ -78,7 +80,7 @@ export default function SettingsClient({
     setTheme(newTheme);
     sessionStorage.setItem("theme", newTheme);
     applyTheme(newTheme);
-    toast.success("Theme updated");
+    toast.success(t("admin.settings.toasts.themeUpdated", "Theme updated"));
   };
 
   const handleSaveNotifications = async () => {
@@ -102,17 +104,17 @@ export default function SettingsClient({
         throw error;
       }
 
-      toast.success("Notification preferences saved");
+      toast.success(t("admin.settings.toasts.notificationsSaved", "Notification preferences saved"));
       router.refresh();
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Failed to save preferences");
+      toast.error(error instanceof Error ? error.message : t("admin.settings.toasts.savePreferencesFailed", "Failed to save preferences"));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Tabs defaultValue="general" className="space-y-6">
+    <Tabs defaultValue="general" className="flex flex-col gap-6">
       <TabsList className="flex h-auto w-full flex-wrap justify-start gap-2 rounded-[1.5rem] border border-border/70 bg-accent/20 p-2">
         <TabsTrigger value="general" className="rounded-full px-5">
           General
@@ -133,25 +135,29 @@ export default function SettingsClient({
 
       <TabsContent value="general" className="mt-0">
         <SectionShell
-          title="Regional defaults"
-          description="Set language and timezone defaults for the operator environment."
+          title={t("admin.settings.general.regionalDefaultsTitle", "Regional defaults")}
+          description={t("admin.settings.general.regionalDefaultsDescription", "Set language and timezone defaults for the operator environment.")}
         >
           <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-3">
-              <Label htmlFor="admin_language">Language</Label>
-              <Select defaultValue="en">
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="admin_language">{t("common.language", "Language")}</Label>
+              <Select
+                value={locale}
+                onValueChange={(value: "en" | "ar") => {
+                  void setLocale(value);
+                }}
+              >
                 <SelectTrigger id="admin_language" className="h-12 rounded-2xl">
-                  <SelectValue placeholder="Select language" />
+                  <SelectValue placeholder={t("admin.settings.general.selectLanguage", "Select language")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="ar">Arabic</SelectItem>
-                  <SelectItem value="fr">French</SelectItem>
+                  <SelectItem value="en">{t("common.english", "English")}</SelectItem>
+                  <SelectItem value="ar">{t("common.arabic", "Arabic")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               <Label htmlFor="admin_timezone">Timezone</Label>
               <Select defaultValue="UTC">
                 <SelectTrigger id="admin_timezone" className="h-12 rounded-2xl">
@@ -221,7 +227,7 @@ export default function SettingsClient({
                     <div className="rounded-xl border border-border/70 bg-background/80 p-2 text-primary">
                       <item.icon className="size-4" />
                     </div>
-                    <div className="space-y-1">
+                    <div className="flex flex-col gap-1">
                       <Label htmlFor={item.id}>{item.label}</Label>
                       <p className="text-sm leading-6 text-muted-foreground">{item.description}</p>
                     </div>
@@ -302,7 +308,7 @@ export default function SettingsClient({
       <TabsContent value="privacy" className="mt-0">
         <SectionShell title="Privacy controls" description="Visibility, export, and account lifecycle settings.">
           <div className="grid gap-5">
-            <div className="space-y-3">
+            <div className="flex flex-col gap-3">
               <Label htmlFor="admin_visibility">Data visibility</Label>
               <Select defaultValue="public">
                 <SelectTrigger id="admin_visibility" className="h-12 rounded-2xl md:max-w-sm">

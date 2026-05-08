@@ -164,7 +164,7 @@ export default function ProfileClient({ initialProfile, userEmail }: ProfileClie
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <h2 className="font-display text-2xl font-semibold tracking-tight">
                   {initialProfile?.full_name || "Courtly operator"}
                 </h2>
@@ -185,7 +185,7 @@ export default function ProfileClient({ initialProfile, userEmail }: ProfileClie
 
           <div className="grid gap-5">
             <div className="grid gap-5 md:grid-cols-2">
-              <div className="space-y-3">
+              <div className="flex flex-col gap-3">
                 <Label htmlFor="admin_full_name">Full name</Label>
                 <Input
                   id="admin_full_name"
@@ -198,7 +198,7 @@ export default function ProfileClient({ initialProfile, userEmail }: ProfileClie
                 ) : null}
               </div>
 
-              <div className="space-y-3">
+              <div className="flex flex-col gap-3">
                 <Label htmlFor="admin_phone">Phone</Label>
                 <Input
                   id="admin_phone"

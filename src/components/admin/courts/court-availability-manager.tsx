@@ -230,8 +230,8 @@ export default function CourtAvailabilityManager({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
+              <div className="flex flex-col gap-4 py-4">
+                <div className="flex flex-col gap-2">
                   <Label>Day of Week</Label>
                   <Select
                     value={dayOfWeek.toString()}
@@ -254,7 +254,7 @@ export default function CourtAvailabilityManager({
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <Label htmlFor="start_time">Start Time</Label>
                     <Input
                       id="start_time"
@@ -263,7 +263,7 @@ export default function CourtAvailabilityManager({
                       onChange={(e) => setStartTime(e.target.value)}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <Label htmlFor="end_time">End Time</Label>
                     <Input
                       id="end_time"
@@ -275,7 +275,7 @@ export default function CourtAvailabilityManager({
                 </div>
 
                 <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
+                  <div className="flex flex-col gap-0.5">
                     <Label>Available for Booking</Label>
                     <p className="text-sm text-muted-foreground">
                       Toggle off to mark as unavailable
@@ -316,15 +316,15 @@ export default function CourtAvailabilityManager({
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4">
             {groupedSlots
               .filter((day) => day.slots.length > 0)
               .map((day) => (
-                <div key={day.value} className="space-y-2">
+                <div key={day.value} className="flex flex-col gap-2">
                   <h4 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide">
                     {day.label}
                   </h4>
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     {day.slots.map((slot) => (
                       <div
                         key={slot.id}

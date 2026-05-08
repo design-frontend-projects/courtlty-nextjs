@@ -56,6 +56,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { statusToBadgeVariant } from "@/components/ui/status";
 
 type BookingWithRelations = Booking & {
   courts: Pick<Court, "name"> | null;
@@ -66,12 +67,11 @@ interface BookingsTableProps {
   initialBookings: BookingWithRelations[];
 }
 
-const statusTone: Record<string, string> = {
-  confirmed:
-    "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  pending: "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  cancelled: "border-destructive/20 bg-destructive/10 text-destructive",
-  completed: "border-primary/20 bg-primary/10 text-primary",
+const statusTone: Record<string, "success" | "pending" | "destructive" | "info"> = {
+  confirmed: "success",
+  pending: "pending",
+  cancelled: "destructive",
+  completed: "info",
 };
 
 export default function BookingsTable({ initialBookings }: BookingsTableProps) {
@@ -168,7 +168,7 @@ export default function BookingsTable({ initialBookings }: BookingsTableProps) {
     <>
       <div className="operator-panel overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-5 py-5">
-          <div className="space-y-1">
+          <div className="flex flex-col gap-1">
             <h3 className="font-display text-2xl font-semibold tracking-tight">Booking requests</h3>
             <p className="text-sm text-muted-foreground">
               Fast access to schedule changes, confirmations, and deletions.
@@ -219,8 +219,8 @@ export default function BookingsTable({ initialBookings }: BookingsTableProps) {
                     <TableCell>${booking.total_amount}</TableCell>
                     <TableCell>
                       <Badge
-                        variant="secondary"
-                        className={`rounded-full border ${statusTone[booking.status] || "border-border/70"}`}
+                        variant={statusToBadgeVariant[statusTone[booking.status] ?? "info"]}
+                        className="rounded-full capitalize"
                       >
                         {booking.status}
                       </Badge>
@@ -312,7 +312,7 @@ export default function BookingsTable({ initialBookings }: BookingsTableProps) {
               Push an update to the user attached to this booking.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-3 py-2">
+          <div className="flex flex-col gap-3 py-2">
             <Label htmlFor="notification_message">Message</Label>
             <Textarea
               id="notification_message"

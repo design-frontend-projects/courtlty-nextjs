@@ -94,11 +94,11 @@ export default async function TeamsPage() {
             <Link key={team.id} href={`/teams/${team.id}`} className="group">
               <div className="surface-panel h-full rounded-[2rem] px-5 py-5 transition-transform duration-200 group-hover:-translate-y-1">
                 <div className="flex items-start justify-between gap-4">
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-3">
                     <div className="flex size-14 items-center justify-center rounded-[1.3rem] border border-primary/15 bg-primary/10 font-display text-2xl font-semibold text-primary">
                       {team.name.charAt(0)}
                     </div>
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-2">
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="font-display text-3xl font-semibold tracking-tight">{team.name}</h2>
                         <Badge variant="secondary" className="rounded-full capitalize">
@@ -113,7 +113,7 @@ export default async function TeamsPage() {
                     </div>
                   </div>
                   {team.looking_for_players ? (
-                    <Badge className="rounded-full border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                    <Badge variant="success" className="rounded-full">
                       Recruiting
                     </Badge>
                   ) : null}

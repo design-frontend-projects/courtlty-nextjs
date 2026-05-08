@@ -33,16 +33,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { statusToBadgeVariant } from "@/components/ui/status";
 
 interface AdminCourtsClientProps {
   initialCourts: CourtWithDetails[];
 }
 
-const statusTone: Record<string, string> = {
-  approved:
-    "border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
-  pending: "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  rejected: "border-destructive/20 bg-destructive/10 text-destructive",
+const statusTone: Record<string, "success" | "pending" | "destructive"> = {
+  approved: "success",
+  pending: "pending",
+  rejected: "destructive",
 };
 
 export default function AdminCourtsClient({ initialCourts }: AdminCourtsClientProps) {
@@ -149,8 +149,8 @@ export default function AdminCourtsClient({ initialCourts }: AdminCourtsClientPr
                   <TableCell>${court.price_per_hour}/hr</TableCell>
                   <TableCell>
                     <Badge
-                      variant="secondary"
-                      className={`rounded-full border ${statusTone[court.status] || "border-border/70"}`}
+                      variant={statusToBadgeVariant[statusTone[court.status] ?? "pending"]}
+                      className="rounded-full capitalize"
                     >
                       {court.status}
                     </Badge>

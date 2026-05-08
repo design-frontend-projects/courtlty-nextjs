@@ -66,7 +66,7 @@ export default async function AdminEditCourtPage({
   }));
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto flex flex-col gap-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Edit Court</h1>
         <p className="text-muted-foreground">Update details for {court.name}</p>

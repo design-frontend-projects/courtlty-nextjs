@@ -71,7 +71,7 @@ export function PaymentDialog({
               <div className="rounded-full border border-emerald-500/18 bg-emerald-500/12 p-4 text-emerald-600 dark:text-emerald-300">
                 <CheckCircle2 className="size-8" />
               </div>
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <p className="font-display text-2xl font-semibold">{bookingDetails.courtName}</p>
                 <p className="text-sm text-muted-foreground">
                   {format(new Date(bookingDetails.date), "PPP")} at {bookingDetails.time}

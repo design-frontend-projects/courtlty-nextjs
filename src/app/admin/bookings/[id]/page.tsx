@@ -30,7 +30,7 @@ export default async function BookingDetailsPage({
   if (!booking) notFound();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto flex flex-col gap-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Booking Details</h1>
         <Button asChild>
@@ -51,7 +51,7 @@ export default async function BookingDetailsPage({
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="flex flex-col gap-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="text-sm font-medium text-gray-500">Court</h3>

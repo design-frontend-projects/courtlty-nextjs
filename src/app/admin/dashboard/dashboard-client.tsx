@@ -124,15 +124,12 @@ export default function AdminDashboardClient({
                 className="operator-panel px-5 py-5"
               >
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-                  <div className="space-y-3">
+                  <div className="flex flex-col gap-3">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="font-display text-3xl font-semibold tracking-tight">
                         {court.name}
                       </h2>
-                      <Badge
-                        variant="secondary"
-                        className="rounded-full border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300"
-                      >
+                      <Badge variant="pending" className="rounded-full">
                         Pending
                       </Badge>
                     </div>

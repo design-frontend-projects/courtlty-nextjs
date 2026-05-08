@@ -44,13 +44,13 @@ export function BookingDetailsModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 py-4">
+        <div className="flex flex-col gap-4 py-4">
           {bookings.map((booking) => (
             <div
               key={booking.id}
               className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 border rounded-lg bg-card"
             >
-              <div className="space-y-1">
+              <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold">{booking.courts?.name}</h4>
                   <Badge variant="outline" className="capitalize">

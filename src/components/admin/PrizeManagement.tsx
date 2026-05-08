@@ -123,8 +123,8 @@ export default function PrizeManagement() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Name</label>
               <Input
                 {...form.register("name")}
@@ -137,7 +137,7 @@ export default function PrizeManagement() {
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Description</label>
               <Textarea
                 {...form.register("description")}
@@ -146,7 +146,7 @@ export default function PrizeManagement() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Points Cost</label>
                 <Input
                   type="number"
@@ -158,7 +158,7 @@ export default function PrizeManagement() {
                   </p>
                 )}
               </div>
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium">Quantity</label>
                 <Input
                   type="number"
@@ -167,7 +167,7 @@ export default function PrizeManagement() {
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">Image URL</label>
               <Input
                 {...form.register("image_url")}
