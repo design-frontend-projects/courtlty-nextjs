@@ -46,6 +46,7 @@ export function PublicNavbar() {
   const { t } = useI18n();
   const pathname = usePathname();
   const [user, setUser] = useState<User | null>(null);
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
   const [hasTeam, setHasTeam] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const supabase = createClient();
@@ -58,17 +59,23 @@ export function PublicNavbar() {
       setUser(user);
 
       if (user) {
-        const { count } = await supabase
-          .from("team_members")
-          .select("*", { count: "exact", head: true })
-          .eq("player_id", user.id);
-
-        const { count: ownedCount } = await supabase
-          .from("teams")
-          .select("*", { count: "exact", head: true })
-          .eq("owner_id", user.id);
+        const [{ count }, { count: ownedCount }, { data: profile }] = await Promise.all([
+          supabase
+            .from("team_members")
+            .select("*", { count: "exact", head: true })
+            .eq("player_id", user.id),
+          supabase
+            .from("teams")
+            .select("*", { count: "exact", head: true })
+            .eq("owner_id", user.id),
+          supabase.from("profiles").select("avatar_url").eq("id", user.id).single(),
+        ]);
 
         setHasTeam((count || 0) > 0 || (ownedCount || 0) > 0);
+        setProfileAvatarUrl(profile?.avatar_url || null);
+      } else {
+        setHasTeam(false);
+        setProfileAvatarUrl(null);
       }
     };
     void getUserData();
@@ -183,7 +190,7 @@ export function PublicNavbar() {
                     >
                       <Avatar className="h-8 w-8">
                         <AvatarImage
-                          src={user.user_metadata?.avatar_url}
+                          src={profileAvatarUrl || user.user_metadata?.avatar_url}
                           alt={user.email || ""}
                         />
                         <AvatarFallback>
@@ -313,7 +320,7 @@ export function PublicNavbar() {
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center gap-3 px-4">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={user.user_metadata?.avatar_url} />
+                          <AvatarImage src={profileAvatarUrl || user.user_metadata?.avatar_url} />
                           <AvatarFallback>
                             {user.email?.[0].toUpperCase()}
                           </AvatarFallback>

@@ -1,13 +1,12 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import {
   CalendarDays,
-  Camera,
   Clock3,
   Edit3,
   Loader2,
@@ -33,7 +32,7 @@ import {
   SectionShell,
   WorkspaceShell,
 } from "@/components/shell/page-shell";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ProfileAvatarUploader from "@/components/profile/profile-avatar-uploader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -94,7 +93,6 @@ export default function ProfilePageClient({
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const supabase = createClient();
 
@@ -103,6 +101,7 @@ export default function ProfilePageClient({
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<ProfileFormData>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -115,61 +114,16 @@ export default function ProfilePageClient({
     },
   });
 
+  const firstName = watch("first_name");
+  const lastName = watch("last_name");
+  const derivedFullName = `${firstName || ""} ${lastName || ""}`.trim();
+  const readonlyFullName = derivedFullName || profile?.full_name || "";
+  const displayName = readonlyFullName || user.email || "Player";
   const completedBookings = recentBookings.filter((booking) => booking.status === "completed").length;
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (!file) {
-      return;
-    }
-
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("Image size must be less than 5MB");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${user.id}-${Math.random().toString(36).slice(2)}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage.from("avatars").upload(filePath, file);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("avatars").getPublicUrl(filePath);
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update({ avatar_url: publicUrl, updated_at: new Date().toISOString() })
-        .eq("id", user.id);
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      setAvatarUrl(publicUrl);
-      setValue("avatar_url", publicUrl);
-      toast.success("Avatar updated");
-      router.refresh();
-    } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Failed to upload avatar");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    setValue("full_name", readonlyFullName);
+  }, [readonlyFullName, setValue]);
 
   const onSubmit = async (data: ProfileFormData) => {
     setLoading(true);
@@ -233,37 +187,20 @@ export default function ProfilePageClient({
           className="xl:col-span-1"
           contentClassName="flex flex-col gap-5"
         >
-          <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-            <div className="relative">
-              <Avatar className="size-28 border border-border/70">
-                <AvatarImage src={avatarUrl} alt={profile?.full_name || "Profile avatar"} />
-                <AvatarFallback className="bg-primary/10 font-display text-3xl font-semibold text-primary">
-                  {(profile?.full_name || user.email || "P").charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <Button
-                type="button"
-                size="icon"
-                variant="secondary"
-                className="absolute bottom-0 right-0 rounded-full border border-border/80"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={loading}
-              >
-                {loading ? <Loader2 className="animate-spin" /> : <Camera />}
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileUpload}
-              />
-            </div>
-
+          <div className="flex flex-col gap-5">
+            <ProfileAvatarUploader
+              initialAvatarUrl={avatarUrl}
+              fallbackText={displayName}
+              onUploadComplete={(nextAvatarUrl) => {
+                setAvatarUrl(nextAvatarUrl);
+                setValue("avatar_url", nextAvatarUrl);
+                router.refresh();
+              }}
+            />
             <div className="flex flex-col gap-3">
               <div>
                 <h2 className="font-display text-3xl font-semibold tracking-tight">
-                  {profile?.full_name || "Player"}
+                  {displayName}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {profile?.role === "admin"
@@ -274,7 +211,7 @@ export default function ProfilePageClient({
               <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary" className="rounded-full border-primary/20 bg-primary/10 text-primary">
                   <ShieldCheck className="mr-1 size-3.5" />
-                  {profile?.role || "player"}
+                  {profile?.role || "user"}
                 </Badge>
                 <Badge variant="success" className="rounded-full">
                   Active
@@ -505,7 +442,7 @@ export default function ProfilePageClient({
                   <Label htmlFor="full_name">Display name</Label>
                   <Input
                     id="full_name"
-                    {...register("full_name")}
+                    value={readonlyFullName}
                     disabled
                     className="h-12 rounded-2xl bg-accent/22"
                   />
