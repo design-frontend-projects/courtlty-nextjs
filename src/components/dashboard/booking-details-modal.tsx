@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface Booking {
   id: string;
@@ -34,13 +35,15 @@ export function BookingDetailsModal({
   onClose,
   bookings,
 }: BookingDetailsModalProps) {
+  const { t } = useI18n();
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Upcoming Bookings Details</DialogTitle>
+          <DialogTitle>{t("dashboard.modal.title", "Upcoming Bookings Details")}</DialogTitle>
           <DialogDescription>
-            View details for all your upcoming games.
+            {t("dashboard.modal.description", "View details for all your upcoming games.")}
           </DialogDescription>
         </DialogHeader>
 
@@ -54,7 +57,7 @@ export function BookingDetailsModal({
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold">{booking.courts?.name}</h4>
                   <Badge variant="outline" className="capitalize">
-                    {booking.status}
+                    {t(`common.${booking.status}`, booking.status)}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -74,7 +77,7 @@ export function BookingDetailsModal({
 
           {bookings.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
-              No upcoming bookings found.
+              {t("dashboard.modal.empty", "No upcoming bookings found.")}
             </div>
           )}
         </div>

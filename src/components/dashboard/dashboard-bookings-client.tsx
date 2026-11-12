@@ -5,6 +5,7 @@ import { CalendarDays } from "lucide-react";
 
 import { MetricTile } from "@/components/shell/page-shell";
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 import { BookingDetailsModal } from "./booking-details-modal";
 
@@ -27,6 +28,7 @@ interface DashboardBookingsClientProps {
 }
 
 export function DashboardBookingsClient({ bookings }: DashboardBookingsClientProps) {
+  const { t } = useI18n();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const stats = useMemo(() => {
@@ -42,7 +44,7 @@ export function DashboardBookingsClient({ bookings }: DashboardBookingsClientPro
     <>
       <div onClick={() => setIsModalOpen(true)} className="cursor-pointer">
         <MetricTile
-          label="Upcoming bookings"
+          label={t("dashboard.metrics.upcomingBookings", "Upcoming bookings")}
           value={bookings.length}
           icon={CalendarDays}
           meta={
@@ -50,11 +52,11 @@ export function DashboardBookingsClient({ bookings }: DashboardBookingsClientPro
               {Object.entries(stats).length > 0 ? (
                 Object.entries(stats).map(([sport, count]) => (
                   <span key={sport} className="rounded-full border border-border/70 bg-accent/25 px-2.5 py-1 text-xs capitalize">
-                    {sport}: {count}
+                    {t(`common.sports.${sport.toLowerCase()}`, sport)}: {count}
                   </span>
                 ))
               ) : (
-                <span>No upcoming games</span>
+                <span>{t("dashboard.metrics.noUpcomingGames", "No upcoming games")}</span>
               )}
               <Button
                 variant="link"
@@ -64,7 +66,7 @@ export function DashboardBookingsClient({ bookings }: DashboardBookingsClientPro
                   setIsModalOpen(true);
                 }}
               >
-                View details
+                {t("dashboard.metrics.viewDetails", "View details")}
               </Button>
             </div>
           }

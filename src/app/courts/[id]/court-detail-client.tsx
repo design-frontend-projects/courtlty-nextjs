@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface CourtData {
   id: string;
@@ -102,6 +103,8 @@ function CourtDetailLoadingState() {
 }
 
 export default function CourtDetailClient({ courtId }: { courtId: string }) {
+  const { t } = useI18n();
+
   const {
     data: court,
     isLoading,
@@ -122,11 +125,11 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
       <WorkspaceShell>
         <EmptyState
           icon={AlertTriangle}
-          title="Court not found"
-          description="The court you requested does not exist, or it was removed."
+          title={t("courtDetail.courtNotFound", "Court not found")}
+          description={t("courtDetail.courtNotFoundDesc", "The court you requested does not exist, or it was removed.")}
           action={
             <Button asChild className="rounded-full px-6">
-              <Link href="/courts">Back to courts</Link>
+              <Link href="/courts">{t("courtDetail.backToCourts", "Back to courts")}</Link>
             </Button>
           }
         />
@@ -139,11 +142,11 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
       <WorkspaceShell>
         <EmptyState
           icon={AlertTriangle}
-          title="Unable to load court"
-          description="We could not load this court right now. Try again."
+          title={t("courtDetail.unableToLoad", "Unable to load court")}
+          description={t("courtDetail.unableToLoadDesc", "We could not load this court right now. Try again.")}
           action={
             <Button className="rounded-full px-6" onClick={() => void refetch()}>
-              Retry
+              {t("common.retry", "Retry")}
             </Button>
           }
         />
@@ -160,18 +163,18 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
   return (
     <WorkspaceShell className="gap-6">
       <PageHeader
-        eyebrow="Court profile"
+        eyebrow={t("courtDetail.eyebrow", "Court profile")}
         title={court.name}
-        description={`${court.address || "Address unavailable"}, ${court.city || "Unknown city"}`}
+        description={`${court.address || ""}, ${court.city || ""}`}
         actions={
           <div className="flex flex-wrap items-center gap-3">
             {(court.sports || []).map((sport) => (
               <Badge key={sport} variant="secondary" className="rounded-full px-3 py-1">
-                {sport}
+                {t(`common.sports.${sport.toLowerCase()}`, sport)}
               </Badge>
             ))}
             <Button asChild variant="outline" className="rounded-full">
-              <Link href="/courts">Back to courts</Link>
+              <Link href="/courts">{t("courtDetail.backToCourts", "Back to courts")}</Link>
             </Button>
           </div>
         }
@@ -186,26 +189,26 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
           <Tabs defaultValue="overview" className="grid gap-5">
             <TabsList className="h-12 rounded-full bg-accent/45 p-1">
               <TabsTrigger value="overview" className="rounded-full">
-                Overview
+                {t("courtDetail.tabs.overview", "Overview")}
               </TabsTrigger>
               <TabsTrigger value="reviews" className="rounded-full">
-                Reviews
+                {t("courtDetail.tabs.reviews", "Reviews")}
               </TabsTrigger>
               <TabsTrigger value="schedule" className="rounded-full">
-                Schedule
+                {t("courtDetail.tabs.schedule", "Schedule")}
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="grid gap-6">
               <SectionShell
-                title="About this court"
-                description="Make the booking decision with the essentials first: quality, location, amenities, and trust signals."
+                title={t("courtDetail.about.title", "About this court")}
+                description={t("courtDetail.about.description", "Make the booking decision with the essentials first: quality, location, amenities, and trust signals.")}
               >
                 <div className="grid gap-8 lg:grid-cols-[1fr_0.92fr]">
                   <div className="flex flex-col gap-6">
                     <p className="text-sm leading-7 text-muted-foreground">
                       {court.description ||
-                        "Professional sports facility designed for recurring team sessions, weekend play, and competitive bookings."}
+                        t("courtDetail.about.defaultDescription", "Professional sports facility designed for recurring team sessions, weekend play, and competitive bookings.")}
                     </p>
 
                     <div className="grid gap-3">
@@ -215,7 +218,7 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
                           className="flex items-center gap-3 rounded-[1.35rem] border border-border/70 bg-accent/20 px-4 py-3 text-sm text-foreground"
                         >
                           <ShieldCheck className="size-4 text-emerald-600 dark:text-emerald-300" />
-                          {amenity}
+                          {t(`common.amenities.${amenity.toLowerCase().replace(/\s+/g, '')}`, amenity)}
                         </div>
                       ))}
                     </div>
@@ -225,7 +228,7 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
                     <div className="surface-panel overflow-hidden rounded-[1.7rem] px-4 py-4">
                       <div className="mb-3 flex items-center gap-2">
                         <MapPinned className="size-4 text-primary" />
-                        <p className="section-kicker text-[0.68rem]">Location</p>
+                        <p className="section-kicker text-[0.68rem]">{t("courtDetail.about.location", "Location")}</p>
                       </div>
                       <div className="overflow-hidden rounded-[1.35rem] border border-border/70">
                         <CourtMap address={`${court.address || ""}, ${court.city || ""}`} />
@@ -235,12 +238,12 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
                     <div className="surface-panel rounded-[1.7rem] px-5 py-5">
                       <div className="mb-4 flex items-start justify-between gap-4">
                         <div>
-                          <p className="section-kicker text-[0.68rem]">Managed by</p>
+                          <p className="section-kicker text-[0.68rem]">{t("courtDetail.about.managedBy", "Managed by")}</p>
                           <p className="font-display mt-2 text-2xl font-semibold">
-                            {court.profiles?.full_name || "Court owner"}
+                            {court.profiles?.full_name || t("courtDetail.about.courtOwner", "Court owner")}
                           </p>
                           <p className="mt-1 text-sm text-muted-foreground">
-                            {court.profiles?.phone || "Phone not listed"}
+                            {court.profiles?.phone || t("courtDetail.about.phoneNotListed", "Phone not listed")}
                           </p>
                         </div>
                         <div className="flex size-12 items-center justify-center rounded-2xl border border-primary/15 bg-primary/10 text-primary">
@@ -253,7 +256,9 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
                           <Star className="size-5 fill-current text-amber-500" />
                           <div>
                             <p className="font-display text-2xl font-semibold text-foreground">{avgRating}</p>
-                            <p className="text-sm text-muted-foreground">{reviews.length} reviews</p>
+                            <p className="text-sm text-muted-foreground">
+                              {t("courtDetail.about.reviewsCount", `${reviews.length} reviews`, { count: reviews.length })}
+                            </p>
                           </div>
                         </div>
                       ) : null}
@@ -269,8 +274,8 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
 
             <TabsContent value="schedule">
               <SectionShell
-                title="Availability windows"
-                description="Use the listed operating windows to decide if the session fits your team schedule."
+                title={t("courtDetail.scheduleSection.title", "Availability windows")}
+                description={t("courtDetail.scheduleSection.description", "Use the listed operating windows to decide if the session fits your team schedule.")}
               >
                 <div className="grid gap-3">
                   {court.court_availability?.length > 0 ? (
@@ -287,7 +292,7 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
                     ))
                   ) : (
                     <p className="text-sm text-muted-foreground">
-                      No specific hours listed yet. Contact the owner for availability details.
+                      {t("courtDetail.scheduleSection.noHours", "No specific hours listed yet. Contact the owner for availability details.")}
                     </p>
                   )}
                 </div>
@@ -299,10 +304,12 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
         <aside className="grid gap-4 xl:sticky xl:top-24 xl:self-start">
           <div className="surface-panel-strong rounded-[2rem] px-6 py-6">
             <div className="flex flex-col gap-2 border-b border-border/70 pb-5">
-              <p className="section-kicker text-[0.68rem]">Starting rate</p>
+              <p className="section-kicker text-[0.68rem]">{t("courtDetail.sidebar.startingRate", "Starting rate")}</p>
               <div className="flex items-baseline gap-2">
-                <span className="font-display text-5xl font-semibold text-primary">${court.price_per_hour}</span>
-                <span className="text-sm text-muted-foreground">per hour</span>
+                <span className="font-display text-5xl font-semibold text-primary">
+                  {court.price_per_hour} {t("common.currency", "EGP")}
+                </span>
+                <span className="text-sm text-muted-foreground">{t("courtDetail.sidebar.perHour", "per hour")}</span>
               </div>
             </div>
             <div className="pt-5">
@@ -319,9 +326,9 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
             <div className="flex items-start gap-3">
               <ShieldCheck className="mt-0.5 size-5 text-emerald-600 dark:text-emerald-300" />
               <div className="flex flex-col gap-2">
-                <p className="font-medium text-foreground">Courtly booking protection</p>
+                <p className="font-medium text-foreground">{t("courtDetail.sidebar.protectionTitle", "Courtly booking protection")}</p>
                 <p className="text-sm leading-6 text-muted-foreground">
-                  Booking details, rate visibility, and confirmation status stay visible all the way through checkout.
+                  {t("courtDetail.sidebar.protectionDesc", "Booking details, rate visibility, and confirmation status stay visible all the way through checkout.")}
                 </p>
               </div>
             </div>
@@ -329,7 +336,7 @@ export default function CourtDetailClient({ courtId }: { courtId: string }) {
             <div className="grid gap-2 text-sm text-muted-foreground">
               {(court.payment_methods || []).map((method) => (
                 <div key={method} className="flex items-center justify-between">
-                  <span>{method}</span>
+                  <span>{t(`common.paymentMethods.${method.toLowerCase()}`, method)}</span>
                   <span className="status-dot" />
                 </div>
               ))}

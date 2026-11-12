@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LayoutDashboard, Plus, Users } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getServerI18n } from "@/lib/i18n/server";
 import {
   ActionRail,
   EmptyState,
@@ -34,47 +35,51 @@ type TeamRecord = {
 };
 
 export default async function TeamsPage() {
+  const { t } = await getServerI18n();
   const supabase = await createClient();
   const { data: teams } = await supabase.from("teams").select("*");
 
   return (
     <WorkspaceShell>
       <PageHeader
-        eyebrow="Team directory"
-        title="Find the right squad."
-        description="Browse active teams, check recruiting status, and jump into the team workspace when a fit looks right."
+        eyebrow={t("teams.eyebrow", "Team directory")}
+        title={t("teams.title", "Find the right squad.")}
+        description={t("teams.description", "Browse active teams, check recruiting status, and jump into the team workspace when a fit looks right.")}
         actions={
           <ActionRail>
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/dashboard">
                 <LayoutDashboard data-icon="inline-start" />
-                Dashboard
+                {t("teams.actions.dashboard", "Dashboard")}
               </Link>
             </Button>
             <Button asChild className="rounded-full">
               <Link href="/teams/create">
                 <Plus data-icon="inline-start" />
-                Create team
+                {t("teams.actions.createTeam", "Create team")}
               </Link>
             </Button>
           </ActionRail>
         }
       />
 
-      <SectionShell title="Directory filters" description="Current filters are visual only in this pass, but the shell is aligned with the rest of the workspace.">
+      <SectionShell
+        title={t("teams.filters.title", "Directory filters")}
+        description={t("teams.filters.description", "Search and filter through teams looking for active teammates.")}
+      >
         <div className="flex flex-wrap items-center gap-6">
           <div className="flex items-center gap-3">
-            <span className="section-kicker text-[0.68rem]">Sport</span>
+            <span className="section-kicker text-[0.68rem]">{t("teams.filters.sport", "Sport")}</span>
             <Select defaultValue="all">
               <SelectTrigger className="h-11 w-44 rounded-full">
-                <SelectValue placeholder="All sports" />
+                <SelectValue placeholder={t("teams.filters.allSports", "All sports")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All sports</SelectItem>
-                <SelectItem value="basketball">Basketball</SelectItem>
-                <SelectItem value="football">Football</SelectItem>
-                <SelectItem value="tennis">Tennis</SelectItem>
-                <SelectItem value="volleyball">Volleyball</SelectItem>
+                <SelectItem value="all">{t("teams.filters.allSports", "All sports")}</SelectItem>
+                <SelectItem value="basketball">{t("common.sports.basketball", "Basketball")}</SelectItem>
+                <SelectItem value="football">{t("common.sports.football", "Football")}</SelectItem>
+                <SelectItem value="tennis">{t("common.sports.tennis", "Tennis")}</SelectItem>
+                <SelectItem value="volleyball">{t("common.sports.volleyball", "Volleyball")}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -82,7 +87,7 @@ export default async function TeamsPage() {
           <div className="flex items-center gap-3">
             <Checkbox id="looking" />
             <label htmlFor="looking" className="text-sm text-muted-foreground">
-              Show only teams recruiting right now
+              {t("teams.filters.onlyRecruiting", "Show only teams recruiting right now")}
             </label>
           </div>
         </div>
@@ -102,19 +107,21 @@ export default async function TeamsPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         <h2 className="font-display text-3xl font-semibold tracking-tight">{team.name}</h2>
                         <Badge variant="secondary" className="rounded-full capitalize">
-                          {team.sport}
+                          {t(`common.sports.${team.sport.toLowerCase()}`, team.sport)}
                         </Badge>
                       </div>
                       {team.description ? (
                         <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">{team.description}</p>
                       ) : (
-                        <p className="text-sm leading-6 text-muted-foreground">Team profile ready for players, schedules, and chat.</p>
+                        <p className="text-sm leading-6 text-muted-foreground">
+                          {t("teams.card.defaultDesc", "Team profile ready for players, schedules, and chat.")}
+                        </p>
                       )}
                     </div>
                   </div>
                   {team.looking_for_players ? (
                     <Badge variant="success" className="rounded-full">
-                      Recruiting
+                      {t("teams.card.recruiting", "Recruiting")}
                     </Badge>
                   ) : null}
                 </div>
@@ -122,9 +129,18 @@ export default async function TeamsPage() {
                 <div className="mt-5 flex items-center justify-between border-t border-border/70 pt-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Users className="size-4 text-primary" />
-                    {(team.team_members?.length || 0).toString()} / {team.max_players} players
+                    {t("teams.card.playersCount", `${team.team_members?.length || 0} / ${team.max_players} players`, {
+                      count: team.team_members?.length || 0,
+                      max: team.max_players,
+                    })}
                   </div>
-                  {team.players_needed ? <span>{team.players_needed} spots open</span> : <span>Roster stable</span>}
+                  {team.players_needed ? (
+                    <span>
+                      {t("teams.card.spotsOpen", `${team.players_needed} spots open`, { count: team.players_needed })}
+                    </span>
+                  ) : (
+                    <span>{t("teams.card.rosterStable", "Roster stable")}</span>
+                  )}
                 </div>
               </div>
             </Link>
@@ -133,11 +149,11 @@ export default async function TeamsPage() {
       ) : (
         <EmptyState
           icon={Users}
-          title="No teams available yet"
-          description="Create the first team and start building the roster, approvals, and session planning flow."
+          title={t("teams.empty.title", "No teams available yet")}
+          description={t("teams.empty.description", "Create the first team and start building the roster, approvals, and session planning flow.")}
           action={
             <Button asChild className="rounded-full px-6">
-              <Link href="/teams/create">Create the first team</Link>
+              <Link href="/teams/create">{t("teams.empty.createFirst", "Create the first team")}</Link>
             </Button>
           }
         />

@@ -3,6 +3,7 @@ import { Heart, LayoutGrid, Search, ShieldCheck, Users } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { getServerI18n } from "@/lib/i18n/server";
 import {
   ActionRail,
   EmptyState,
@@ -17,6 +18,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { DashboardBookingsClient } from "@/components/dashboard/dashboard-bookings-client";
 
 export default async function DashboardPage() {
+  const { t } = await getServerI18n();
   const supabase = await createClient();
 
   const {
@@ -107,29 +109,31 @@ export default async function DashboardPage() {
   return (
     <WorkspaceShell>
       <PageHeader
-        eyebrow="Player workspace"
-        title={`Welcome back, ${profile?.full_name?.split(" ")[0] || "Player"}.`}
-        description="Keep your active bookings, squads, and next actions in one place."
+        eyebrow={t("dashboard.eyebrow", "Player workspace")}
+        title={t("dashboard.welcomeBack", `Welcome back, ${profile?.full_name?.split(" ")[0] || "Player"}.`, {
+          name: profile?.full_name?.split(" ")[0] || "Player",
+        })}
+        description={t("dashboard.description", "Keep your active bookings, squads, and next actions in one place.")}
         actions={
           <ActionRail>
             {profile?.role === "admin" ? (
               <Button asChild variant="outline" className="rounded-full">
                 <Link href="/admin">
                   <ShieldCheck data-icon="inline-start" />
-                  Admin
+                  {t("dashboard.actions.admin", "Admin")}
                 </Link>
               </Button>
             ) : null}
             <Button asChild variant="outline" className="rounded-full">
               <Link href="/teams">
                 <LayoutGrid data-icon="inline-start" />
-                Teams
+                {t("dashboard.actions.teams", "Teams")}
               </Link>
             </Button>
             <Button asChild className="rounded-full">
               <Link href="/courts">
                 <Search data-icon="inline-start" />
-                Find courts
+                {t("dashboard.actions.findCourts", "Find courts")}
               </Link>
             </Button>
           </ActionRail>
@@ -139,26 +143,26 @@ export default async function DashboardPage() {
       <section className="grid gap-5 md:grid-cols-3">
         <DashboardBookingsClient bookings={bookings || []} />
         <MetricTile
-          label="Squad memberships"
+          label={t("dashboard.metrics.squadMemberships", "Squad memberships")}
           value={allTeams.length}
           icon={Users}
-          meta="Teams you own or actively play with."
+          meta={t("dashboard.metrics.squadMembershipsMeta", "Teams you own or actively play with.")}
         />
         <MetricTile
-          label="Saved venues"
+          label={t("dashboard.metrics.savedVenues", "Saved venues")}
           value={0}
           icon={Heart}
-          meta="Favorites are not set up yet, but this space is reserved for quick access."
+          meta={t("dashboard.metrics.savedVenuesMeta", "Favorites are not set up yet, but this space is reserved for quick access.")}
         />
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
         <SectionShell
-          title="Upcoming sessions"
-          description="Your next confirmed and pending bookings, ordered by date."
+          title={t("dashboard.upcomingSessions.title", "Upcoming sessions")}
+          description={t("dashboard.upcomingSessions.description", "Your next confirmed and pending bookings, ordered by date.")}
           actions={
             <Button asChild variant="ghost" className="rounded-full">
-              <Link href="/courts">Book another court</Link>
+              <Link href="/courts">{t("dashboard.upcomingSessions.bookAnother", "Book another court")}</Link>
             </Button>
           }
         >
@@ -173,18 +177,18 @@ export default async function DashboardPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <p className="font-medium text-foreground">{booking.courts?.name}</p>
                       <Badge variant="secondary" className="rounded-full capitalize">
-                        {booking.status}
+                        {t(`common.${booking.status}`, booking.status)}
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      {booking.booking_date} at {booking.start_time} - {booking.end_time}
+                      {booking.booking_date} {t("dashboard.upcomingSessions.at", "at")} {booking.start_time} - {booking.end_time}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {booking.courts?.address}, {booking.courts?.city}
                     </p>
                   </div>
                   <Button asChild variant="outline" className="rounded-full sm:self-center">
-                    <Link href={`/courts/${booking.court_id}`}>Open court</Link>
+                    <Link href={`/courts/${booking.court_id}`}>{t("courts.card.viewCourt", "Open court")}</Link>
                   </Button>
                 </div>
               ))}
@@ -192,11 +196,11 @@ export default async function DashboardPage() {
           ) : (
             <EmptyState
               icon={Search}
-              title="No sessions booked yet"
-              description="Search the court directory and lock your next booking. Once a session is scheduled, it will stay visible here."
+              title={t("dashboard.upcomingSessions.emptyTitle", "No sessions booked yet")}
+              description={t("dashboard.upcomingSessions.emptyDescription", "Search the court directory and lock your next booking. Once a session is scheduled, it will stay visible here.")}
               action={
                 <Button asChild className="rounded-full px-6">
-                  <Link href="/courts">Search courts</Link>
+                  <Link href="/courts">{t("courts.empty.resetSearch", "Search courts")}</Link>
                 </Button>
               }
             />
@@ -204,11 +208,11 @@ export default async function DashboardPage() {
         </SectionShell>
 
         <SectionShell
-          title="My squads"
-          description="Teams you currently own or belong to."
+          title={t("dashboard.teamsSection.title", "My squads")}
+          description={t("dashboard.teamsSection.description", "Teams you currently own or belong to.")}
           actions={
             <Button asChild className="rounded-full">
-              <Link href="/teams/create">Create team</Link>
+              <Link href="/teams/create">{t("dashboard.teamsSection.createTeam", "Create team")}</Link>
             </Button>
           }
         >
@@ -227,16 +231,16 @@ export default async function DashboardPage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <p className="font-display text-2xl font-semibold text-foreground">{team.name}</p>
                           <Badge variant="secondary" className="rounded-full capitalize">
-                            {team.sport}
+                            {t(`common.sports.${team.sport.toLowerCase()}`, team.sport)}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {(team.team_members?.length || 0).toString()} members active
+                          {(team.team_members?.length || 0).toString()} {t("dashboard.teamsSection.players", "players")}
                         </p>
                       </div>
                     </div>
                     <Button asChild variant="ghost" className="rounded-full">
-                      <Link href={`/teams/${team.id}`}>Open team</Link>
+                      <Link href={`/teams/${team.id}`}>{t("teams.eyebrow", "Open team")}</Link>
                     </Button>
                   </div>
                 </div>
@@ -245,11 +249,11 @@ export default async function DashboardPage() {
           ) : (
             <EmptyState
               icon={Users}
-              title="No teams yet"
-              description="Create your own team or join an existing squad to keep roster, chat, and session details together."
+              title={t("dashboard.teamsSection.emptyTitle", "No teams yet")}
+              description={t("dashboard.teamsSection.emptyDescription", "Create your own team or join an existing squad to keep roster, chat, and session details together.")}
               action={
                 <Button asChild className="rounded-full px-6">
-                  <Link href="/teams/create">Create a team</Link>
+                  <Link href="/teams/create">{t("dashboard.teamsSection.createTeam", "Create a team")}</Link>
                 </Button>
               }
             />

@@ -2,6 +2,7 @@ import { CalendarDays, Trophy, Users } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { getServerI18n } from "@/lib/i18n/server";
 import {
   ActionRail,
   EmptyState,
@@ -43,6 +44,7 @@ type TeamRecord = {
 
 export default async function TeamDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { t } = await getServerI18n();
   const supabase = await createClient();
 
   const {
@@ -90,24 +92,29 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
   return (
     <WorkspaceShell>
       <PageHeader
-        eyebrow="Team workspace"
+        eyebrow={t("teamWorkspace.eyebrow", "Team workspace")}
         title={typedTeam.name}
-        description={typedTeam.description || `${typedTeam.sport} team workspace for members, scheduling, and approvals.`}
+        description={
+          typedTeam.description ||
+          t("teamWorkspace.defaultDesc", "{sport} team workspace for members, scheduling, and approvals.", {
+            sport: t(`common.sports.${typedTeam.sport.toLowerCase()}`, typedTeam.sport),
+          })
+        }
         actions={
           <ActionRail>
             <Badge variant="secondary" className="rounded-full capitalize">
-              {typedTeam.sport}
+              {t(`common.sports.${typedTeam.sport.toLowerCase()}`, typedTeam.sport)}
             </Badge>
             {!isMember && !currentMember ? (
               <form action={joinTeam}>
                 <Button type="submit" className="rounded-full px-6">
-                  Join team
+                  {t("teamWorkspace.joinTeam", "Join team")}
                 </Button>
               </form>
             ) : null}
             {currentMember?.status === "pending" ? (
               <Button variant="outline" className="rounded-full px-6" disabled>
-                Request pending
+                {t("teamWorkspace.requestPending", "Request pending")}
               </Button>
             ) : null}
           </ActionRail>
@@ -115,13 +122,31 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
       />
 
       <section className="grid gap-5 md:grid-cols-3">
-        <MetricTile label="Approved players" value={approvedMembers.length} icon={Users} meta="Current active roster." />
-        <MetricTile label="Weekly wins" value={typedTeam.weekly_wins || 0} icon={Trophy} meta="Running win count." />
-        <MetricTile label="Total games" value={typedTeam.total_games || 0} icon={CalendarDays} meta="Matches and scheduled fixtures." />
+        <MetricTile
+          label={t("teamWorkspace.metrics.approvedPlayers", "Approved players")}
+          value={approvedMembers.length}
+          icon={Users}
+          meta={t("teamWorkspace.metrics.approvedPlayersMeta", "Current active roster.")}
+        />
+        <MetricTile
+          label={t("teamWorkspace.metrics.weeklyWins", "Weekly wins")}
+          value={typedTeam.weekly_wins || 0}
+          icon={Trophy}
+          meta={t("teamWorkspace.metrics.weeklyWinsMeta", "Running win count.")}
+        />
+        <MetricTile
+          label={t("teamWorkspace.metrics.totalGames", "Total games")}
+          value={typedTeam.total_games || 0}
+          icon={CalendarDays}
+          meta={t("teamWorkspace.metrics.totalGamesMeta", "Matches and scheduled fixtures.")}
+        />
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[0.86fr_1.14fr]">
-        <SectionShell title="Roster" description="Members currently approved on this squad.">
+        <SectionShell
+          title={t("teamWorkspace.roster.title", "Roster")}
+          description={t("teamWorkspace.roster.description", "Members currently approved on this squad.")}
+        >
           <div className="grid gap-3">
             {approvedMembers.map((member) => (
               <div
@@ -137,12 +162,16 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
                     <p className="font-medium text-foreground">
                       {member.profiles?.first_name || member.profiles?.email || "Player"}
                     </p>
-                    <p className="text-sm capitalize text-muted-foreground">{member.role}</p>
+                    <p className="text-sm capitalize text-muted-foreground">
+                      {member.role === "owner"
+                        ? t("teamWorkspace.roster.owner", "Owner")
+                        : t("teamWorkspace.roster.member", "Member")}
+                    </p>
                   </div>
                 </div>
                 {member.role === "owner" ? (
                   <Badge variant="secondary" className="rounded-full">
-                    Owner
+                    {t("teamWorkspace.roster.owner", "Owner")}
                   </Badge>
                 ) : null}
               </div>
@@ -152,9 +181,19 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
 
         <Tabs defaultValue={isMember ? "chat" : "games"} className="grid gap-5">
           <TabsList className="h-12 rounded-full bg-accent/45 p-1">
-            {isMember ? <TabsTrigger value="chat" className="rounded-full">Team chat</TabsTrigger> : null}
-            <TabsTrigger value="games" className="rounded-full">Upcoming games</TabsTrigger>
-            {isOwner ? <TabsTrigger value="management" className="rounded-full">Management</TabsTrigger> : null}
+            {isMember ? (
+              <TabsTrigger value="chat" className="rounded-full">
+                {t("teamWorkspace.tabs.teamChat", "Team chat")}
+              </TabsTrigger>
+            ) : null}
+            <TabsTrigger value="games" className="rounded-full">
+              {t("teamWorkspace.tabs.upcomingGames", "Upcoming games")}
+            </TabsTrigger>
+            {isOwner ? (
+              <TabsTrigger value="management" className="rounded-full">
+                {t("teamWorkspace.tabs.management", "Management")}
+              </TabsTrigger>
+            ) : null}
           </TabsList>
 
           {isMember ? (
@@ -164,18 +203,24 @@ export default async function TeamDetailPage({ params }: { params: Promise<{ id:
           ) : null}
 
           <TabsContent value="games">
-            <SectionShell title="Upcoming fixtures" description="Game scheduling is ready for the next phase of the product.">
+            <SectionShell
+              title={t("teamWorkspace.fixtures.title", "Upcoming fixtures")}
+              description={t("teamWorkspace.fixtures.description", "Game scheduling is ready for the next phase of the product.")}
+            >
               <EmptyState
                 icon={CalendarDays}
-                title="No upcoming games"
-                description="Once matches are scheduled, the team will be able to track them here alongside roster communication."
+                title={t("teamWorkspace.fixtures.emptyTitle", "No upcoming games")}
+                description={t("teamWorkspace.fixtures.emptyDesc", "Once matches are scheduled, the team will be able to track them here alongside roster communication.")}
               />
             </SectionShell>
           </TabsContent>
 
           {isOwner ? (
             <TabsContent value="management">
-              <SectionShell title="Pending join requests" description="Approve or reject new players without leaving the team workspace.">
+              <SectionShell
+                title={t("teamWorkspace.managementSection.title", "Pending join requests")}
+                description={t("teamWorkspace.managementSection.description", "Approve or reject new players without leaving the team workspace.")}
+              >
                 <TeamMemberManagement initialPendingMembers={pendingMembers} teamId={typedTeam.id} />
               </SectionShell>
             </TabsContent>

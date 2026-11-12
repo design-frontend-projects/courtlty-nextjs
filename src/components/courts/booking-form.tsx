@@ -36,6 +36,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 import { PaymentDialog } from "./payment-dialog";
 
@@ -52,6 +53,7 @@ export default function BookingForm({
   sports,
   pricePerHour,
 }: BookingFormProps) {
+  const { t } = useI18n();
   const [showPayment, setShowPayment] = useState(false);
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -96,7 +98,7 @@ export default function BookingForm({
       } = await supabase.auth.getUser();
 
       if (!user) {
-        toast.error("Please log in to book a court.");
+        toast.error(t("bookingForm.loginRequired", "Please log in to book a court."));
         router.push(`/login?redirect=/courts/${courtId}`);
         return;
       }
@@ -112,13 +114,13 @@ export default function BookingForm({
       });
 
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Failed to create booking");
+      if (!response.ok) throw new Error(result.error || t("bookingForm.bookingFailed", "Failed to create booking"));
 
       setLastBookingId(result.id || "ID-123456");
       setPaymentSuccess(true);
-      toast.success("Booking confirmed.");
+      toast.success(t("bookingForm.bookingConfirmed", "Booking confirmed."));
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "An error occurred");
+      toast.error(error instanceof Error ? error.message : t("bookingForm.bookingFailed", "An error occurred"));
       setPaymentProcessing(false);
     }
   };
@@ -158,17 +160,17 @@ export default function BookingForm({
             name="sport"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="section-kicker text-[0.68rem]">Sport</FormLabel>
+                <FormLabel className="section-kicker text-[0.68rem]">{t("bookingForm.sport", "Sport")}</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger className="h-12 rounded-2xl">
-                      <SelectValue placeholder="Select sport" />
+                      <SelectValue placeholder={t("bookingForm.selectSport", "Select sport")} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {sports.map((sport) => (
                       <SelectItem key={sport} value={sport}>
-                        {sport}
+                        {t(`common.sports.${sport.toLowerCase()}`, sport)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -183,7 +185,7 @@ export default function BookingForm({
             name="booking_date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
-                <FormLabel className="section-kicker text-[0.68rem]">Date</FormLabel>
+                <FormLabel className="section-kicker text-[0.68rem]">{t("bookingForm.date", "Date")}</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -194,7 +196,7 @@ export default function BookingForm({
                           !field.value && "text-muted-foreground",
                         )}
                       >
-                        {field.value ? format(new Date(field.value), "PPP") : "Pick a date"}
+                        {field.value ? format(new Date(field.value), "PPP") : t("bookingForm.pickDate", "Pick a date")}
                         <CalendarIcon className="size-4 text-muted-foreground" />
                       </Button>
                     </FormControl>
@@ -221,7 +223,7 @@ export default function BookingForm({
               name="start_time"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="section-kicker text-[0.68rem]">Start</FormLabel>
+                  <FormLabel className="section-kicker text-[0.68rem]">{t("bookingForm.startTime", "Start")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Clock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -238,7 +240,7 @@ export default function BookingForm({
               name="end_time"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="section-kicker text-[0.68rem]">End</FormLabel>
+                  <FormLabel className="section-kicker text-[0.68rem]">{t("bookingForm.endTime", "End")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Clock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -254,21 +256,23 @@ export default function BookingForm({
           <div className="surface-panel rounded-[1.75rem] px-5 py-5">
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-col gap-1">
-                <p className="section-kicker text-[0.68rem]">Booking total</p>
-                <p className="font-display text-4xl font-semibold text-primary">${totalAmount.toFixed(2)}</p>
+                <p className="section-kicker text-[0.68rem]">{t("bookingForm.total", "Booking total")}</p>
+                <p className="font-display text-4xl font-semibold text-primary">
+                  {totalAmount.toFixed(2)} {t("common.currency", "EGP")}
+                </p>
               </div>
               <Badge variant="secondary" className="rounded-full px-3 py-1">
-                ${pricePerHour}/hour
+                {pricePerHour} {t("common.currency", "EGP")}/{t("common.perHour", "hour")}
               </Badge>
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Includes the selected session length. Payment confirmation will generate the receipt.
+              {t("bookingForm.summary", "Includes the selected session length. Payment confirmation will generate the receipt.")}
             </p>
           </div>
 
           <Button type="submit" className="h-12 rounded-full text-base" disabled={totalAmount <= 0}>
             <ReceiptText data-icon="inline-start" />
-            Continue to payment
+            {t("bookingForm.bookNow", "Continue to payment")}
           </Button>
         </form>
       </Form>

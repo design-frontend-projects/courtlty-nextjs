@@ -22,6 +22,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface CourtFiltersProps {
   availableSports: string[];
@@ -29,6 +30,7 @@ interface CourtFiltersProps {
 }
 
 export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -71,20 +73,20 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
           onKeyDown={(event) => {
             if (event.key === "Enter") handleSearch();
           }}
-          placeholder="Search by court name or city"
+          placeholder={t("courts.filters.searchPlaceholder", "Search by court name or city")}
           className="h-12 rounded-2xl pl-11"
         />
       </div>
 
       <Select value={sport} onValueChange={setSport}>
         <SelectTrigger className="h-12 rounded-2xl">
-          <SelectValue placeholder="Sport" />
+          <SelectValue placeholder={t("courts.filters.sport", "Sport")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All sports</SelectItem>
+          <SelectItem value="all">{t("courts.filters.allSports", "All sports")}</SelectItem>
           {availableSports.map((option) => (
             <SelectItem key={option} value={option}>
-              {option}
+              {t(`common.sports.${option.toLowerCase()}`, option)}
             </SelectItem>
           ))}
         </SelectContent>
@@ -92,10 +94,10 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
 
       <Select value={city} onValueChange={setCity}>
         <SelectTrigger className="h-12 rounded-2xl">
-          <SelectValue placeholder="City" />
+          <SelectValue placeholder={t("courts.filters.city", "City")} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All cities</SelectItem>
+          <SelectItem value="all">{t("courts.filters.allCities", "All cities")}</SelectItem>
           {cities.map((option) => (
             <SelectItem key={option} value={option}>
               {option}
@@ -106,7 +108,7 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
 
       <Input
         type="number"
-        placeholder="Min"
+        placeholder={t("courts.filters.minPrice", "Min")}
         value={minPrice}
         onChange={(event) => setMinPrice(event.target.value)}
         className="h-12 rounded-2xl"
@@ -114,7 +116,7 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
 
       <Input
         type="number"
-        placeholder="Max"
+        placeholder={t("courts.filters.maxPrice", "Max")}
         value={maxPrice}
         onChange={(event) => setMaxPrice(event.target.value)}
         className="h-12 rounded-2xl"
@@ -122,10 +124,10 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
 
       <div className="flex items-center gap-2">
         <Button onClick={handleSearch} className="h-12 rounded-full px-5">
-          Search
+          {t("courts.filters.filter", "Search")}
         </Button>
         <Button variant="outline" onClick={clearFilters} className="h-12 rounded-full px-5">
-          Reset
+          {t("courts.filters.clear", "Reset")}
         </Button>
       </div>
     </div>
@@ -135,19 +137,19 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
     <FilterBar className="flex flex-col gap-4 px-4 py-4 sm:px-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="section-kicker">Discovery controls</p>
-          <p className="text-sm text-muted-foreground">Find the right venue without leaving the results grid.</p>
+          <p className="section-kicker">{t("courts.filters.filters", "Discovery controls")}</p>
+          <p className="text-sm text-muted-foreground">{t("courts.description", "Find the right venue without leaving the results grid.")}</p>
         </div>
 
         <div className="flex items-center gap-2 lg:hidden">
           <Button onClick={handleSearch} className="rounded-full px-5">
-            Search
+            {t("courts.filters.filter", "Search")}
           </Button>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" className="rounded-full px-4">
                 <SlidersHorizontal data-icon="inline-start" />
-                Filters
+                {t("courts.filters.filters", "Filters")}
                 {activeFiltersCount > 0 ? (
                   <Badge variant="secondary" className="ml-1 rounded-full">
                     {activeFiltersCount}
@@ -157,7 +159,7 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-[2rem]">
               <SheetHeader className="pb-4">
-                <SheetTitle className="text-2xl font-semibold">Refine courts</SheetTitle>
+                <SheetTitle className="text-2xl font-semibold">{t("courts.filters.filters", "Refine courts")}</SheetTitle>
               </SheetHeader>
               <div className="grid gap-4">
                 <div className="relative">
@@ -165,29 +167,29 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
                   <Input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search by name or city"
+                    placeholder={t("courts.filters.searchPlaceholder", "Search by court name or city")}
                     className="h-12 rounded-2xl pl-11"
                   />
                 </div>
                 <Select value={sport} onValueChange={setSport}>
                   <SelectTrigger className="h-12 rounded-2xl">
-                    <SelectValue placeholder="Sport" />
+                    <SelectValue placeholder={t("courts.filters.sport", "Sport")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All sports</SelectItem>
+                    <SelectItem value="all">{t("courts.filters.allSports", "All sports")}</SelectItem>
                     {availableSports.map((option) => (
                       <SelectItem key={option} value={option}>
-                        {option}
+                        {t(`common.sports.${option.toLowerCase()}`, option)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Select value={city} onValueChange={setCity}>
                   <SelectTrigger className="h-12 rounded-2xl">
-                    <SelectValue placeholder="City" />
+                    <SelectValue placeholder={t("courts.filters.city", "City")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All cities</SelectItem>
+                    <SelectItem value="all">{t("courts.filters.allCities", "All cities")}</SelectItem>
                     {cities.map((option) => (
                       <SelectItem key={option} value={option}>
                         {option}
@@ -198,14 +200,14 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
                 <div className="grid grid-cols-2 gap-3">
                   <Input
                     type="number"
-                    placeholder="Min"
+                    placeholder={t("courts.filters.minPrice", "Min")}
                     value={minPrice}
                     onChange={(event) => setMinPrice(event.target.value)}
                     className="h-12 rounded-2xl"
                   />
                   <Input
                     type="number"
-                    placeholder="Max"
+                    placeholder={t("courts.filters.maxPrice", "Max")}
                     value={maxPrice}
                     onChange={(event) => setMaxPrice(event.target.value)}
                     className="h-12 rounded-2xl"
@@ -213,10 +215,10 @@ export function CourtFilters({ availableSports, cities }: CourtFiltersProps) {
                 </div>
                 <div className="flex gap-3 pt-2">
                   <Button variant="outline" onClick={clearFilters} className="h-12 flex-1 rounded-full">
-                    Reset
+                    {t("courts.filters.clear", "Reset")}
                   </Button>
                   <Button onClick={handleSearch} className="h-12 flex-1 rounded-full">
-                    Show results
+                    {t("courts.filters.filter", "Show results")}
                   </Button>
                 </div>
               </div>

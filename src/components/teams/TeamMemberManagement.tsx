@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { toast } from "sonner";
 
+import { useI18n } from "@/lib/i18n/client";
 import { updateMemberStatus } from "@/lib/actions/teams";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,12 +26,17 @@ export function TeamMemberManagement({
   initialPendingMembers: TeamMember[];
   teamId: string;
 }) {
+  const { t } = useI18n();
   const [pendingMembers, setPendingMembers] = useState(initialPendingMembers);
 
   const handleAction = async (memberId: string, action: "approved" | "rejected") => {
     try {
       await updateMemberStatus(teamId, memberId, action);
-      toast.success(`Member ${action}.`);
+      toast.success(
+        action === "approved"
+          ? t("teamWorkspace.managementSection.approvedToast", "Member approved.")
+          : t("teamWorkspace.managementSection.rejectedToast", "Member rejected.")
+      );
       setPendingMembers((current) => current.filter((member) => member.player_id !== memberId));
     } catch (error: unknown) {
       toast.error(error instanceof Error ? error.message : `Failed to ${action} member`);
@@ -38,7 +44,11 @@ export function TeamMemberManagement({
   };
 
   if (!pendingMembers.length) {
-    return <p className="text-sm text-muted-foreground">No pending requests.</p>;
+    return (
+      <p className="text-sm text-muted-foreground">
+        {t("teamWorkspace.managementSection.empty", "No pending requests.")}
+      </p>
+    );
   }
 
   return (
@@ -57,7 +67,9 @@ export function TeamMemberManagement({
               <p className="font-medium text-foreground">
                 {member.profiles?.first_name || member.profiles?.email?.split("@")[0]}
               </p>
-              <p className="text-sm text-muted-foreground">Requested to join</p>
+              <p className="text-sm text-muted-foreground">
+                {t("teamWorkspace.managementSection.requestedToJoin", "Requested to join")}
+              </p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -68,7 +80,7 @@ export function TeamMemberManagement({
               onClick={() => handleAction(member.player_id, "approved")}
             >
               <Check data-icon="inline-start" />
-              Approve
+              {t("teamWorkspace.managementSection.approve", "Approve")}
             </Button>
             <Button
               size="sm"
@@ -77,7 +89,7 @@ export function TeamMemberManagement({
               onClick={() => handleAction(member.player_id, "rejected")}
             >
               <X data-icon="inline-start" />
-              Reject
+              {t("teamWorkspace.managementSection.reject", "Reject")}
             </Button>
           </div>
         </div>

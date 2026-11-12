@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, MapPin, Trophy } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/server";
+import { getServerI18n } from "@/lib/i18n/server";
 import { CourtWithDetails } from "@/types";
 import { PageHeader, WorkspaceShell } from "@/components/shell/page-shell";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ interface SearchParams {
 }
 
 export default async function CourtsPage(props: { searchParams: Promise<SearchParams> }) {
+  const { t } = await getServerI18n();
   const searchParams = await props.searchParams;
   const { q, sport, city, minPrice, maxPrice } = searchParams;
   const supabase = await createClient();
@@ -53,13 +55,13 @@ export default async function CourtsPage(props: { searchParams: Promise<SearchPa
   return (
     <WorkspaceShell className="gap-6">
       <PageHeader
-        eyebrow="Court discovery"
-        title="Find the right court fast."
-        description="Search active venues by sport, city, and price, then move straight into booking without losing context."
+        eyebrow={t("courts.eyebrow", "Court discovery")}
+        title={t("courts.title", "Find the right court fast.")}
+        description={t("courts.description", "Search active venues by sport, city, and price, then move straight into booking without losing context.")}
         actions={
           <div className="flex flex-wrap items-center gap-3">
             <div className="rounded-full border border-border/70 bg-background/80 px-4 py-2 text-sm text-muted-foreground">
-              {courts?.length || 0} active results
+              {t("courts.activeResults", `${courts?.length || 0} active results`, { count: courts?.length || 0 })}
             </div>
           </div>
         }
@@ -89,13 +91,15 @@ export default async function CourtsPage(props: { searchParams: Promise<SearchPa
                     <div className="flex flex-wrap gap-2">
                       {court.sports.map((item: string) => (
                         <Badge key={item} className="border-white/15 bg-white/14 text-white shadow-none">
-                          {item}
+                          {t(`common.sports.${item.toLowerCase()}`, item)}
                         </Badge>
                       ))}
                     </div>
                     <div className="rounded-2xl border border-white/12 bg-white/12 px-3 py-2 text-right text-white backdrop-blur-sm">
-                      <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/64">Rate</p>
-                      <p className="font-display text-2xl font-semibold">${court.price_per_hour}</p>
+                      <p className="text-[0.68rem] uppercase tracking-[0.18em] text-white/64">{t("courts.card.rate", "Rate")}</p>
+                      <p className="font-display text-2xl font-semibold">
+                        {court.price_per_hour} {t("common.currency", "EGP")}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -113,7 +117,7 @@ export default async function CourtsPage(props: { searchParams: Promise<SearchPa
                         </p>
                       </div>
                       <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-emerald-600 dark:text-emerald-300">
-                        Available
+                        {t("courts.card.available", "Available")}
                       </span>
                     </div>
                     {court.description ? (
@@ -122,9 +126,9 @@ export default async function CourtsPage(props: { searchParams: Promise<SearchPa
                   </div>
 
                   <div className="flex items-center justify-between border-t border-border/70 pt-4">
-                    <p className="text-sm text-muted-foreground">Open court details, availability, and booking.</p>
+                    <p className="text-sm text-muted-foreground">{t("courts.card.openDetails", "Open court details, availability, and booking.")}</p>
                     <Button variant="ghost" className="rounded-full px-0 text-primary hover:bg-transparent hover:text-primary">
-                      View court
+                      {t("courts.card.viewCourt", "View court")}
                       <ArrowRight data-icon="inline-end" />
                     </Button>
                   </div>
@@ -139,12 +143,12 @@ export default async function CourtsPage(props: { searchParams: Promise<SearchPa
             <div className="rounded-2xl border border-border/80 bg-background/90 p-4 text-primary">
               <Trophy className="size-7" />
             </div>
-            <h2 className="font-display text-3xl font-semibold">No courts matched those filters.</h2>
+            <h2 className="font-display text-3xl font-semibold">{t("courts.empty.title", "No courts matched those filters.")}</h2>
             <p className="text-sm leading-6 text-muted-foreground">
-              Reset the current search or widen your city and price range to surface more options.
+              {t("courts.empty.description", "Reset the current search or widen your city and price range to surface more options.")}
             </p>
             <Button asChild className="rounded-full px-6">
-              <Link href="/courts">Reset search</Link>
+              <Link href="/courts">{t("courts.empty.resetSearch", "Reset search")}</Link>
             </Button>
           </div>
         </div>

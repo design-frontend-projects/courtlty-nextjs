@@ -3,11 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MessageSquareText, Star } from "lucide-react";
+import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
 import { EmptyState } from "@/components/shell/page-shell";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface Review {
   id: string;
@@ -27,6 +29,7 @@ interface ReviewsListProps {
 }
 
 export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: ReviewsListProps) {
+  const { t } = useI18n();
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -59,7 +62,7 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
         .single();
 
       if (!recentBooking) {
-        throw new Error("You need a confirmed booking before leaving a review.");
+        throw new Error(t("reviews.bookingRequired", "You need a confirmed booking before leaving a review."));
       }
 
       const response = await fetch("/api/reviews", {
@@ -75,16 +78,17 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "Failed to submit review");
+        throw new Error(result.error || t("reviews.errorToast", "Failed to submit review"));
       }
 
       setShowForm(false);
       setComment("");
       setRating(5);
+      toast.success(t("reviews.successToast", "Review submitted successfully."));
       onReviewSubmitted?.();
       router.refresh();
     } catch (error: unknown) {
-      alert(error instanceof Error ? error.message : "An unexpected error occurred");
+      toast.error(error instanceof Error ? error.message : t("reviews.errorToast", "An unexpected error occurred"));
     } finally {
       setLoading(false);
     }
@@ -94,11 +98,11 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
     <div className="grid gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="section-kicker">Court reviews</p>
-          <h2 className="font-display text-3xl font-semibold tracking-tight">Feedback from recent sessions</h2>
+          <p className="section-kicker">{t("courtDetail.tabs.reviews", "Court reviews")}</p>
+          <h2 className="font-display text-3xl font-semibold tracking-tight">{t("reviews.title", "Feedback from recent sessions")}</h2>
         </div>
         <Button variant={showForm ? "outline" : "default"} onClick={() => setShowForm((current) => !current)} className="rounded-full px-5">
-          {showForm ? "Cancel" : "Write a review"}
+          {showForm ? t("common.cancel", "Cancel") : t("reviews.writeReview", "Write a review")}
         </Button>
       </div>
 
@@ -106,7 +110,7 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
         <form onSubmit={handleSubmit} className="surface-panel rounded-[1.85rem] px-5 py-5">
           <div className="grid gap-5">
             <div className="grid gap-2">
-              <p className="section-kicker text-[0.68rem]">Rating</p>
+              <p className="section-kicker text-[0.68rem]">{t("reviews.rating", "Rating")}</p>
               <div className="flex items-center gap-2">
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
@@ -123,17 +127,17 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
               </div>
             </div>
             <div className="grid gap-2">
-              <p className="section-kicker text-[0.68rem]">Comment</p>
+              <p className="section-kicker text-[0.68rem]">{t("common.comment", "Comment")}</p>
               <Textarea
                 value={comment}
                 onChange={(event) => setComment(event.target.value)}
-                placeholder="Describe the court, surface, atmosphere, and reliability of the booking."
+                placeholder={t("reviews.commentPlaceholder", "Describe the court, surface, atmosphere, and reliability of the booking.")}
                 className="min-h-32 rounded-[1.4rem]"
               />
             </div>
             <div className="flex justify-end">
               <Button type="submit" className="rounded-full px-6" disabled={loading}>
-                {loading ? "Submitting..." : "Submit review"}
+                {loading ? t("reviews.submitting", "Submitting...") : t("reviews.submitReview", "Submit review")}
               </Button>
             </div>
           </div>
@@ -150,7 +154,7 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
                 </div>
                 <div className="min-w-0 flex-1 flex flex-col gap-2">
                   <div className="flex flex-wrap items-center gap-3">
-                    <p className="font-medium text-foreground">{review.profiles?.full_name || "Anonymous"}</p>
+                    <p className="font-medium text-foreground">{review.profiles?.full_name || t("common.anonymous", "Anonymous")}</p>
                     <div className="flex items-center gap-1 text-amber-500">
                       {Array.from({ length: review.rating }).map((_, index) => (
                         <Star key={index} className="size-4 fill-current" />
@@ -171,8 +175,8 @@ export default function ReviewsList({ reviews, courtId, onReviewSubmitted }: Rev
       ) : (
         <EmptyState
           icon={MessageSquareText}
-          title="No reviews yet"
-          description="Be the first player to share how the court felt, how the booking held up, and whether the venue matched the listing."
+          title={t("reviews.noReviews", "No reviews yet")}
+          description={t("reviews.noReviewsDesc", "Be the first player to share how the court felt, how the booking held up, and whether the venue matched the listing.")}
         />
       )}
     </div>

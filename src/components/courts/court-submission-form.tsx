@@ -28,6 +28,7 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 const SPORTS_OPTIONS = ["basketball", "football", "tennis", "volleyball", "badminton", "padel"] as const;
 const PAYMENT_OPTIONS = ["cash", "card"] as const;
@@ -77,6 +78,7 @@ export default function CourtSubmissionForm({
   courtId,
   isAdmin = false,
 }: CourtSubmissionFormProps) {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -142,27 +144,47 @@ export default function CourtSubmissionForm({
       }
     });
 
-    if (changed) {
-      setValue("size", currentSizeData);
-    }
-  }, [currentSize, selectedSports, setValue]);
+    Object.keys(currentSizeData).forEach((sport) => {
+      if (!selectedSports.includes(sport)) {
+        delete currentSizeData[sport];
+        changed = true;
+      }
+    });
 
-  const onSubmit = async (values: CourtFormData) => {
+    if (changed) {
+      setValue("size", currentSizeData, { shouldValidate: true });
+    }
+  }, [selectedSports, currentSize, setValue]);
+
+  const onSubmit = async (data: CourtFormData) => {
     setLoading(true);
+
     try {
-      const url = mode === "create" ? "/api/courts" : `/api/courts/${courtId}`;
+      const endpoint = mode === "create" ? "/api/courts" : `/api/courts/${courtId}`;
       const method = mode === "create" ? "POST" : "PUT";
-      const response = await fetch(url, {
+
+      const payload = {
+        ...data,
+        status: isAdmin ? (initialData?.status || "approved") : "pending",
+        is_active: isAdmin ? (initialData?.is_active ?? true) : false,
+      };
+
+      const response = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload),
       });
+
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "Failed to save court");
+        throw new Error(result.error || t("courts.submissionForm.errorSubmit", "Failed to save court"));
       }
 
-      toast.success(mode === "create" ? "Court submitted for approval." : "Court updated.");
+      toast.success(
+        mode === "create"
+          ? t("courts.submissionForm.successCreate", "Court submitted for approval.")
+          : t("courts.submissionForm.successUpdate", "Court updated."),
+      );
       router.push(isAdmin ? "/admin/courts" : "/dashboard");
       router.refresh();
     } catch (err: unknown) {
@@ -178,8 +200,8 @@ export default function CourtSubmissionForm({
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           <Card className="operator-panel">
             <CardHeader>
-              <CardTitle>General Information</CardTitle>
-              <CardDescription>Core details users see while searching.</CardDescription>
+              <CardTitle>{t("courts.submissionForm.generalInfo", "General Information")}</CardTitle>
+              <CardDescription>{t("courts.submissionForm.generalInfoDesc", "Core details users see while searching.")}</CardDescription>
             </CardHeader>
             <CardContent>
               <FieldGroup>
@@ -189,9 +211,15 @@ export default function CourtSubmissionForm({
                   render={({ field }) => (
                     <FormItem>
                       <Field data-invalid={!!errors.name}>
-                        <FieldLabel htmlFor="court-name">Court name</FieldLabel>
+                        <FieldLabel htmlFor="court-name">{t("courts.submissionForm.courtName", "Court name")}</FieldLabel>
                         <FormControl>
-                          <Input id="court-name" aria-invalid={!!errors.name} {...field} className="h-11 rounded-xl" />
+                          <Input
+                            id="court-name"
+                            aria-invalid={!!errors.name}
+                            placeholder={t("courts.submissionForm.courtNamePlaceholder", "e.g. Al-Ahly Sports Arena")}
+                            {...field}
+                            className="h-11 rounded-xl"
+                          />
                         </FormControl>
                         <FormMessage />
                       </Field>
@@ -205,16 +233,17 @@ export default function CourtSubmissionForm({
                   render={({ field }) => (
                     <FormItem>
                       <Field data-invalid={!!errors.description}>
-                        <FieldLabel htmlFor="court-description">Description</FieldLabel>
+                        <FieldLabel htmlFor="court-description">{t("courts.submissionForm.description", "Description")}</FieldLabel>
                         <FormControl>
                           <Textarea
                             id="court-description"
                             aria-invalid={!!errors.description}
+                            placeholder={t("courts.submissionForm.descriptionPlaceholder", "Describe the court, flooring type, rules, and facilities...")}
                             {...field}
                             className="min-h-28 rounded-xl"
                           />
                         </FormControl>
-                        <FieldDescription>Include surface quality, lighting, and access notes.</FieldDescription>
+                        <FieldDescription>{t("courts.submissionForm.generalInfoDesc", "Include surface quality, lighting, and access notes.")}</FieldDescription>
                         <FormMessage />
                       </Field>
                     </FormItem>
@@ -228,9 +257,15 @@ export default function CourtSubmissionForm({
                     render={({ field }) => (
                       <FormItem>
                         <Field data-invalid={!!errors.address}>
-                          <FieldLabel htmlFor="court-address">Address</FieldLabel>
+                          <FieldLabel htmlFor="court-address">{t("courts.submissionForm.address", "Address")}</FieldLabel>
                           <FormControl>
-                            <Input id="court-address" aria-invalid={!!errors.address} {...field} className="h-11 rounded-xl" />
+                            <Input
+                              id="court-address"
+                              aria-invalid={!!errors.address}
+                              placeholder={t("courts.submissionForm.addressPlaceholder", "Street address, area")}
+                              {...field}
+                              className="h-11 rounded-xl"
+                            />
                           </FormControl>
                           <FormMessage />
                         </Field>
@@ -243,9 +278,15 @@ export default function CourtSubmissionForm({
                     render={({ field }) => (
                       <FormItem>
                         <Field data-invalid={!!errors.city}>
-                          <FieldLabel htmlFor="court-city">City</FieldLabel>
+                          <FieldLabel htmlFor="court-city">{t("courts.submissionForm.city", "City")}</FieldLabel>
                           <FormControl>
-                            <Input id="court-city" aria-invalid={!!errors.city} {...field} className="h-11 rounded-xl" />
+                            <Input
+                              id="court-city"
+                              aria-invalid={!!errors.city}
+                              placeholder={t("courts.submissionForm.cityPlaceholder", "e.g. Cairo, Alexandria")}
+                              {...field}
+                              className="h-11 rounded-xl"
+                            />
                           </FormControl>
                           <FormMessage />
                         </Field>
@@ -259,8 +300,8 @@ export default function CourtSubmissionForm({
 
           <Card className="operator-panel">
             <CardHeader>
-              <CardTitle>Pricing and Availability</CardTitle>
-              <CardDescription>Set hourly rate and supported payment methods.</CardDescription>
+              <CardTitle>{t("courts.submissionForm.pricingAndAmenities", "Pricing and Availability")}</CardTitle>
+              <CardDescription>{t("courts.submissionForm.pricingAndAmenitiesDesc", "Set hourly rate and supported payment methods.")}</CardDescription>
             </CardHeader>
             <CardContent>
               <FieldGroup>
@@ -270,10 +311,14 @@ export default function CourtSubmissionForm({
                   render={({ field }) => (
                     <FormItem>
                       <Field data-invalid={!!errors.price_per_hour}>
-                        <FieldLabel htmlFor="price-per-hour">Price per hour (USD)</FieldLabel>
+                        <FieldLabel htmlFor="price-per-hour">
+                          {t("courts.submissionForm.pricePerHour", `Price per hour (${t("common.currency", "EGP")})`, {
+                            currency: t("common.currency", "EGP"),
+                          })}
+                        </FieldLabel>
                         <FormControl>
                           <InputGroup className="rounded-xl" aria-invalid={!!errors.price_per_hour}>
-                            <InputGroupAddon>$</InputGroupAddon>
+                            <InputGroupAddon>{t("common.currency", "EGP")}</InputGroupAddon>
                             <InputGroupInput
                               id="price-per-hour"
                               type="number"
@@ -292,7 +337,7 @@ export default function CourtSubmissionForm({
 
                 <Field data-invalid={!!errors.payment_methods}>
                   <FieldSet>
-                    <FieldLegend>Payment methods</FieldLegend>
+                    <FieldLegend>{t("courts.submissionForm.paymentMethods", "Payment methods")}</FieldLegend>
                     <ToggleGroup
                       type="multiple"
                       value={paymentMethods}
@@ -305,7 +350,7 @@ export default function CourtSubmissionForm({
                           value={method}
                           className="h-10 rounded-full border border-input px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                         >
-                          {method}
+                          {t(`common.paymentMethods.${method.toLowerCase()}`, method)}
                         </ToggleGroupItem>
                       ))}
                     </ToggleGroup>
@@ -318,13 +363,13 @@ export default function CourtSubmissionForm({
 
           <Card className="operator-panel">
             <CardHeader>
-              <CardTitle>Sports and Dimensions</CardTitle>
-              <CardDescription>Choose supported sports and set dimensions for each.</CardDescription>
+              <CardTitle>{t("courts.submissionForm.sportsAndDimensions", "Sports and Dimensions")}</CardTitle>
+              <CardDescription>{t("courts.submissionForm.sportsAndDimensionsDesc", "Choose supported sports and set dimensions for each.")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
               <Field data-invalid={!!errors.sports}>
                 <FieldSet>
-                  <FieldLegend>Sports</FieldLegend>
+                  <FieldLegend>{t("courts.submissionForm.selectSports", "Sports")}</FieldLegend>
                   <ToggleGroup
                     type="multiple"
                     value={selectedSports}
@@ -337,7 +382,7 @@ export default function CourtSubmissionForm({
                         value={sport}
                         className="h-10 rounded-full border border-input px-4 capitalize data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                       >
-                        {sport}
+                        {t(`common.sports.${sport.toLowerCase()}`, sport)}
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
@@ -349,10 +394,12 @@ export default function CourtSubmissionForm({
                 <div className="grid gap-4 md:grid-cols-2">
                   {selectedSports.map((sportId) => (
                     <FieldSet key={sportId} className="rounded-2xl border border-border/70 p-4">
-                      <FieldLegend className="mb-2 capitalize">{sportId} dimensions (m)</FieldLegend>
+                      <FieldLegend className="mb-2 capitalize">
+                        {t(`common.sports.${sportId.toLowerCase()}`, sportId)} {t("courts.submissionForm.dimensions", "dimensions (m)")}
+                      </FieldLegend>
                       <div className="grid gap-3 sm:grid-cols-2">
                         <Field>
-                          <FieldLabel htmlFor={`width-${sportId}`}>Width</FieldLabel>
+                          <FieldLabel htmlFor={`width-${sportId}`}>{t("courts.submissionForm.width", "Width")}</FieldLabel>
                           <Input
                             id={`width-${sportId}`}
                             type="number"
@@ -366,7 +413,7 @@ export default function CourtSubmissionForm({
                           />
                         </Field>
                         <Field>
-                          <FieldLabel htmlFor={`length-${sportId}`}>Length</FieldLabel>
+                          <FieldLabel htmlFor={`length-${sportId}`}>{t("courts.submissionForm.length", "Length")}</FieldLabel>
                           <Input
                             id={`length-${sportId}`}
                             type="number"
@@ -389,13 +436,13 @@ export default function CourtSubmissionForm({
 
           <Card className="operator-panel">
             <CardHeader>
-              <CardTitle>Amenities and Location</CardTitle>
-              <CardDescription>Select onsite facilities and set exact map coordinates.</CardDescription>
+              <CardTitle>{t("courts.submissionForm.location", "Amenities and Location")}</CardTitle>
+              <CardDescription>{t("courts.submissionForm.locationDesc", "Select onsite facilities and set exact map coordinates.")}</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-6">
               <Field>
                 <FieldSet>
-                  <FieldLegend>Amenities</FieldLegend>
+                  <FieldLegend>{t("courts.submissionForm.selectAmenities", "Amenities")}</FieldLegend>
                   <ToggleGroup
                     type="multiple"
                     value={selectedAmenities}
@@ -408,7 +455,7 @@ export default function CourtSubmissionForm({
                         value={amenity}
                         className="h-10 rounded-full border border-input px-4 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                       >
-                        {amenity}
+                        {t(`common.amenities.${amenity.toLowerCase().replace(/\s+/g, '')}`, amenity)}
                       </ToggleGroupItem>
                     ))}
                   </ToggleGroup>
@@ -436,7 +483,7 @@ export default function CourtSubmissionForm({
                   render={({ field }) => (
                     <FormItem>
                       <Field>
-                        <FieldLabel>Latitude</FieldLabel>
+                        <FieldLabel>{t("courts.submissionForm.latitude", "Latitude")}</FieldLabel>
                         <FormControl>
                           <Input {...field} value={field.value ?? ""} readOnly className="h-11 rounded-xl bg-muted/35" />
                         </FormControl>
@@ -450,7 +497,7 @@ export default function CourtSubmissionForm({
                   render={({ field }) => (
                     <FormItem>
                       <Field>
-                        <FieldLabel>Longitude</FieldLabel>
+                        <FieldLabel>{t("courts.submissionForm.longitude", "Longitude")}</FieldLabel>
                         <FormControl>
                           <Input {...field} value={field.value ?? ""} readOnly className="h-11 rounded-xl bg-muted/35" />
                         </FormControl>
@@ -474,17 +521,19 @@ export default function CourtSubmissionForm({
               {loading ? (
                 <>
                   <Spinner data-icon="inline-start" />
-                  {mode === "create" ? "Submitting court..." : "Saving updates..."}
+                  {mode === "create"
+                    ? t("courts.submissionForm.saving", "Submitting court...")
+                    : t("courts.submissionForm.saving", "Saving updates...")}
                 </>
               ) : mode === "create" ? (
-                "Submit Court for Approval"
+                t("courts.submissionForm.createCourt", "Submit Court for Approval")
               ) : (
-                "Save Changes"
+                t("courts.submissionForm.saveCourt", "Save Changes")
               )}
             </Button>
             {mode === "create" ? (
               <p className="text-center text-sm text-muted-foreground">
-                Submissions are reviewed before they appear in the public directory.
+                {t("courts.submissionForm.generalInfoDesc", "Submissions are reviewed before they appear in the public directory.")}
               </p>
             ) : null}
           </div>

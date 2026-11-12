@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
+import { useI18n } from "@/lib/i18n/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,6 +48,7 @@ export function TeamChat({
   teamId: string;
   currentUserId: string;
 }) {
+  const { t } = useI18n();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const supabase = createClient();
@@ -125,8 +127,10 @@ export function TeamChat({
     <div className="surface-panel rounded-[1.8rem] px-0 py-0">
       <div className="flex items-center justify-between border-b border-border/70 px-5 py-4">
         <div>
-          <p className="section-kicker text-[0.68rem]">Team chat</p>
-          <p className="text-sm text-muted-foreground">{messages.length} messages in this thread</p>
+          <p className="section-kicker text-[0.68rem]">{t("teamWorkspace.chat.title", "Team chat")}</p>
+          <p className="text-sm text-muted-foreground">
+            {t("teamWorkspace.chat.threadCount", "{count} messages in this thread", { count: messages.length })}
+          </p>
         </div>
       </div>
 
@@ -163,11 +167,11 @@ export function TeamChat({
           value={newMessage}
           onChange={(event) => setNewMessage(event.target.value)}
           onKeyDown={(event) => event.key === "Enter" && sendMessage()}
-          placeholder="Send a quick update to the squad"
+          placeholder={t("teamWorkspace.chat.inputPlaceholder", "Send a quick update to the squad")}
           className="h-12 rounded-full"
         />
         <Button onClick={sendMessage} className="rounded-full px-5">
-          Send
+          {t("teamWorkspace.chat.send", "Send")}
         </Button>
       </div>
     </div>

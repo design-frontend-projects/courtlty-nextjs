@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 
+import { useI18n } from "@/lib/i18n/client";
 import { teamSchema, type TeamFormData } from "@/lib/validations/schemas";
 import { getMaxPlayersForSport } from "@/lib/utils/business-logic";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 const SPORTS_OPTIONS = ["Basketball", "Football", "Tennis", "Volleyball", "Badminton", "Padel"];
 
 export default function TeamCreationForm() {
+  const { t } = useI18n();
   const [selectedSport, setSelectedSport] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -56,13 +58,13 @@ export default function TeamCreationForm() {
 
       const result = await response.json();
       if (!response.ok) {
-        throw new Error(result.error || "Failed to create team");
+        throw new Error(result.error || t("teamCreation.form.errorToast", "Failed to create team."));
       }
 
-      toast.success("Team created successfully.");
+      toast.success(t("teamCreation.form.successToast", "Team created successfully."));
       router.push(`/teams/${result.team.id}`);
     } catch (error: unknown) {
-      toast.error(error instanceof Error ? error.message : "Failed to create team");
+      toast.error(error instanceof Error ? error.message : t("teamCreation.form.errorToast", "Failed to create team."));
     } finally {
       setLoading(false);
     }
@@ -72,19 +74,21 @@ export default function TeamCreationForm() {
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6">
       <div className="grid gap-2">
         <Label htmlFor="name" className="section-kicker text-[0.68rem]">
-          Team name
+          {t("teamCreation.form.teamName", "Team Name")}
         </Label>
         <Input
           id="name"
           {...register("name")}
-          placeholder="Example: Downtown Wednesday Club"
+          placeholder={t("teamCreation.form.teamNamePlaceholder", "e.g. Cairo Strikers")}
           className="h-12 rounded-2xl"
         />
         {errors.name ? <p className="text-sm text-destructive">{errors.name.message}</p> : null}
       </div>
 
       <div className="grid gap-3">
-        <Label className="section-kicker text-[0.68rem]">Sport</Label>
+        <Label className="section-kicker text-[0.68rem]">
+          {t("teamCreation.form.sport", "Sport")}
+        </Label>
         <div className="flex flex-wrap gap-2">
           {SPORTS_OPTIONS.map((sport) => {
             const value = sport.toLowerCase();
@@ -98,7 +102,7 @@ export default function TeamCreationForm() {
                   active ? "border-primary bg-primary/10 text-primary" : "border-border/70 bg-background text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {sport}
+                {t(`common.sports.${value}`, sport)}
               </button>
             );
           })}
@@ -108,12 +112,12 @@ export default function TeamCreationForm() {
 
       <div className="grid gap-2">
         <Label htmlFor="description" className="section-kicker text-[0.68rem]">
-          Team description
+          {t("teamCreation.form.description", "Team description")}
         </Label>
         <Textarea
           id="description"
           {...register("description")}
-          placeholder="Explain the squad style, match rhythm, and who should join."
+          placeholder={t("teamCreation.form.descriptionPlaceholder", "Explain the squad style, match rhythm, and who should join.")}
           className="min-h-32 rounded-[1.5rem]"
         />
       </div>
@@ -121,7 +125,7 @@ export default function TeamCreationForm() {
       <div className="grid gap-5 md:grid-cols-2">
         <div className="grid gap-2">
           <Label htmlFor="max_players" className="section-kicker text-[0.68rem]">
-            Maximum players
+            {t("teamCreation.form.maxPlayers", "Maximum players")}
           </Label>
           <Input
             id="max_players"
@@ -132,7 +136,12 @@ export default function TeamCreationForm() {
             className="h-12 rounded-2xl"
           />
           <p className="text-sm text-muted-foreground">
-            {selectedSport ? `Up to ${maxPlayersAllowed} players for ${selectedSport}.` : "Select a sport to set the recommended roster size."}
+            {selectedSport
+              ? t("teamCreation.form.maxPlayersSportHint", "Up to {max} players for {sport}.", {
+                  max: maxPlayersAllowed,
+                  sport: t(`common.sports.${selectedSport}`, selectedSport),
+                })
+              : t("teamCreation.form.maxPlayersDefaultHint", "Select a sport to set the recommended roster size.")}
           </p>
           {errors.max_players ? (
             <p className="text-sm text-destructive">{errors.max_players.message}</p>
@@ -143,9 +152,11 @@ export default function TeamCreationForm() {
           <div className="flex items-start gap-3">
             <Checkbox id="looking_for_players" {...register("looking_for_players")} />
             <div className="grid gap-1">
-              <Label htmlFor="looking_for_players">Open recruitment</Label>
+              <Label htmlFor="looking_for_players">
+                {t("teamCreation.form.openRecruitment", "Open recruitment")}
+              </Label>
               <p className="text-sm text-muted-foreground">
-                Show that the team is actively looking for new players.
+                {t("teamCreation.form.openRecruitmentDesc", "Show that the team is actively looking for new players.")}
               </p>
             </div>
           </div>
@@ -153,7 +164,7 @@ export default function TeamCreationForm() {
           {lookingForPlayers ? (
             <div className="mt-4 grid gap-2">
               <Label htmlFor="players_needed" className="section-kicker text-[0.68rem]">
-                Players needed
+                {t("teamCreation.form.playersNeeded", "Players needed")}
               </Label>
               <Input
                 id="players_needed"
@@ -169,19 +180,23 @@ export default function TeamCreationForm() {
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.6rem] border border-border/70 bg-accent/22 px-5 py-4">
         <div className="flex flex-col gap-1">
-          <p className="section-kicker text-[0.68rem]">Team setup</p>
-          <p className="text-sm text-muted-foreground">Courtly will create the roster shell and redirect you to the team workspace.</p>
+          <p className="section-kicker text-[0.68rem]">
+            {t("teamCreation.form.teamSetup", "Team setup")}
+          </p>
+          <p className="text-sm text-muted-foreground">
+            {t("teamCreation.form.teamSetupDesc", "Courtly will create the roster shell and redirect you to the team workspace.")}
+          </p>
         </div>
         {selectedSport ? (
           <Badge variant="secondary" className="rounded-full capitalize">
-            {selectedSport}
+            {t(`common.sports.${selectedSport}`, selectedSport)}
           </Badge>
         ) : null}
       </div>
 
       <div className="flex justify-end">
         <Button type="submit" className="rounded-full px-6" disabled={loading}>
-          {loading ? "Creating team..." : "Create team"}
+          {loading ? t("teamCreation.form.creating", "Creating team...") : t("teamCreation.form.createButton", "Create team")}
         </Button>
       </div>
     </form>

@@ -16,7 +16,7 @@ import { type Locale } from "@/lib/i18n/types";
 
 const localeOptions: Array<{ value: Locale; labelKey: string; nativeLabel: string }> = [
   { value: "en", labelKey: "common.english", nativeLabel: "English" },
-  { value: "ar", labelKey: "common.arabic", nativeLabel: "???????" },
+  { value: "ar", labelKey: "common.arabic", nativeLabel: "العربية" },
 ];
 
 export function LanguageSwitcher({ className }: { className?: string }) {

@@ -6,7 +6,17 @@
     "switchLanguage": "Switch language",
     "loading": "Loading...",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
+    "close": "Close",
+    "back": "Back",
+    "retry": "Retry",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "edit": "Edit",
+    "create": "Create",
+    "confirm": "Confirm",
+    "reject": "Reject",
     "home": "Home",
     "login": "Log in",
     "logout": "Log out",
@@ -14,7 +24,51 @@
     "settings": "Settings",
     "dashboard": "Dashboard",
     "teams": "Teams",
-    "courts": "Courts"
+    "courts": "Courts",
+    "admin": "Admin",
+    "currency": "EGP",
+    "viewDetails": "View details",
+    "perHour": "per hour",
+    "all": "All",
+    "actions": "Actions",
+    "status": "Status",
+    "name": "Name",
+    "city": "City",
+    "rate": "Rate",
+    "sport": "Sport",
+    "date": "Date",
+    "time": "Time",
+    "total": "Total",
+    "active": "Active",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "completed": "Completed",
+    "rejected": "Rejected",
+    "recruiting": "Recruiting",
+    "sports": {
+      "basketball": "Basketball",
+      "football": "Football",
+      "tennis": "Tennis",
+      "volleyball": "Volleyball",
+      "badminton": "Badminton",
+      "padel": "Padel",
+      "other": "Other"
+    },
+    "amenities": {
+      "parking": "Parking",
+      "changingRooms": "Changing Rooms",
+      "showers": "Showers",
+      "lockers": "Lockers",
+      "lighting": "Lighting",
+      "seating": "Seating",
+      "waterFountain": "Water Fountain",
+      "firstAid": "First Aid"
+    },
+    "paymentMethods": {
+      "cash": "Cash",
+      "card": "Credit / Debit Card"
+    }
   },
   "languageSwitcher": {
     "label": "Language",
@@ -27,62 +81,8 @@
     "loggedIn": "Logged in",
     "mySquads": "My squads",
     "signUp": "Sign up",
-    "startBooking": "Start booking"
-  },
-  "admin": {
-    "operatorMode": "Operator mode",
-    "liveSite": "Live site",
-    "courtlyOperator": "Courtly operator",
-    "suiteTagline": "Operator suite",
-    "operations": "Operations",
-    "account": "Account",
-    "footerCopy": "Keep approvals, payouts, and venue quality in one high-clarity workspace.",
-    "route": {
-      "bookingsTitle": "Bookings hub",
-      "bookingsDescription": "Calendar, requests, and session changes.",
-      "approvalsTitle": "Approvals",
-      "approvalsDescription": "Venue submissions, growth signals, and fast decisions.",
-      "courtsTitle": "Courts",
-      "courtsDescription": "Venue inventory, listing health, and status control.",
-      "paymentsTitle": "Payments",
-      "paymentsDescription": "Settlement visibility and transaction oversight.",
-      "notificationsTitle": "Notifications",
-      "notificationsDescription": "System-wide and targeted operator communication.",
-      "profileTitle": "Profile",
-      "profileDescription": "Identity and account-level operating preferences.",
-      "settingsTitle": "Settings",
-      "settingsDescription": "Environment defaults, alerts, and privacy controls."
-    },
-    "sidebar": {
-      "bookings": "Bookings hub",
-      "approvals": "Approvals",
-      "courts": "Courts",
-      "payments": "Payments",
-      "notifications": "Notifications",
-      "profile": "Profile",
-      "settings": "Settings"
-    },
-    "toasts": {
-      "signedOut": "Signed out",
-      "signOutError": "Error signing out"
-    },
-    "settings": {
-      "page": {
-        "eyebrow": "Admin settings",
-        "title": "Tune the operator environment.",
-        "description": "Adjust notifications, appearance, privacy, and other preferences without leaving the admin shell."
-      },
-      "general": {
-        "regionalDefaultsTitle": "Regional defaults",
-        "regionalDefaultsDescription": "Set language and timezone defaults for the operator environment.",
-        "selectLanguage": "Select language"
-      },
-      "toasts": {
-        "themeUpdated": "Theme updated",
-        "notificationsSaved": "Notification preferences saved",
-        "savePreferencesFailed": "Failed to save preferences"
-      }
-    }
+    "startBooking": "Start booking",
+    "admin": "Admin Console"
   },
   "homePage": {
     "title": "Courtly - Book Sports Courts, Build Teams, Play Together",
@@ -211,6 +211,641 @@
       "verifyCodeError": "Unable to verify code",
       "missingUser": "No authenticated user returned"
     }
+  },
+  "dashboard": {
+    "eyebrow": "Player workspace",
+    "welcomeBack": "Welcome back, {name}.",
+    "description": "Keep your active bookings, squads, and next actions in one place.",
+    "actions": {
+      "admin": "Admin",
+      "teams": "Teams",
+      "findCourts": "Find courts"
+    },
+    "metrics": {
+      "upcomingBookings": "Upcoming bookings",
+      "noUpcomingGames": "No upcoming games",
+      "viewDetails": "View details",
+      "squadMemberships": "Squad memberships",
+      "squadMembershipsMeta": "Teams you own or actively play with.",
+      "savedVenues": "Saved venues",
+      "savedVenuesMeta": "Favorites are not set up yet, but this space is reserved for quick access."
+    },
+    "upcomingSessions": {
+      "title": "Upcoming sessions",
+      "description": "Your next confirmed and pending bookings, ordered by date.",
+      "bookAnother": "Book another court",
+      "at": "at",
+      "viewDetails": "View details",
+      "emptyTitle": "No upcoming bookings",
+      "emptyDescription": "Browse open courts and lock in your next practice or match."
+    },
+    "teamsSection": {
+      "title": "Your teams",
+      "description": "Squads where you are captain or an active teammate.",
+      "createTeam": "Create team",
+      "activeRoster": "Active roster",
+      "players": "players",
+      "owner": "Owner",
+      "emptyTitle": "No teams yet",
+      "emptyDescription": "Create a squad to manage rosters, matches, and team chat."
+    },
+    "modal": {
+      "title": "Upcoming Bookings Details",
+      "description": "View details for all your upcoming games.",
+      "empty": "No upcoming bookings found."
+    }
+  },
+  "courts": {
+    "eyebrow": "Court discovery",
+    "title": "Find the right court fast.",
+    "description": "Search active venues by sport, city, and price, then move straight into booking without losing context.",
+    "activeResults": "{count} active results",
+    "rate": "Rate",
+    "available": "Available",
+    "card": {
+      "rate": "Rate",
+      "available": "Available",
+      "openDetails": "Open court details, availability, and booking.",
+      "viewCourt": "View court"
+    },
+    "empty": {
+      "title": "No courts matched those filters.",
+      "description": "Reset the current search or widen your city and price range to surface more options.",
+      "resetSearch": "Reset search"
+    },
+    "filters": {
+      "searchPlaceholder": "Search by court name or city",
+      "sport": "Sport",
+      "allSports": "All sports",
+      "city": "City",
+      "allCities": "All cities",
+      "minPrice": "Min",
+      "maxPrice": "Max",
+      "priceRange": "Price Range",
+      "filter": "Filter",
+      "clear": "Clear",
+      "filters": "Filters",
+      "activeFilter": "{count} active"
+    },
+    "submit": {
+      "accessDeniedTitle": "Access Denied",
+      "accessDeniedDescription": "Only court owners can submit courts. Please contact support to upgrade your account.",
+      "backToDashboard": "Back to Dashboard",
+      "pageTitle": "Submit Your Court",
+      "pageDescription": "List your court and start accepting bookings"
+    },
+    "submissionForm": {
+      "titleCreate": "Add New Court",
+      "titleEdit": "Edit Court",
+      "generalInfo": "General Information",
+      "generalInfoDesc": "Core court details and descriptions.",
+      "courtName": "Court Name",
+      "courtNamePlaceholder": "e.g. Al-Ahly Sports Arena",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the court, flooring type, rules, and facilities...",
+      "sportsAndDimensions": "Sports & Dimensions",
+      "sportsAndDimensionsDesc": "Supported sports and field dimensions.",
+      "selectSports": "Select Sports",
+      "dimensions": "Dimensions (meters)",
+      "width": "Width (m)",
+      "length": "Length (m)",
+      "location": "Location Details",
+      "locationDesc": "Address, city, and map coordinates.",
+      "address": "Address",
+      "addressPlaceholder": "Street address, area",
+      "city": "City",
+      "cityPlaceholder": "e.g. Cairo, Alexandria",
+      "coordinates": "Map Coordinates",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "pricingAndAmenities": "Pricing & Amenities",
+      "pricingAndAmenitiesDesc": "Hourly rate and available venue facilities.",
+      "pricePerHour": "Price per hour ({currency})",
+      "selectAmenities": "Venue Amenities",
+      "paymentMethods": "Payment Methods",
+      "paymentMethodsDesc": "Payment types accepted at this venue.",
+      "courtImages": "Court Images",
+      "courtImagesDesc": "Upload quality photos to increase bookings.",
+      "availabilityHours": "Availability Hours",
+      "availabilityHoursDesc": "Set weekly opening hours and available slots.",
+      "saveCourt": "Save Court",
+      "createCourt": "Submit Court",
+      "saving": "Saving...",
+      "successCreate": "Court submitted successfully.",
+      "successUpdate": "Court updated successfully.",
+      "errorSubmit": "Failed to save court."
+    }
+  },
+  "courtDetail": {
+    "eyebrow": "Court profile",
+    "backToCourts": "Back to courts",
+    "courtNotFound": "Court not found",
+    "courtNotFoundDesc": "The court you requested does not exist, or it was removed.",
+    "unableToLoad": "Unable to load court",
+    "unableToLoadDesc": "We could not load this court right now. Try again.",
+    "tabs": {
+      "overview": "Overview",
+      "reviews": "Reviews",
+      "schedule": "Schedule"
+    },
+    "about": {
+      "title": "About this court",
+      "description": "Make the booking decision with the essentials first: quality, location, amenities, and trust signals.",
+      "defaultDescription": "Professional sports facility designed for recurring team sessions, weekend play, and competitive bookings.",
+      "location": "Location",
+      "managedBy": "Managed by",
+      "courtOwner": "Court owner",
+      "phoneNotListed": "Phone not listed",
+      "reviewsCount": "{count} reviews"
+    },
+    "scheduleSection": {
+      "title": "Availability windows",
+      "description": "Use the listed operating windows to decide if the session fits your team schedule.",
+      "noHours": "No specific hours listed yet. Contact the owner for availability details."
+    },
+    "sidebar": {
+      "startingRate": "Starting rate",
+      "perHour": "per hour",
+      "protectionTitle": "Courtly booking protection",
+      "protectionDesc": "Booking details, rate visibility, and confirmation status stay visible all the way through checkout."
+    }
+  },
+  "bookingForm": {
+    "sport": "Sport",
+    "selectSport": "Select sport",
+    "date": "Date",
+    "pickDate": "Pick a date",
+    "timeSlot": "Time slot",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "summary": "Booking summary",
+    "rate": "Rate",
+    "duration": "Duration",
+    "durationHours": "{hours} hours",
+    "total": "Total",
+    "bookNow": "Book now",
+    "loginRequired": "Please log in to book a court.",
+    "bookingConfirmed": "Booking confirmed.",
+    "bookingFailed": "Failed to create booking."
+  },
+  "paymentDialog": {
+    "titleConfirmed": "Booking confirmed",
+    "titlePayment": "Complete payment",
+    "descConfirmed": "The booking is locked. Download the receipt or close this dialog to return to your dashboard.",
+    "descPayment": "Review the session details and confirm payment to finalize the booking.",
+    "bookingId": "Booking ID",
+    "court": "Court",
+    "date": "Date",
+    "time": "Time",
+    "totalPaid": "Total paid",
+    "totalAmount": "Total amount",
+    "paymentMethod": "Payment method",
+    "card": "Credit / Debit Card",
+    "cardNumber": "Card number",
+    "cardNumberPlaceholder": "4000 0000 0000 0000",
+    "expiry": "Expiry date",
+    "expiryPlaceholder": "MM / YY",
+    "cvc": "CVC",
+    "cvcPlaceholder": "123",
+    "secureNotice": "Payments are secured with end-to-end encryption.",
+    "pay": "Pay {amount} {currency}",
+    "processing": "Processing payment...",
+    "downloadReceipt": "Download receipt",
+    "done": "Done"
+  },
+  "reviews": {
+    "title": "Player Reviews",
+    "writeReview": "Write a review",
+    "rating": "Rating",
+    "commentPlaceholder": "Share details of your experience, court condition, lighting, facilities...",
+    "submitting": "Submitting...",
+    "submitReview": "Submit review",
+    "noReviews": "No reviews yet. Be the first player to review this venue!",
+    "successToast": "Review submitted successfully.",
+    "errorToast": "Failed to submit review."
+  },
+  "teams": {
+    "eyebrow": "Team directory",
+    "title": "Find the right squad.",
+    "description": "Browse active teams, check recruiting status, and jump into the team workspace when a fit looks right.",
+    "actions": {
+      "dashboard": "Dashboard",
+      "createTeam": "Create team"
+    },
+    "filters": {
+      "title": "Directory filters",
+      "description": "Search and filter through teams looking for active teammates.",
+      "sport": "Sport",
+      "allSports": "All sports",
+      "onlyRecruiting": "Show only teams recruiting right now"
+    },
+    "card": {
+      "recruiting": "Recruiting",
+      "playersCount": "{count} / {max} players",
+      "spotsOpen": "{count} spots open",
+      "rosterStable": "Roster stable",
+      "defaultDesc": "Team profile ready for players, schedules, and chat."
+    },
+    "empty": {
+      "title": "No teams available yet",
+      "description": "Create the first team and start building the roster, approvals, and session planning flow.",
+      "createFirst": "Create the first team"
+    }
+  },
+  "teamCreation": {
+    "eyebrow": "Team creation",
+    "alreadyOwnerTitle": "You already own a team.",
+    "alreadyOwnerDesc": "Manage {name} instead of opening a second owner account.",
+    "openMyTeam": "Open my team",
+    "newTeamTitle": "Build the squad shell before the next session.",
+    "newTeamDesc": "Name the team, define the roster, and open recruitment if you still need players.",
+    "teamDetailsTitle": "Team details",
+    "teamDetailsDesc": "Everything here feeds the public team profile and owner workspace.",
+    "form": {
+      "teamName": "Team Name",
+      "teamNamePlaceholder": "e.g. Cairo Strikers",
+      "sport": "Sport",
+      "selectSport": "Select sport",
+      "description": "Description",
+      "descriptionPlaceholder": "Describe the squad culture, play style, and match schedule...",
+      "maxPlayers": "Maximum Players",
+      "maxPlayersDefaultHint": "Select a sport to set the recommended roster size.",
+      "maxPlayersSportHint": "Up to {max} players for {sport}.",
+      "recruitment": "Recruitment Status",
+      "openRecruitment": "Open recruitment",
+      "openRecruitmentDesc": "Show that the team is actively looking for new players.",
+      "lookingForPlayers": "Currently looking for new players",
+      "playersNeeded": "Players needed",
+      "teamSetup": "Team setup",
+      "teamSetupDesc": "Courtly will create the roster shell and redirect you to the team workspace.",
+      "createButton": "Create Team",
+      "creating": "Creating team...",
+      "successToast": "Team created successfully.",
+      "errorToast": "Failed to create team."
+    }
+  },
+  "teamWorkspace": {
+    "eyebrow": "Team workspace",
+    "defaultDesc": "{sport} team workspace for members, scheduling, and approvals.",
+    "joinTeam": "Join team",
+    "requestPending": "Request pending",
+    "joined": "Member",
+    "metrics": {
+      "approvedPlayers": "Approved players",
+      "approvedPlayersMeta": "Current active roster.",
+      "weeklyWins": "Weekly wins",
+      "weeklyWinsMeta": "Running win count.",
+      "totalGames": "Total games",
+      "totalGamesMeta": "Matches and scheduled fixtures."
+    },
+    "roster": {
+      "title": "Roster",
+      "description": "Members currently approved on this squad.",
+      "owner": "Owner",
+      "member": "Member"
+    },
+    "tabs": {
+      "teamChat": "Team chat",
+      "upcomingGames": "Upcoming games",
+      "management": "Management"
+    },
+    "fixtures": {
+      "title": "Upcoming fixtures",
+      "description": "Game scheduling is ready for the next phase of the product.",
+      "emptyTitle": "No upcoming games",
+      "emptyDesc": "Once matches are scheduled, the team will be able to track them here alongside roster communication."
+    },
+    "managementSection": {
+      "title": "Pending join requests",
+      "description": "Approve or reject new players without leaving the team workspace.",
+      "empty": "No pending requests.",
+      "requestedToJoin": "Requested to join",
+      "approve": "Approve",
+      "reject": "Reject",
+      "approvedToast": "Member approved.",
+      "rejectedToast": "Member rejected."
+    },
+    "chat": {
+      "title": "Team chat",
+      "threadCount": "{count} messages in this thread",
+      "inputPlaceholder": "Send a quick update to the squad",
+      "send": "Send"
+    }
+  },
+  "profile": {
+    "eyebrow": "Player profile",
+    "title": "Keep your player identity and match history current.",
+    "description": "Keep identity, bookings, and squad activity aligned in one operational view.",
+    "editProfile": "Edit profile",
+    "stopEditing": "Stop editing",
+    "cancelEdit": "Cancel",
+    "saveChanges": "Save changes",
+    "saving": "Saving...",
+    "uploadPhoto": "Upload photo",
+    "changePhoto": "Change",
+    "removePhoto": "Remove",
+    "fullName": "Full name",
+    "email": "Email",
+    "phone": "Phone number",
+    "favoriteSports": "Favorite sports",
+    "personalInfo": "Personal Information",
+    "teamsTab": "My Squads",
+    "bookingsTab": "Booking History",
+    "noTeams": "You have not joined any squads yet.",
+    "noBookings": "No bookings found.",
+    "browseCourts": "Browse courts",
+    "browseTeams": "Browse teams",
+    "savedSuccess": "Profile updated",
+    "savedError": "Failed to update profile",
+    "identity": "Identity",
+    "identityDesc": "Primary contact data, role, and access state.",
+    "adminNotice": "Administrative privileges are enabled on this account.",
+    "playerNotice": "Player-facing account with booking and team access.",
+    "notProvided": "Not provided",
+    "metrics": {
+      "recentBookings": "Recent bookings",
+      "recentBookingsMeta": "Latest sessions visible across the booking flow.",
+      "teamMemberships": "Team memberships",
+      "teamMembershipsMeta": "Approved squads currently tied to your account.",
+      "completedSessions": "Completed sessions",
+      "completedSessionsMeta": "Sessions that have already moved through the full flow."
+    },
+    "tabs": {
+      "overview": "Overview",
+      "teams": "Teams",
+      "settings": "Settings"
+    },
+    "recentActivity": "Recent booking activity",
+    "recentActivityDesc": "Upcoming and recently completed sessions in the order you need to scan them.",
+    "bookCourt": "Book a court",
+    "openCourt": "Open court",
+    "addressPending": "Address pending",
+    "emptyBookingsTitle": "No booking activity yet",
+    "emptyBookingsDesc": "Once you reserve a court, your schedule, status, and venue context will stay visible here.",
+    "discoverCourts": "Discover courts",
+    "teamWorkspace": "Team workspace",
+    "teamWorkspaceDesc": "Squads connected to your account, including role and recruiting context.",
+    "createTeam": "Create team",
+    "openTeam": "Open team",
+    "emptyTeamsTitle": "No teams linked yet",
+    "emptyTeamsDesc": "Create a new squad or join one to keep chat, roster, and session prep in the same workspace.",
+    "settingsTitle": "Profile settings",
+    "settingsDesc": "Use a single editing flow with clearer labels and mobile-friendly controls.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "displayName": "Display name",
+    "displayNameHint": "This is derived from your first and last name.",
+    "phoneHint": "Keep this current for booking confirmations and team coordination.",
+    "editingLocked": "Editing is locked until you enter edit mode from the header.",
+    "avatar": {
+      "title": "Profile image",
+      "description": "Choose a clear photo, preview it locally, then upload it to the avatars bucket.",
+      "chooseImage": "Choose image",
+      "replaceImage": "Replace image",
+      "uploadButton": "Upload avatar",
+      "resetPreview": "Reset preview",
+      "previewNote": "Previewing {name}. This image is not saved until you upload it.",
+      "defaultNote": "Supported formats depend on the browser. Keep files under 5MB for faster uploads.",
+      "errorNotImage": "Please upload an image file",
+      "errorTooLarge": "Image size must be less than 5MB",
+      "errorNoFile": "Choose an image before uploading",
+      "successToast": "Avatar updated",
+      "errorToast": "Failed to upload avatar"
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all read",
+    "noNotifications": "No notifications",
+    "loading": "Loading...",
+    "markAsRead": "Mark as read",
+    "allReadSuccess": "All marked as read",
+    "errorUpdate": "Failed to update",
+    "errorMarkAll": "Failed to mark all as read"
+  },
+  "admin": {
+    "operatorMode": "Operator mode",
+    "liveSite": "Live site",
+    "courtlyOperator": "Courtly operator",
+    "suiteTagline": "Operator suite",
+    "operations": "Operations",
+    "account": "Account",
+    "footerCopy": "Keep approvals, payouts, and venue quality in one high-clarity workspace.",
+    "route": {
+      "bookingsTitle": "Bookings hub",
+      "bookingsDescription": "Calendar, requests, and session changes.",
+      "approvalsTitle": "Approvals",
+      "approvalsDescription": "Venue submissions, growth signals, and fast decisions.",
+      "courtsTitle": "Courts",
+      "courtsDescription": "Venue inventory, listing health, and status control.",
+      "paymentsTitle": "Payments",
+      "paymentsDescription": "Settlement visibility and transaction oversight.",
+      "notificationsTitle": "Notifications",
+      "notificationsDescription": "System-wide and targeted operator communication.",
+      "profileTitle": "Profile",
+      "profileDescription": "Identity and account-level operating preferences.",
+      "settingsTitle": "Settings",
+      "settingsDescription": "Environment defaults, alerts, and privacy controls."
+    },
+    "sidebar": {
+      "bookings": "Bookings hub",
+      "approvals": "Approvals",
+      "courts": "Courts",
+      "payments": "Payments",
+      "notifications": "Notifications",
+      "profile": "Profile",
+      "settings": "Settings"
+    },
+    "toasts": {
+      "signedOut": "Signed out",
+      "signOutError": "Error signing out"
+    },
+    "dashboard": {
+      "eyebrow": "Admin approvals",
+      "title": "Review new courts with speed and confidence.",
+      "description": "Prioritize pending submissions, approve trusted venues quickly, and keep the live directory clean.",
+      "bookings": "Bookings",
+      "openCourts": "Open courts inventory",
+      "pendingSubmissions": "Pending submissions",
+      "pendingSubmissionsMeta": "Courts still waiting on approval or rejection.",
+      "totalCourts": "Total courts",
+      "totalCourtsMeta": "Live and pending venues across the platform.",
+      "totalUsers": "Total users",
+      "totalUsersMeta": "Registered accounts attached to the current system.",
+      "pendingQueue": "Pending court queue",
+      "pendingQueueDesc": "Scan venue quality, ownership, and price before releasing the listing to the public directory.",
+      "unknownOwner": "Unknown owner",
+      "noEmail": "No email provided",
+      "reject": "Reject",
+      "approveVenue": "Approve venue",
+      "working": "Working...",
+      "courtApproved": "Court approved",
+      "courtRejected": "Court rejected",
+      "noApprovals": "No approvals waiting",
+      "noApprovalsDesc": "The pending queue is clear. New submissions will appear here when owners add venues."
+    },
+    "bookingsHub": {
+      "eyebrow": "Admin bookings",
+      "title": "Operate the live booking floor.",
+      "description": "Monitor court sessions, confirm requests, and react to schedule changes from one high-clarity board.",
+      "approvals": "Approvals",
+      "courts": "Courts",
+      "addBooking": "Add booking",
+      "stats": {
+        "revenueTracked": "Revenue tracked",
+        "revenueTrackedMeta": "{count} bookings contributing to current totals.",
+        "activeCourts": "Active courts",
+        "activeCourtsMeta": "Venues currently represented in recent booking activity.",
+        "pendingRequests": "Pending requests",
+        "pendingRequestsMeta": "Sessions still waiting on operator confirmation.",
+        "activeUsers": "Active users",
+        "activeUsersMeta": "Unique users involved in recent booking traffic."
+      },
+      "calendar": {
+        "title": "Schedule board",
+        "description": "View sessions by day, week, or month and open them directly from the board.",
+        "confirmed": "Confirmed",
+        "pending": "Pending",
+        "cancelled": "Cancelled"
+      },
+      "table": {
+        "title": "Live table",
+        "description": "Search or inspect recent sessions, confirm states, and trigger player notifications.",
+        "colCourt": "Court",
+        "colCustomer": "Customer",
+        "colDateTime": "Date & Time",
+        "colTotal": "Total",
+        "colStatus": "Status",
+        "colActions": "Actions",
+        "viewDetails": "View details",
+        "edit": "Edit",
+        "confirm": "Confirm",
+        "reject": "Reject",
+        "notifyCustomer": "Notify customer",
+        "delete": "Delete",
+        "noBookings": "No bookings found",
+        "notifyDialogTitle": "Send notification",
+        "notifyDialogDesc": "Message the customer regarding their session.",
+        "message": "Message",
+        "messagePlaceholder": "Enter message for player...",
+        "send": "Send",
+        "deleteConfirmTitle": "Are you sure?",
+        "deleteConfirmDesc": "This will permanently remove the booking record.",
+        "deleteBooking": "Delete booking"
+      }
+    },
+    "courtInventory": {
+      "eyebrow": "Admin courts",
+      "title": "Maintain the live court inventory.",
+      "description": "Manage listing quality, update status, and jump into venue edits without leaving the operator workspace.",
+      "addCourt": "Add court",
+      "tableTitle": "Court inventory ({count})",
+      "tableDesc": "Every listing, owner, and status in one table for rapid maintenance.",
+      "colName": "Name",
+      "colCity": "City",
+      "colOwner": "Owner",
+      "colSports": "Sports",
+      "colPrice": "Price",
+      "colStatus": "Status",
+      "deleteConfirm": "Delete this court permanently?",
+      "courtDeleted": "Court deleted"
+    },
+    "payments": {
+      "eyebrow": "Admin payments",
+      "title": "Track settlements and transaction health.",
+      "description": "This surface is ready for payout review, refund actions, and revenue monitoring as payment data is connected.",
+      "transactions": "Transactions",
+      "transactionsDesc": "Recent payment activity and payout status will appear here.",
+      "emptyTitle": "No payment records yet",
+      "emptyDesc": "Once transactions are connected to the operator dashboard, this table will become the main finance review surface."
+    },
+    "notificationsManager": {
+      "eyebrow": "Admin notifications",
+      "title": "Control platform communications.",
+      "description": "Manage broadcast and targeted alerts from the same operator shell used for bookings, courts, and payouts.",
+      "composeTitle": "Send Notification",
+      "composeDesc": "Create in-app alerts and notifications for players and venue owners.",
+      "fieldTitle": "Title",
+      "fieldTitlePlaceholder": "e.g. Schedule Update or Tournament Alert",
+      "fieldMessage": "Message",
+      "fieldMessagePlaceholder": "Enter notification body...",
+      "fieldType": "Type",
+      "sendToAll": "Broadcast to all users",
+      "sendToAllDesc": "When enabled, every registered account will receive this notification.",
+      "recipient": "Select Recipient",
+      "searchUsers": "Search users by name or email...",
+      "sendButton": "Send notification",
+      "sending": "Sending...",
+      "sentSuccess": "Notification dispatched successfully."
+    },
+    "profile": {
+      "eyebrow": "Admin profile",
+      "title": "Keep operator identity current.",
+      "description": "Update the account details attached to approvals, bookings, notifications, and payout actions.",
+      "save": "Save operator profile"
+    },
+    "settings": {
+      "page": {
+        "eyebrow": "Admin settings",
+        "title": "Tune the operator environment.",
+        "description": "Adjust notifications, appearance, privacy, and other preferences without leaving the admin shell."
+      },
+      "tabs": {
+        "general": "General",
+        "notifications": "Notifications",
+        "appearance": "Appearance",
+        "security": "Security",
+        "privacy": "Privacy"
+      },
+      "general": {
+        "regionalDefaultsTitle": "Regional defaults",
+        "regionalDefaultsDescription": "Set language and timezone defaults for the operator environment.",
+        "selectLanguage": "Select language",
+        "timezone": "Timezone",
+        "selectTimezone": "Select timezone"
+      },
+      "notifications": {
+        "title": "Notification controls",
+        "description": "Choose which alerts reach the operator account.",
+        "save": "Save notifications",
+        "emailTitle": "Email notifications",
+        "emailDesc": "Receive approval and booking updates by email.",
+        "pushTitle": "Push alerts",
+        "pushDesc": "Immediate mobile notifications for urgent session events.",
+        "remindersTitle": "Booking reminders",
+        "remindersDesc": "Reminders ahead of court start times.",
+        "marketingTitle": "Marketing updates",
+        "marketingDesc": "News about platform features and partner venues."
+      },
+      "appearance": {
+        "title": "Appearance & Theme",
+        "description": "Switch between dark, light, or system themes for optimal clarity.",
+        "themeLabel": "Interface theme",
+        "themeSystem": "System default",
+        "themeLight": "Light",
+        "themeDark": "Dark"
+      },
+      "security": {
+        "title": "Security & Sessions",
+        "description": "Review authenticated operator access and credentials.",
+        "activeSessions": "Active operator sessions",
+        "activeSessionsDesc": "Logged in via Supabase Auth with elevated operator roles.",
+        "twoFactor": "Two-factor authentication",
+        "twoFactorDesc": "Enforce OTP verification for high-privilege actions."
+      },
+      "privacy": {
+        "title": "Privacy & Data",
+        "description": "Manage telemetry, analytics, and operational logging preferences.",
+        "logging": "Audit logging",
+        "loggingDesc": "Keep detailed records of approval and payment mutations.",
+        "analytics": "Performance telemetry",
+        "analyticsDesc": "Share anonymous usage data to improve application responsiveness."
+      },
+      "toasts": {
+        "themeUpdated": "Theme updated",
+        "notificationsSaved": "Notification preferences saved",
+        "savePreferencesFailed": "Failed to save preferences"
+      }
+    }
   }
 }
-

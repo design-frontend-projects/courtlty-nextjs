@@ -15,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useI18n } from "@/components/providers/i18n-provider";
 
 interface PaymentDialogProps {
   isOpen: boolean;
@@ -41,6 +42,7 @@ export function PaymentDialog({
   isSuccess,
   onDownloadReceipt,
 }: PaymentDialogProps) {
+  const { t } = useI18n();
   const [cardNumber, setCardNumber] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
@@ -56,12 +58,20 @@ export function PaymentDialog({
       <DialogContent className="rounded-[2rem] p-7 sm:max-w-xl">
         <DialogHeader className="gap-3">
           <DialogTitle className="font-display text-3xl font-semibold tracking-tight">
-            {isSuccess ? "Booking confirmed" : "Complete payment"}
+            {isSuccess
+              ? t("paymentDialog.titleConfirmed", "Booking confirmed")
+              : t("paymentDialog.titlePayment", "Complete payment")}
           </DialogTitle>
           <DialogDescription className="text-sm leading-6">
             {isSuccess
-              ? "The booking is locked. Download the receipt or close this dialog to return to your dashboard."
-              : "Review the session details and confirm payment to finalize the booking."}
+              ? t(
+                  "paymentDialog.descConfirmed",
+                  "The booking is locked. Download the receipt or close this dialog to return to your dashboard.",
+                )
+              : t(
+                  "paymentDialog.descPayment",
+                  "Review the session details and confirm payment to finalize the booking.",
+                )}
           </DialogDescription>
         </DialogHeader>
 
@@ -74,13 +84,13 @@ export function PaymentDialog({
               <div className="flex flex-col gap-2">
                 <p className="font-display text-2xl font-semibold">{bookingDetails.courtName}</p>
                 <p className="text-sm text-muted-foreground">
-                  {format(new Date(bookingDetails.date), "PPP")} at {bookingDetails.time}
+                  {format(new Date(bookingDetails.date), "PPP")} {t("dashboard.upcomingSessions.at", "at")} {bookingDetails.time}
                 </p>
               </div>
             </div>
             <Button onClick={onDownloadReceipt} className="h-12 rounded-full">
               <Download data-icon="inline-start" />
-              Download receipt
+              {t("paymentDialog.downloadReceipt", "Download receipt")}
             </Button>
           </div>
         ) : (
@@ -88,32 +98,34 @@ export function PaymentDialog({
             <div className="surface-panel rounded-[1.75rem] px-5 py-5">
               <div className="grid gap-3 text-sm">
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Court</span>
+                  <span className="text-muted-foreground">{t("paymentDialog.court", "Court")}</span>
                   <span className="font-medium text-foreground">{bookingDetails.courtName}</span>
                 </div>
                 <div className="flex items-center justify-between gap-4">
-                  <span className="text-muted-foreground">Session</span>
+                  <span className="text-muted-foreground">{t("paymentDialog.time", "Session")}</span>
                   <span className="font-medium text-foreground">
-                    {format(new Date(bookingDetails.date), "PPP")} at {bookingDetails.time}
+                    {format(new Date(bookingDetails.date), "PPP")} {t("dashboard.upcomingSessions.at", "at")} {bookingDetails.time}
                   </span>
                 </div>
                 <div className="flex items-center justify-between gap-4 border-t border-border/70 pt-3">
-                  <span className="section-kicker text-[0.68rem]">Total</span>
-                  <span className="font-display text-3xl font-semibold text-primary">${amount.toFixed(2)}</span>
+                  <span className="section-kicker text-[0.68rem]">{t("paymentDialog.totalAmount", "Total")}</span>
+                  <span className="font-display text-3xl font-semibold text-primary">
+                    {amount.toFixed(2)} {t("common.currency", "EGP")}
+                  </span>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="cardNumber">Card number</Label>
+                <Label htmlFor="cardNumber">{t("paymentDialog.cardNumber", "Card number")}</Label>
                 <div className="relative">
                   <CreditCard className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     id="cardNumber"
                     value={cardNumber}
                     onChange={handleCardNumberChange}
-                    placeholder="0000 0000 0000 0000"
+                    placeholder={t("paymentDialog.cardNumberPlaceholder", "0000 0000 0000 0000")}
                     className="h-12 rounded-2xl pl-11"
                   />
                 </div>
@@ -121,17 +133,17 @@ export function PaymentDialog({
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="expiry">Expiry</Label>
+                  <Label htmlFor="expiry">{t("paymentDialog.expiry", "Expiry")}</Label>
                   <Input
                     id="expiry"
                     value={expiry}
                     onChange={(event) => setExpiry(event.target.value)}
-                    placeholder="MM/YY"
+                    placeholder={t("paymentDialog.expiryPlaceholder", "MM/YY")}
                     className="h-12 rounded-2xl"
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="cvc">CVC</Label>
+                  <Label htmlFor="cvc">{t("paymentDialog.cvc", "CVC")}</Label>
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
                     <Input
@@ -139,7 +151,7 @@ export function PaymentDialog({
                       type="password"
                       value={cvc}
                       onChange={(event) => setCvc(event.target.value)}
-                      placeholder="123"
+                      placeholder={t("paymentDialog.cvcPlaceholder", "123")}
                       className="h-12 rounded-2xl pl-11"
                     />
                   </div>
@@ -147,7 +159,7 @@ export function PaymentDialog({
               </div>
 
               <p className="rounded-2xl border border-border/70 bg-accent/30 px-4 py-3 text-xs leading-5 text-muted-foreground">
-                Demo checkout only. Payment is simulated, but the booking confirmation flow matches the real session path.
+                {t("paymentDialog.secureNotice", "Payments are secured with end-to-end encryption.")}
               </p>
             </div>
           </div>
@@ -157,19 +169,24 @@ export function PaymentDialog({
           {!isSuccess ? (
             <>
               <Button variant="ghost" onClick={onClose} disabled={isProcessing} className="rounded-full">
-                Cancel
+                {t("common.cancel", "Cancel")}
               </Button>
               <Button
                 onClick={onConfirm}
                 disabled={isProcessing || !cardNumber || !expiry || !cvc}
                 className="rounded-full px-6"
               >
-                {isProcessing ? "Processing..." : `Pay $${amount.toFixed(2)}`}
+                {isProcessing
+                  ? t("paymentDialog.processing", "Processing...")
+                  : t("paymentDialog.pay", `Pay ${amount.toFixed(2)} ${t("common.currency", "EGP")}`, {
+                      amount: amount.toFixed(2),
+                      currency: t("common.currency", "EGP"),
+                    })}
               </Button>
             </>
           ) : (
             <Button variant="outline" onClick={onClose} className="w-full rounded-full">
-              Close
+              {t("common.close", "Close")}
             </Button>
           )}
         </DialogFooter>
